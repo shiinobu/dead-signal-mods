@@ -9,6 +9,9 @@ import {
     GameRuntime,
 } from "../src/application/index.js";
 import {
+    flagEquals,
+} from "../src/domain/shared/index.js";
+import {
     type Quest,
 } from "../src/domain/quest/index.js";
 import {
@@ -36,11 +39,7 @@ const quest: Quest = {
         {
             id: "objective.integration",
             description: "Start the mission.",
-            condition: {
-                kind: "flag_equals",
-                flag: "mission_started",
-                value: true,
-            },
+            condition: flagEquals("mission_started", true),
         },
     ],
 };
