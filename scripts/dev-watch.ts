@@ -1,4 +1,4 @@
-import { buildMod } from "@hotbunny/hackhub-content-sdk/build";
+import { spawn } from "node:child_process";
 import { watch } from "node:fs";
 import { resolve } from "node:path";
 
@@ -12,8 +12,9 @@ const watchedPaths = [
 let building = false;
 let queued = false;
 let timer: NodeJS.Timeout | undefined;
+let buildProcess: ReturnType<typeof spawn> | undefined;
 
-async function runBuild() {
+function runBuild() {
     if (building) {
         queued = true;
         return;
@@ -22,22 +23,34 @@ async function runBuild() {
     building = true;
     console.log("[DEAD SIGNAL] Building mod...");
 
-    try {
-        await buildMod({
-            entryPoint: "src/index.ts",
-            outfile: "dist/mod.js",
-        });
-        console.log("[DEAD SIGNAL] Build complete. Watching for changes...");
-    } catch (error) {
-        console.error("[DEAD SIGNAL] Build failed:", error);
-    } finally {
+    const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+    buildProcess = spawn(npmCommand, ["run", "build"], {
+        cwd: root,
+        stdio: "inherit",
+        windowsHide: false,
+    });
+
+    buildProcess.once("error", (error) => {
+        console.error("[DEAD SIGNAL] Build process failed to start:", error);
+    });
+
+    buildProcess.once("close", (code, signal) => {
+        buildProcess = undefined;
         building = false;
+
+        if (code === 0) {
+            console.log("[DEAD SIGNAL] Build complete. Watching for changes...");
+        } else {
+            console.error(
+                `[DEAD SIGNAL] Build failed (code=${code ?? "null"}, signal=${signal ?? "none"}).`,
+            );
+        }
 
         if (queued) {
             queued = false;
-            void runBuild();
+            scheduleBuild();
         }
-    }
+    });
 }
 
 function scheduleBuild() {
@@ -47,8 +60,8 @@ function scheduleBuild() {
 
     timer = setTimeout(() => {
         timer = undefined;
-        void runBuild();
-    }, 150);
+        runBuild();
+    }, 300);
 }
 
 for (const path of watchedPaths) {
@@ -63,12 +76,18 @@ for (const path of watchedPaths) {
     }
 }
 
-void runBuild();
+runBuild();
 
 function shutdown() {
     if (timer) {
         clearTimeout(timer);
     }
+
+    if (buildProcess) {
+        buildProcess.kill();
+        buildProcess = undefined;
+    }
+
     console.log("\n[DEAD SIGNAL] Watcher stopped.");
 }
 
