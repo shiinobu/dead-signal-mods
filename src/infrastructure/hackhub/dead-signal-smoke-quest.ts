@@ -116,6 +116,23 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
     override OnObjectivesStart() {
         this.registerTerminalData();
+
+        this.Events.on(
+            "Terminal.NmapScan",
+            (data: { ip: string }) => {
+                console.log(
+                    `[DEAD SIGNAL] Terminal.NmapScan received: ${JSON.stringify(data)}`,
+                );
+
+                UI.notify(
+                    `DEAD SIGNAL V2 Nmap event: ${data.ip}`,
+                );
+            },
+        );
+
+        console.log(
+            `[DEAD SIGNAL] V2 Nmap event listener active for ${this.Data.targetIp}`,
+        );
     }
 
     override OnComplete() {
