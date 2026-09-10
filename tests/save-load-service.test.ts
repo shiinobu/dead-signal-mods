@@ -2,6 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+    asId,
+} from "../src/core/index.js";
+import {
     createDefaultRuntimeState,
     SaveLoadService,
     StateSerializer,
@@ -97,15 +100,15 @@ test("save and load preserve the complete runtime state", () => {
         domain: {
             ...state.domain,
             quests: {
-                activeQuestId: "quest.test",
-                completedQuestIds: ["quest.previous"],
+                activeQuestId: asId<"Quest">("quest.test"),
+                completedQuestIds: [asId<"Quest">("quest.previous")],
                 failedQuestIds: [],
             },
             economy: {
                 balance: 500,
                 transactions: [
                     {
-                        id: "transaction.test",
+                        id: asId<"Transaction">("transaction.test"),
                         type: "CREDIT",
                         amount: 500,
                         source: "QUEST_REWARD",
