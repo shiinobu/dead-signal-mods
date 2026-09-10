@@ -7,10 +7,10 @@ import {
     DomainStateAccess,
     FlagStore,
     SaveLoadService,
-    SaveStorage,
     StateSerializer,
     StateStore,
 } from "../state/index.js";
+import type { SaveStorage } from "../state/index.js";
 
 import {
     AccessService,
