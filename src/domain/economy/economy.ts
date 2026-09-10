@@ -25,7 +25,7 @@ export interface MissionReward {
     readonly rewardIndex: number;
 }
 
-export interface Reward {
+export interface EconomyReward {
     readonly amount: number;
     readonly source: Extract<TransactionSource, "QUEST_REWARD" | "BONUS">;
 }
