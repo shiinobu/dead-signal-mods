@@ -2,6 +2,7 @@ import {
     Network,
     Quest as HackHubQuest,
     RegisterQuest,
+    UI,
 } from "@hotbunny/hackhub-content-sdk";
 
 import { GameRuntime } from "../../application/index.js";
@@ -79,6 +80,8 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
         runtime.quest.start(smokeQuest);
 
+        UI.notify(`DEAD SIGNAL smoke target: ${this.Data.targetIp}`);
+
         console.log(
             `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
         );
@@ -107,6 +110,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         }
 
         Network.destroyNetwork(this.Data.targetIp);
+
+        UI.notify(
+            `DEAD SIGNAL smoke test completed: ${completed ? "PASS" : "FAIL"}`,
+        );
 
         console.log(
             `[DEAD SIGNAL] Runtime smoke test completed: ${completed}`,
