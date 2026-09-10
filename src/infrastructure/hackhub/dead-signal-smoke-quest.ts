@@ -1,4 +1,5 @@
 import {
+    Events,
     Quest as HackHubQuest,
     RegisterQuest,
     UI,
@@ -14,7 +15,7 @@ const SMOKE_TARGET_IP = "10.42.0.81";
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     override Name = "DeadSignalRuntimeSmokeTestV5";
     override Title = "DEAD SIGNAL — Runtime Smoke Test V5";
-    override Description = `Listen for the native Terminal.NmapScan event.`;
+    override Description = `Isolate the Terminal.NmapScan event system.`;
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = false;
@@ -46,8 +47,14 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
                 payload = String(data);
             }
 
-            console.log("[DEAD SIGNAL] V5 raw Terminal.NmapScan:", data);
+            console.log("[DEAD SIGNAL] V5 Terminal.NmapScan received:", data);
             UI.notify(`DEAD SIGNAL V5 EVENT RECEIVED: ${payload}`);
+        });
+
+        // Diagnostic only: prove that this listener can receive a mod-emitted
+        // event independently of the game's native nmap command path.
+        Events.emit("Terminal.NmapScan", {
+            ip: this.Data.targetIp,
         });
     }
 }
