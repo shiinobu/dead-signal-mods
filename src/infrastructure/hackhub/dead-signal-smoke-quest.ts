@@ -1,5 +1,4 @@
 import {
-    Events,
     Quest as HackHubQuest,
     RegisterQuest,
     UI,
@@ -33,12 +32,12 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         };
     }
 
-    override OnStart() {
+    override OnObjectivesStart() {
         UI.notify(
             `DEAD SIGNAL V5 EVENT TEST: waiting for Terminal.NmapScan on ${this.Data.targetIp}`,
         );
 
-        Events.on("Terminal.NmapScan", (data: unknown) => {
+        this.Events.on("Terminal.NmapScan", (data) => {
             let payload = "undefined";
 
             try {
