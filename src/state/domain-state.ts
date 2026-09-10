@@ -12,7 +12,8 @@ import type {
     CharacterState,
     RelationshipState,
     DatabaseState,
-    TerminalState
+    TerminalState,
+    HackingState
 } from "../domain/index.js";
 
 import type {
@@ -29,7 +30,7 @@ export interface DomainState {
     readonly dialogue: DialogueState;
     readonly terminal: TerminalState;
     readonly database: DatabaseState;
-    readonly hacking: Readonly<Record<string, unknown>>;
+    readonly hacking: HackingState;
     readonly access: AccessState;
     readonly economy: Readonly<Record<string, unknown>>;
     readonly progression: ProgressionState;

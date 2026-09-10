@@ -37,7 +37,10 @@ const createEmptyDomainState = (): DomainState => ({
     database: {
         discoveredDatabaseIds: [],
     },
-    hacking: {},
+    hacking: {
+        activeAttemptId: null,
+        completedAttemptIds: [],
+    },
     access: {
         grants: {}
     },

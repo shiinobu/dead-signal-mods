@@ -11,6 +11,7 @@ export type EvidenceId = Id<"Evidence">;
 export type DialogueId = Id<"Dialogue">;
 export type TerminalId = Id<"Terminal">;
 export type DatabaseId = Id<"Database">;
+export type HackAttemptId = Id<"HackAttempt">;
 export type AccessGrantId = Id<"AccessGrant">;
 export type RewardId = Id<"Reward">;
 
