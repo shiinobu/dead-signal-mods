@@ -1,4 +1,4 @@
-import type { RuntimeState } from "./runtime-state.js";
+import type { RuntimeState } from "./domain-state.js";
 
 export class StateStore {
     private state: RuntimeState;

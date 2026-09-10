@@ -12,10 +12,23 @@ test("StateStore owns the canonical runtime state", () => {
     const stateStore = new StateStore(initialState);
 
     assert.deepEqual(
-        stateStore.getState(),
-        {
-            flags: {},
-        },
+        stateStore.getState().flags,
+        {},
+    );
+
+    assert.deepEqual(
+        stateStore.getState().domain.quests,
+        {},
+    );
+
+    assert.deepEqual(
+        stateStore.getState().domain.evidence,
+        {},
+    );
+
+    assert.deepEqual(
+        stateStore.getState().domain.ending,
+        {},
     );
 });
 
@@ -99,9 +112,7 @@ test("FlagStore clear removes all flags", () => {
 });
 
 test("StateStore updateState replaces state atomically", () => {
-    const stateStore = new StateStore(
-        createDefaultRuntimeState(),
-    );
+    const stateStore = new StateStore(createDefaultRuntimeState());
 
     const previousState = stateStore.getState();
 
@@ -109,20 +120,24 @@ test("StateStore updateState replaces state atomically", () => {
         ...current,
         flags: {
             ...current.flags,
-            mission_started: true,
+            testFlag: true,
         },
     }));
 
-    const nextState = stateStore.getState();
+    assert.deepEqual(previousState, createDefaultRuntimeState());
 
-    assert.notEqual(nextState, previousState);
-
-    assert.equal(
-        nextState.flags.mission_started,
-        true,
-    );
-
-    assert.deepEqual(previousState, {
-        flags: {},
+    assert.deepEqual(stateStore.getState().flags, {
+        testFlag: true,
     });
+});
+
+test("default runtime states are independent", () => {
+    const first = createDefaultRuntimeState();
+    const second = createDefaultRuntimeState();
+
+    assert.notEqual(first, second);
+    assert.notEqual(first.flags, second.flags);
+    assert.notEqual(first.domain, second.domain);
+    assert.notEqual(first.domain.quests, second.domain.quests);
+    assert.notEqual(first.domain.evidence, second.domain.evidence);
 });
