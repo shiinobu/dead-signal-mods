@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { buildMod } from "@hotbunny/hackhub-content-sdk/build";
 import { watch } from "node:fs";
 import { resolve } from "node:path";
 
@@ -13,7 +13,7 @@ let building = false;
 let queued = false;
 let timer: NodeJS.Timeout | undefined;
 
-function runBuild() {
+async function runBuild() {
     if (building) {
         queued = true;
         return;
@@ -22,26 +22,22 @@ function runBuild() {
     building = true;
     console.log("[DEAD SIGNAL] Building mod...");
 
-    const command = process.platform === "win32" ? "npm.cmd" : "npm";
-    const child = spawn(command, ["run", "build"], {
-        cwd: root,
-        stdio: "inherit",
-    });
-
-    child.on("close", (code) => {
+    try {
+        await buildMod({
+            entryPoint: "src/index.ts",
+            outfile: "dist/mod.js",
+        });
+        console.log("[DEAD SIGNAL] Build complete. Watching for changes...");
+    } catch (error) {
+        console.error("[DEAD SIGNAL] Build failed:", error);
+    } finally {
         building = false;
-
-        if (code === 0) {
-            console.log("[DEAD SIGNAL] Build complete. Watching for changes...");
-        } else {
-            console.error(`[DEAD SIGNAL] Build failed with exit code ${code ?? "unknown"}.`);
-        }
 
         if (queued) {
             queued = false;
-            runBuild();
+            void runBuild();
         }
-    });
+    }
 }
 
 function scheduleBuild() {
@@ -51,16 +47,14 @@ function scheduleBuild() {
 
     timer = setTimeout(() => {
         timer = undefined;
-        runBuild();
+        void runBuild();
     }, 150);
 }
 
 for (const path of watchedPaths) {
     try {
         watch(path, { recursive: true }, (_eventType, filename) => {
-            console.log(
-                `[DEAD SIGNAL] Change detected: ${filename ?? path}`,
-            );
+            console.log(`[DEAD SIGNAL] Change detected: ${filename ?? path}`);
             scheduleBuild();
         });
     } catch (error) {
@@ -69,7 +63,7 @@ for (const path of watchedPaths) {
     }
 }
 
-runBuild();
+void runBuild();
 
 function shutdown() {
     if (timer) {
