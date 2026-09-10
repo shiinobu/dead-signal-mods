@@ -42,9 +42,13 @@ const createEmptyDomainState = (): DomainState => ({
         completedAttemptIds: [],
     },
     access: {
-        grants: {}
+        grants: {},
     },
-    economy: {},
+    economy: {
+        balance: 0,
+        transactions: [],
+        appliedMissionRewardKeys: [],
+    },
     progression: {
         level: 1,
         experience: 0,
