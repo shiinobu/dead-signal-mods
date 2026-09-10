@@ -166,7 +166,11 @@ test("cross-service updates preserve sibling state in the canonical StateStore",
     assert.equal(state.domain.dialogue.activeNodeId, "node.clue");
     assert.equal(state.domain.progression.experience, 75);
     assert.equal(state.domain.economy.balance, 300);
-    assert.equal(state.domain.access.grants["access.cross-service"].actorId, actorId);
+
+    const accessGrant = state.domain.access.grants["access.cross-service"];
+    assert.ok(accessGrant);
+    assert.equal(accessGrant.actorId, actorId);
+
     assert.equal(state.domain.ending.endingId, "ending.cross-service");
     assert.equal(state.domain.ending.resolved, true);
 });
