@@ -80,10 +80,16 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
         runtime.quest.start(smokeQuest);
 
+        console.log(
+            `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
+        );
+    }
+
+    override OnObjectivesStart() {
         UI.notify(`DEAD SIGNAL smoke target: ${this.Data.targetIp}`);
 
         console.log(
-            `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
+            `[DEAD SIGNAL] Smoke objective active for: ${this.Data.targetIp}`,
         );
     }
 
