@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 
 import {
     asId,
-    type CharacterId,
 } from "../src/core/index.js";
+import type { CharacterId } from "../src/core/index.js";
 import {
     GameRuntime,
 } from "../src/application/index.js";
@@ -44,7 +44,7 @@ const quest: Quest = {
     ],
 };
 
-const actorId = asId<CharacterId>("character.marcus");
+const actorId: CharacterId = asId("character.marcus");
 
 test("GameRuntime integrates quest, access, reward, economy, and persistence through canonical state", () => {
     const storage = new SharedSaveStorage();
