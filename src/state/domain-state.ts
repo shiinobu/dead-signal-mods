@@ -1,24 +1,23 @@
 import type {
     AccessState,
+    CharacterState,
+    DatabaseState,
     DialogueState,
+    EconomyState,
     EndingState,
+    EntityState,
+    EvidenceState,
+    HackingState,
     InvestigationState,
     NarrativeState,
     ProgressionState,
     QuestState,
-    RewardState,
-    EntityState,
-    EvidenceState,
-    CharacterState,
     RelationshipState,
-    DatabaseState,
+    RewardState,
     TerminalState,
-    HackingState
 } from "../domain/index.js";
 
-import type {
-    FlagRecord,
-} from "../domain/shared/index.js";
+import type { FlagRecord } from "../domain/shared/index.js";
 
 export interface DomainState {
     readonly quests: QuestState;
@@ -32,7 +31,7 @@ export interface DomainState {
     readonly database: DatabaseState;
     readonly hacking: HackingState;
     readonly access: AccessState;
-    readonly economy: Readonly<Record<string, unknown>>;
+    readonly economy: EconomyState;
     readonly progression: ProgressionState;
     readonly narrative: NarrativeState;
     readonly reward: RewardState;
