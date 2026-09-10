@@ -15,7 +15,7 @@ const SMOKE_TARGET_IP = "10.42.0.81";
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     override Name = "DeadSignalRuntimeSmokeTestV5";
     override Title = "DEAD SIGNAL — Runtime Smoke Test V5";
-    override Description = `Isolate the Terminal.NmapScan event system.`;
+    override Description = `Isolate the global Terminal.NmapScan event system.`;
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = false;
@@ -35,10 +35,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
     override OnObjectivesStart() {
         UI.notify(
-            `DEAD SIGNAL V5 EVENT TEST: waiting for Terminal.NmapScan on ${this.Data.targetIp}`,
+            `DEAD SIGNAL V5 GLOBAL TEST: waiting for Terminal.NmapScan on ${this.Data.targetIp}`,
         );
 
-        this.Events.on("Terminal.NmapScan", (data) => {
+        Events.on("Terminal.NmapScan", (data) => {
             let payload = "undefined";
 
             try {
@@ -47,12 +47,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
                 payload = String(data);
             }
 
-            console.log("[DEAD SIGNAL] V5 Terminal.NmapScan received:", data);
-            UI.notify(`DEAD SIGNAL V5 EVENT RECEIVED: ${payload}`);
+            console.log("[DEAD SIGNAL] V5 global Terminal.NmapScan received:", data);
+            UI.notify(`DEAD SIGNAL V5 GLOBAL EVENT RECEIVED: ${payload}`);
         });
 
-        // Diagnostic only: prove that this listener can receive a mod-emitted
-        // event independently of the game's native nmap command path.
         Events.emit("Terminal.NmapScan", {
             ip: this.Data.targetIp,
         });
