@@ -17,32 +17,32 @@ interface SmokeQuestData {
     readonly targetIp: string;
 }
 
-const SMOKE_TARGET_IP = "10.42.0.80";
+const SMOKE_TARGET_IP = "10.42.0.81";
 const runtime = new GameRuntime(
     undefined,
     undefined,
-    new HackHubSaveStorageAdapter("dead-signal.runtime.v4"),
+    new HackHubSaveStorageAdapter("dead-signal.runtime.v5"),
 );
 
 const smokeQuest: DomainQuest = {
-    id: asId("quest.dead-signal.smoke.v4"),
+    id: asId("quest.dead-signal.smoke.v5"),
     chapterId: "01",
-    title: "Dead Signal — Runtime Smoke Test V4",
-    description: "Diagnose HackHub Nmap event delivery and payload shape.",
+    title: "Dead Signal — Runtime Smoke Test V5",
+    description: "Verify native HackHub Nmap event delivery without injected Nmap response data.",
     objectives: [
         {
             id: "scan-target",
             description: `Scan the smoke-test target ${SMOKE_TARGET_IP}.`,
-            condition: flagEquals("dead_signal.smoke.v4.scan_complete", true),
+            condition: flagEquals("dead_signal.smoke.v5.scan_complete", true),
         },
     ],
 };
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTestV4";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test V4";
-    override Description = `Scan ${SMOKE_TARGET_IP} to diagnose Nmap event delivery.`;
+    override Name = "DeadSignalRuntimeSmokeTestV5";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test V5";
+    override Description = `Scan ${SMOKE_TARGET_IP} using the native Nmap path.`;
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = true;
@@ -66,23 +66,12 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     }
 
     private registerTerminalData() {
+        // Keep only the ping override. V5 deliberately does NOT inject
+        // Nmap response data so the scan exercises HackHub's native Nmap path.
         Shell.addCommandData("ping", this.Data.targetIp, true);
-        Shell.addCommandData("nmap", this.Data.targetIp, [
-            {
-                port: 22,
-                status: "OPEN",
-                service: "ssh",
-                version: "DEAD SIGNAL Smoke SSH",
-            },
-        ]);
-
-        const nmapData = Shell.getCommandData(
-            "nmap",
-            this.Data.targetIp,
-        );
 
         UI.notify(
-            `DEAD SIGNAL V4: Nmap data ${nmapData ? "READY" : "MISSING"} for ${this.Data.targetIp}`,
+            `DEAD SIGNAL V5: native Nmap test target ${this.Data.targetIp}`,
         );
     }
 
@@ -118,7 +107,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         this.registerTerminalData();
 
         UI.notify(
-            `DEAD SIGNAL V4 persistence: ${loaded ? "LOADED" : "NEW"}`,
+            `DEAD SIGNAL V5 persistence: ${loaded ? "LOADED" : "NEW"}`,
+        );
+        UI.notify(
+            `DEAD SIGNAL V5: waiting for native Terminal.NmapScan on ${this.Data.targetIp}`,
         );
 
         Events.on("Terminal.NmapScan", (data: unknown) => {
@@ -130,8 +122,8 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
                 payload = String(data);
             }
 
-            UI.notify(`DEAD SIGNAL V4 EVENT: ${payload}`);
-            console.log("[DEAD SIGNAL] V4 raw Nmap event payload:", data);
+            UI.notify(`DEAD SIGNAL V5 EVENT: ${payload}`);
+            console.log("[DEAD SIGNAL] V5 raw Nmap event payload:", data);
 
             if (
                 typeof data !== "object" ||
@@ -140,26 +132,25 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
                 typeof data.ip !== "string" ||
                 data.ip !== this.Data.targetIp
             ) {
-                UI.notify("DEAD SIGNAL V4 EVENT: payload target mismatch");
                 return;
             }
 
             this.completeObjective("scan-target");
             runtime.flagStore.set(
-                "dead_signal.smoke.v4.scan_complete",
+                "dead_signal.smoke.v5.scan_complete",
                 true,
             );
             runtime.persistence.save();
 
             UI.notify(
-                `DEAD SIGNAL V4 Nmap objective completed: ${data.ip}`,
+                `DEAD SIGNAL V5 Nmap objective completed: ${data.ip}`,
             );
         });
     }
 
     override OnComplete() {
         runtime.flagStore.set(
-            "dead_signal.smoke.v4.scan_complete",
+            "dead_signal.smoke.v5.scan_complete",
             true,
         );
 
@@ -168,7 +159,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
         if (completed) {
             runtime.reward.claim({
-                id: asId("reward.dead-signal.smoke.v4"),
+                id: asId("reward.dead-signal.smoke.v5"),
                 kind: "experience",
                 amount: 25,
             });
@@ -183,11 +174,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         }
 
         Shell.removeCommandData("ping", this.Data.targetIp);
-        Shell.removeCommandData("nmap", this.Data.targetIp);
         Network.destroyNetwork(this.Data.targetIp);
 
         UI.notify(
-            `DEAD SIGNAL V4 smoke test completed: ${completed ? "PASS" : "FAIL"}`,
+            `DEAD SIGNAL V5 smoke test completed: ${completed ? "PASS" : "FAIL"}`,
         );
     }
 }
