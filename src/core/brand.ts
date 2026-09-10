@@ -14,6 +14,8 @@ export type DatabaseId = Id<"Database">;
 export type HackAttemptId = Id<"HackAttempt">;
 export type AccessGrantId = Id<"AccessGrant">;
 export type RewardId = Id<"Reward">;
+export type TransactionId = Id<"Transaction">;
+export type MissionRewardId = Id<"MissionReward">;
 
 export const asId = <T extends string>(value: string): Id<T> => value as Id<T>;
 
