@@ -1,8 +1,7 @@
 import type {
-    EconomyState,
+    EconomyReward,
     MissionReward,
     Penalty,
-    Reward,
     Transaction,
     TransactionSource,
 } from "../domain/economy/index.js";
@@ -30,14 +29,7 @@ export class EconomyService {
         timestamp: string = new Date().toISOString(),
     ): void {
         this.validateAmount(amount);
-
-        this.updateBalance(
-            amount,
-            "CREDIT",
-            source,
-            reference,
-            timestamp,
-        );
+        this.updateBalance(amount, "CREDIT", source, reference, timestamp);
     }
 
     debit(
@@ -48,34 +40,22 @@ export class EconomyService {
     ): void {
         this.validateAmount(amount);
 
-        const state = this.domainState.get().economy;
-        if (state.balance < amount) {
+        if (this.domainState.get().economy.balance < amount) {
             throw new DomainError(
                 "PRECONDITION_FAILED",
                 `Insufficient balance for debit of ${amount}.`,
             );
         }
 
-        this.updateBalance(
-            -amount,
-            "DEBIT",
-            source,
-            reference,
-            timestamp,
-        );
+        this.updateBalance(-amount, "DEBIT", source, reference, timestamp);
     }
 
     reward(
-        reward: Reward,
+        reward: EconomyReward,
         reference: string | null = null,
         timestamp?: string,
     ): void {
-        this.credit(
-            reward.amount,
-            reward.source,
-            reference,
-            timestamp,
-        );
+        this.credit(reward.amount, reward.source, reference, timestamp);
     }
 
     penalize(
@@ -83,12 +63,7 @@ export class EconomyService {
         reference: string | null = null,
         timestamp?: string,
     ): void {
-        this.debit(
-            penalty.amount,
-            penalty.source,
-            reference,
-            timestamp,
-        );
+        this.debit(penalty.amount, penalty.source, reference, timestamp);
     }
 
     applyMissionReward(
@@ -132,10 +107,7 @@ export class EconomyService {
             economy: {
                 ...domain.economy,
                 balance: domain.economy.balance + reward.amount,
-                transactions: [
-                    ...domain.economy.transactions,
-                    transaction,
-                ],
+                transactions: [...domain.economy.transactions, transaction],
                 appliedMissionRewardKeys: [
                     ...domain.economy.appliedMissionRewardKeys,
                     key,
@@ -178,10 +150,7 @@ export class EconomyService {
             economy: {
                 ...domain.economy,
                 balance: domain.economy.balance + delta,
-                transactions: [
-                    ...domain.economy.transactions,
-                    transaction,
-                ],
+                transactions: [...domain.economy.transactions, transaction],
             },
         }));
     }
