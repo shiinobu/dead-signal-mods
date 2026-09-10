@@ -21,11 +21,17 @@ const createEmptyDomainState = (): DomainState => ({
         grants: {}
     },
     economy: {},
-    progression: {},
+    progression: {
+        level: 1,
+        experience: 0,
+    },
     narrative: {
         chapterId: null,
         sceneId: null,
         completedChapterIds: [],
+    },
+    reward: {
+        claimedRewardIds: [],
     },
     ending: {},
 });

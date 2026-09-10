@@ -2,6 +2,8 @@ import type {
     AccessState,
     DialogueState,
     NarrativeState,
+    ProgressionState,
+    RewardState
 } from "../domain/index.js";
 
 import type {
@@ -20,8 +22,9 @@ export interface DomainState {
     readonly hacking: Readonly<Record<string, unknown>>;
     readonly access: AccessState;
     readonly economy: Readonly<Record<string, unknown>>;
-    readonly progression: Readonly<Record<string, unknown>>;
+    readonly progression: ProgressionState;
     readonly narrative: NarrativeState;
+    readonly reward: RewardState;
     readonly ending: Readonly<Record<string, unknown>>;
 }
 

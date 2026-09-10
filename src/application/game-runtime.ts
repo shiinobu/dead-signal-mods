@@ -17,6 +17,10 @@ import {
     NarrativeStateService,
 } from "./narrative-state-service.js";
 
+import {
+    RewardService,
+} from "./reward-service.js";
+
 export interface RuntimeServices {
     readonly narrativeState: NarrativeStateService;
     readonly ending: EndingService;
@@ -26,10 +30,6 @@ export interface RuntimeServices {
 
 export interface EndingService {
     readonly kind: "ending";
-}
-
-export interface RewardService {
-    readonly kind: "reward";
 }
 
 export class GameRuntime {
@@ -82,7 +82,7 @@ const createDefaultRuntimeServices = (
     access: new AccessService(
         domainState,
     ),
-    reward: {
-        kind: "reward",
-    },
+    reward: new RewardService(
+        domainState,
+    ),
 });
