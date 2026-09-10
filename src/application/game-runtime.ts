@@ -14,6 +14,10 @@ import {
 } from "./access-service.js";
 
 import {
+    EconomyService,
+} from "./economy-service.js";
+
+import {
     NarrativeStateService,
 } from "./narrative-state-service.js";
 
@@ -35,6 +39,7 @@ export interface RuntimeServices {
     readonly ending: EndingService;
     readonly access: AccessService;
     readonly reward: RewardService;
+    readonly economy: EconomyService;
 }
 
 export class GameRuntime {
@@ -48,6 +53,7 @@ export class GameRuntime {
     readonly access: AccessService;
     readonly reward: RewardService;
     readonly quest: QuestService;
+    readonly economy: EconomyService;
 
     constructor(
         stateStore: StateStore = new StateStore(
@@ -75,6 +81,7 @@ export class GameRuntime {
         this.ending = runtimeServices.ending;
         this.access = runtimeServices.access;
         this.reward = runtimeServices.reward;
+        this.economy = runtimeServices.economy;
     }
 }
 
@@ -101,6 +108,10 @@ const createDefaultRuntimeServices = (
     ),
 
     reward: new RewardService(
+        domainState,
+    ),
+
+    economy: new EconomyService(
         domainState,
     ),
 });
