@@ -1,7 +1,15 @@
-/**
- * DEAD SIGNAL mod SDK public entry point.
- *
- * Domain implementations are intentionally added incrementally by phase.
- * This module must remain a stable public boundary and should not own runtime state.
- */
-export {};
+import {
+    Bootstrap,
+    RegisterModPackage,
+} from "@hotbunny/hackhub-content-sdk";
+
+@RegisterModPackage
+export default class DeadSignalMod extends Bootstrap {
+    OnModPackageLoaded() {
+        console.log("DEAD SIGNAL mod loaded!");
+    }
+
+    OnModPackageUnloaded() {
+        console.log("DEAD SIGNAL mod unloaded.");
+    }
+}
