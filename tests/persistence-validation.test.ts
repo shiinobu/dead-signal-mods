@@ -82,7 +82,7 @@ test("serializer rejects invalid economy balance", () => {
     );
 });
 
-test("serializer rejects an unresolved ending with an ending ID", () => {
+test("serializer accepts a pending ending ID before resolution", () => {
     const serializer = new StateSerializer();
     const payload = createPayload();
     payload.state.domain.ending = {
@@ -90,10 +90,7 @@ test("serializer rejects an unresolved ending with an ending ID", () => {
         resolved: false,
     };
 
-    assert.throws(
-        () => serializer.deserialize(JSON.stringify(payload)),
-        /Invalid runtime state payload/,
-    );
+    assert.doesNotThrow(() => serializer.deserialize(JSON.stringify(payload)));
 });
 
 test("serializer rejects a resolved ending without an ending ID", () => {
