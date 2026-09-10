@@ -9,7 +9,11 @@ const createEmptyDomainState = (): DomainState => ({
         completedQuestIds: [],
         failedQuestIds: [],
     },
-    investigation: {},
+    investigation: {
+        activeInvestigationId: null,
+        discoveredLeadIds: [],
+        completedInvestigationIds: [],
+    },
     evidence: {},
     entities: {},
     relationships: {},
