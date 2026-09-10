@@ -16,27 +16,27 @@ interface SmokeQuestData {
 }
 
 const runtime = new GameRuntime();
-const SMOKE_TARGET_IP = "10.42.0.77";
+const SMOKE_TARGET_IP = "10.42.0.78";
 
 const smokeQuest: DomainQuest = {
-    id: asId("quest.dead-signal.smoke"),
+    id: asId("quest.dead-signal.smoke.v2"),
     chapterId: "01",
-    title: "Dead Signal — Runtime Smoke Test",
-    description: "Verify the DEAD SIGNAL runtime inside HackHub.",
+    title: "Dead Signal — Runtime Smoke Test V2",
+    description: "Verify the DEAD SIGNAL runtime inside HackHub with a fresh quest instance.",
     objectives: [
         {
             id: "scan-target",
             description: `Scan the smoke-test target ${SMOKE_TARGET_IP}.`,
-            condition: flagEquals("dead_signal.smoke.scan_complete", true),
+            condition: flagEquals("dead_signal.smoke.v2.scan_complete", true),
         },
     ],
 };
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTest";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test";
-    override Description = `Scan ${SMOKE_TARGET_IP} to verify the DEAD SIGNAL runtime is connected to HackHub.`;
+    override Name = "DeadSignalRuntimeSmokeTestV2";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test V2";
+    override Description = `Scan ${SMOKE_TARGET_IP} to verify fresh quest lifecycle and terminal integration.`;
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = true;
@@ -57,6 +57,32 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         return {
             targetIp: SMOKE_TARGET_IP,
         };
+    }
+
+    private registerTerminalData() {
+        Shell.addCommandData("ping", this.Data.targetIp, true);
+        Shell.addCommandData("nmap", this.Data.targetIp, [
+            {
+                port: 22,
+                status: "OPEN",
+                service: "ssh",
+                version: "DEAD SIGNAL Smoke SSH",
+            },
+        ]);
+
+        const nmapData = Shell.getCommandData(
+            "nmap",
+            this.Data.targetIp,
+        );
+
+        UI.notify(
+            `DEAD SIGNAL V2: Nmap data ${nmapData ? "READY" : "MISSING"} for ${this.Data.targetIp}`,
+        );
+
+        console.log(
+            `[DEAD SIGNAL] V2 terminal data registered: ${this.Data.targetIp}`,
+            nmapData,
+        );
     }
 
     override OnStart() {
@@ -81,36 +107,20 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         });
 
         runtime.quest.start(smokeQuest);
+        this.registerTerminalData();
 
         console.log(
-            `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
+            `[DEAD SIGNAL] V2 smoke target created: ${this.Data.targetIp}`,
         );
     }
 
     override OnObjectivesStart() {
-        // Objective-scoped infrastructure must be restored on every load.
-        // OnStart() is intentionally not used for this because HackHub only
-        // invokes OnStart() when the quest is first claimed.
-        Shell.addCommandData("ping", this.Data.targetIp, true);
-        Shell.addCommandData("nmap", this.Data.targetIp, [
-            {
-                port: 22,
-                status: "OPEN",
-                service: "ssh",
-                version: "DEAD SIGNAL Smoke SSH",
-            },
-        ]);
-
-        UI.notify(`DEAD SIGNAL target: ${this.Data.targetIp}`);
-
-        console.log(
-            `[DEAD SIGNAL] Smoke objective active for ${this.Data.targetIp}`,
-        );
+        this.registerTerminalData();
     }
 
     override OnComplete() {
         runtime.flagStore.set(
-            "dead_signal.smoke.scan_complete",
+            "dead_signal.smoke.v2.scan_complete",
             true,
         );
 
@@ -118,7 +128,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
         if (completed) {
             runtime.reward.claim({
-                id: asId("reward.dead-signal.smoke"),
+                id: asId("reward.dead-signal.smoke.v2"),
                 kind: "experience",
                 amount: 25,
             });
@@ -135,11 +145,11 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         Network.destroyNetwork(this.Data.targetIp);
 
         UI.notify(
-            `DEAD SIGNAL smoke test completed: ${completed ? "PASS" : "FAIL"}`,
+            `DEAD SIGNAL V2 smoke test completed: ${completed ? "PASS" : "FAIL"}`,
         );
 
         console.log(
-            `[DEAD SIGNAL] Runtime smoke test completed: ${completed}`,
+            `[DEAD SIGNAL] V2 runtime smoke test completed: ${completed}`,
         );
     }
 }
