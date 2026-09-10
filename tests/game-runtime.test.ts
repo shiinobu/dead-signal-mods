@@ -5,6 +5,10 @@ import {
     GameRuntime,
 } from "../src/application/index.js";
 
+import type {
+    Quest,
+} from "../src/domain/quest/index.js";
+
 test("GameRuntime creates canonical runtime state", () => {
     const runtime = new GameRuntime();
 
@@ -137,5 +141,54 @@ test("NarrativeStateService tracks completed chapters", () => {
             .getNarrativeState()
             .completedChapterIds,
         ["chapter-01"],
+    );
+});
+
+test("GameRuntime owns a functional QuestService", () => {
+    const runtime = new GameRuntime();
+
+    const quest: Quest = {
+        id: "quest-001" as Quest["id"],
+        chapterId: "chapter-01",
+        title: "Test Quest",
+        description: "Test quest description.",
+        objectives: [
+            {
+                id: "objective-001",
+                description: "Complete objective.",
+                condition: {
+                    kind: "always",
+                },
+            },
+        ],
+    };
+
+    runtime.quest.start(quest);
+
+    assert.equal(
+        runtime.quest.isActive(quest),
+        true,
+    );
+
+    assert.equal(
+        runtime.stateStore.getState()
+            .domain.quests.activeQuestId,
+        quest.id,
+    );
+
+    assert.equal(
+        runtime.quest.complete(quest),
+        true,
+    );
+
+    assert.equal(
+        runtime.quest.isCompleted(quest),
+        true,
+    );
+
+    assert.deepEqual(
+        runtime.stateStore.getState()
+            .domain.quests.completedQuestIds,
+        [quest.id],
     );
 });
