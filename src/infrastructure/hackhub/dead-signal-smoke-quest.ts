@@ -1,8 +1,6 @@
 import {
-    Events,
     Quest as HackHubQuest,
     RegisterQuest,
-    UI,
 } from "@hotbunny/hackhub-content-sdk";
 
 interface SmokeQuestData {
@@ -13,17 +11,21 @@ const SMOKE_TARGET_IP = "10.42.0.81";
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTestV7";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test V7";
-    override Description = "Isolate native terminal event delivery with Ping as a control.";
+    override Name = "DeadSignalRuntimeSmokeTestV8";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test V8";
+    override Description = "Control test: declarative Terminal.Ping objective trigger.";
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = false;
 
     override Objectives = [
         {
-            name: "terminal-event",
-            description: `Run ping and nmap against ${SMOKE_TARGET_IP} and verify native terminal events.`,
+            name: "ping-event",
+            description: `Run ping against ${SMOKE_TARGET_IP}. The objective should complete from Terminal.Ping.`,
+            trigger: {
+                event: "Terminal.Ping",
+                condition: (data: { ip: string }) => data.ip === SMOKE_TARGET_IP,
+            },
         },
     ];
 
@@ -31,36 +33,5 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         return {
             targetIp: SMOKE_TARGET_IP,
         };
-    }
-
-    override OnObjectivesStart() {
-        const eventsApi = Events as unknown as Record<string, unknown>;
-        const apiKeys = Object.keys(eventsApi).sort().join(",") || "<none>";
-
-        UI.notify(`DEAD SIGNAL V7: Events.on=${typeof Events.on}, emit=${typeof Events.emit}`);
-        UI.notify(`DEAD SIGNAL V7: Events keys=${apiKeys}`);
-        UI.notify(`DEAD SIGNAL V7: waiting for Ping + Nmap events on ${this.Data.targetIp}`);
-
-        this.Events.on("Terminal.Ping", (data) => {
-            let payload = "undefined";
-            try {
-                payload = JSON.stringify(data);
-            } catch {
-                payload = String(data);
-            }
-            console.log("[DEAD SIGNAL] V7 Terminal.Ping:", data);
-            UI.notify(`DEAD SIGNAL V7 PING RECEIVED: ${payload}`);
-        });
-
-        this.Events.on("Terminal.NmapScan", (data) => {
-            let payload = "undefined";
-            try {
-                payload = JSON.stringify(data);
-            } catch {
-                payload = String(data);
-            }
-            console.log("[DEAD SIGNAL] V7 Terminal.NmapScan:", data);
-            UI.notify(`DEAD SIGNAL V7 NMAP RECEIVED: ${payload}`);
-        });
     }
 }
