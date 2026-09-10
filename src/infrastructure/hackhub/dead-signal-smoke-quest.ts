@@ -2,6 +2,7 @@ import {
     Network,
     Quest as HackHubQuest,
     RegisterQuest,
+    Shell,
     UI,
 } from "@hotbunny/hackhub-content-sdk";
 
@@ -15,6 +16,7 @@ interface SmokeQuestData {
 }
 
 const runtime = new GameRuntime();
+const SMOKE_TARGET_IP = "10.42.0.77";
 
 const smokeQuest: DomainQuest = {
     id: asId("quest.dead-signal.smoke"),
@@ -24,7 +26,7 @@ const smokeQuest: DomainQuest = {
     objectives: [
         {
             id: "scan-target",
-            description: "Scan the smoke-test target.",
+            description: `Scan the smoke-test target ${SMOKE_TARGET_IP}.`,
             condition: flagEquals("dead_signal.smoke.scan_complete", true),
         },
     ],
@@ -34,7 +36,7 @@ const smokeQuest: DomainQuest = {
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     override Name = "DeadSignalRuntimeSmokeTest";
     override Title = "DEAD SIGNAL — Runtime Smoke Test";
-    override Description = "Scan the target to verify the DEAD SIGNAL runtime is connected to HackHub.";
+    override Description = `Scan ${SMOKE_TARGET_IP} to verify the DEAD SIGNAL runtime is connected to HackHub.`;
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = true;
@@ -42,7 +44,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     override Objectives = [
         {
             name: "scan-target",
-            description: "Scan the smoke-test target",
+            description: `Scan the smoke-test target ${SMOKE_TARGET_IP}`,
             trigger: {
                 event: "Terminal.NmapScan",
                 condition: (data: { ip: string }) =>
@@ -53,7 +55,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
     override CreateData(): SmokeQuestData {
         return {
-            targetIp: Network.randomIp(),
+            targetIp: SMOKE_TARGET_IP,
         };
     }
 
@@ -78,7 +80,18 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             children: [],
         });
 
+        Shell.addCommandData("nmap", this.Data.targetIp, [
+            {
+                port: 22,
+                status: "OPEN",
+                service: "ssh",
+                version: "DEAD SIGNAL Smoke SSH",
+            },
+        ]);
+
         runtime.quest.start(smokeQuest);
+
+        UI.notify(`DEAD SIGNAL target ready: ${this.Data.targetIp}`);
 
         console.log(
             `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
@@ -86,10 +99,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     }
 
     override OnObjectivesStart() {
-        UI.notify(`DEAD SIGNAL smoke target: ${this.Data.targetIp}`);
+        UI.notify(`DEAD SIGNAL target: ${this.Data.targetIp}`);
 
         console.log(
-            `[DEAD SIGNAL] Smoke objective active for: ${this.Data.targetIp}`,
+            `[DEAD SIGNAL] Smoke objective active for ${this.Data.targetIp}`,
         );
     }
 
@@ -115,6 +128,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             );
         }
 
+        Shell.removeCommandData("nmap", this.Data.targetIp);
         Network.destroyNetwork(this.Data.targetIp);
 
         UI.notify(
