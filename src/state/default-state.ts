@@ -17,7 +17,9 @@ const createEmptyDomainState = (): DomainState => ({
     terminal: {},
     database: {},
     hacking: {},
-    access: {},
+    access: {
+        grants: {}
+    },
     economy: {},
     progression: {},
     narrative: {

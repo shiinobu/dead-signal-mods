@@ -1,4 +1,5 @@
 import type {
+    AccessState,
     DialogueState,
     NarrativeState,
 } from "../domain/index.js";
@@ -17,7 +18,7 @@ export interface DomainState {
     readonly terminal: Readonly<Record<string, unknown>>;
     readonly database: Readonly<Record<string, unknown>>;
     readonly hacking: Readonly<Record<string, unknown>>;
-    readonly access: Readonly<Record<string, unknown>>;
+    readonly access: AccessState;
     readonly economy: Readonly<Record<string, unknown>>;
     readonly progression: Readonly<Record<string, unknown>>;
     readonly narrative: NarrativeState;

@@ -10,6 +10,10 @@ import {
 } from "../state/index.js";
 
 import {
+    AccessService,
+} from "./access-service.js";
+
+import {
     NarrativeStateService,
 } from "./narrative-state-service.js";
 
@@ -22,10 +26,6 @@ export interface RuntimeServices {
 
 export interface EndingService {
     readonly kind: "ending";
-}
-
-export interface AccessService {
-    readonly kind: "access";
 }
 
 export interface RewardService {
@@ -79,9 +79,9 @@ const createDefaultRuntimeServices = (
     ending: {
         kind: "ending",
     },
-    access: {
-        kind: "access",
-    },
+    access: new AccessService(
+        domainState,
+    ),
     reward: {
         kind: "reward",
     },
