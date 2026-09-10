@@ -14,8 +14,12 @@ const createEmptyDomainState = (): DomainState => ({
         discoveredLeadIds: [],
         completedInvestigationIds: [],
     },
-    evidence: {},
-    entities: {},
+    evidence: {
+        discoveredEvidenceIds: [],
+    },
+    entity: {
+        discoveredEntityIds: [],
+    },
     relationships: {},
     dialogue: {
         activeDialogueId: null,

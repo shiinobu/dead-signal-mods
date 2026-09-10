@@ -7,6 +7,8 @@ import type {
     ProgressionState,
     QuestState,
     RewardState,
+    EntityState,
+    EvidenceState
 } from "../domain/index.js";
 
 import type {
@@ -16,8 +18,8 @@ import type {
 export interface DomainState {
     readonly quests: QuestState;
     readonly investigation: InvestigationState;
-    readonly evidence: Readonly<Record<string, unknown>>;
-    readonly entities: Readonly<Record<string, unknown>>;
+    readonly evidence: EvidenceState;
+    readonly entity: EntityState;
     readonly relationships: Readonly<Record<string, unknown>>;
     readonly dialogue: DialogueState;
     readonly terminal: Readonly<Record<string, unknown>>;

@@ -7,3 +7,5 @@ export * from "./progression/index.js";
 export * from "./quest/index.js";
 export * from "./reward/index.js";
 export * from "./shared/index.js";
+export * from "./entity/index.js";
+export * from "./evidence/index.js";

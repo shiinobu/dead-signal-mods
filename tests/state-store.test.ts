@@ -32,7 +32,9 @@ test("StateStore owns the canonical runtime state", () => {
 
     assert.deepEqual(
         stateStore.getState().domain.evidence,
-        {},
+        {
+            discoveredEvidenceIds: [],
+        },
     );
 
     assert.deepEqual(
