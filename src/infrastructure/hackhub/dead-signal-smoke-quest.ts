@@ -10,13 +10,18 @@ import { GameRuntime } from "../../application/index.js";
 import { asId } from "../../core/index.js";
 import type { Quest as DomainQuest } from "../../domain/quest/index.js";
 import { flagEquals } from "../../domain/shared/index.js";
+import { HackHubSaveStorageAdapter } from "./save-storage-adapter.js";
 
 interface SmokeQuestData {
     readonly targetIp: string;
 }
 
-const runtime = new GameRuntime();
 const SMOKE_TARGET_IP = "10.42.0.78";
+const runtime = new GameRuntime(
+    undefined,
+    undefined,
+    new HackHubSaveStorageAdapter("dead-signal.runtime.v2"),
+);
 
 const smokeQuest: DomainQuest = {
     id: asId("quest.dead-signal.smoke.v2"),
@@ -107,6 +112,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         });
 
         runtime.quest.start(smokeQuest);
+        runtime.persistence.save();
         this.registerTerminalData();
 
         console.log(
@@ -115,7 +121,13 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     }
 
     override OnObjectivesStart() {
+        const loaded = runtime.persistence.load();
+
         this.registerTerminalData();
+
+        UI.notify(
+            `DEAD SIGNAL V2 persistence: ${loaded ? "LOADED" : "NEW"}`,
+        );
 
         this.Events.on("Terminal.NmapScan", (data: { ip: string }) => {
             if (data.ip !== this.Data.targetIp) {
@@ -124,12 +136,18 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
 
             this.completeObjective("scan-target");
 
+            runtime.flagStore.set(
+                "dead_signal.smoke.v2.scan_complete",
+                true,
+            );
+            runtime.persistence.save();
+
             UI.notify(
                 `DEAD SIGNAL V2 Nmap objective completed: ${data.ip}`,
             );
 
             console.log(
-                `[DEAD SIGNAL] V2 Nmap objective completed: ${data.ip}`,
+                `[DEAD SIGNAL] V2 Nmap objective completed and persisted: ${data.ip}`,
             );
         });
 
@@ -145,6 +163,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         );
 
         const completed = runtime.quest.complete(smokeQuest);
+        runtime.persistence.save();
 
         if (completed) {
             runtime.reward.claim({
@@ -158,6 +177,8 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
                 "QUEST_REWARD",
                 smokeQuest.id,
             );
+
+            runtime.persistence.save();
         }
 
         Shell.removeCommandData("ping", this.Data.targetIp);
