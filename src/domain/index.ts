@@ -14,3 +14,4 @@ export * from "./relationship/index.js";
 export * from "./database/index.js";
 export * from "./terminal/index.js";
 export * from "./hacking/index.js";
+export * from "./economy/index.js";
