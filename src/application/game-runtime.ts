@@ -21,15 +21,15 @@ import {
     RewardService,
 } from "./reward-service.js";
 
+import {
+    EndingService,
+} from "./ending-service.js";
+
 export interface RuntimeServices {
     readonly narrativeState: NarrativeStateService;
     readonly ending: EndingService;
     readonly access: AccessService;
     readonly reward: RewardService;
-}
-
-export interface EndingService {
-    readonly kind: "ending";
 }
 
 export class GameRuntime {
@@ -60,6 +60,7 @@ export class GameRuntime {
             services ??
             createDefaultRuntimeServices(
                 this.domainState,
+                this.conditionEvaluator,
             );
 
         this.narrativeState =
@@ -72,16 +73,21 @@ export class GameRuntime {
 
 const createDefaultRuntimeServices = (
     domainState: DomainStateAccess,
+    conditionEvaluator: ConditionEvaluator,
 ): RuntimeServices => ({
     narrativeState: new NarrativeStateService(
         domainState,
     ),
-    ending: {
-        kind: "ending",
-    },
+
+    ending: new EndingService(
+        domainState,
+        conditionEvaluator,
+    ),
+
     access: new AccessService(
         domainState,
     ),
+
     reward: new RewardService(
         domainState,
     ),

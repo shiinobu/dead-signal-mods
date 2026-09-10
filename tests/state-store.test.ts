@@ -29,7 +29,10 @@ test("StateStore owns the canonical runtime state", () => {
 
     assert.deepEqual(
         stateStore.getState().domain.ending,
-        {},
+        {
+            endingId: null,
+            resolved: false,
+        },
     );
 });
 
@@ -192,9 +195,8 @@ test("DomainStateAccess can replace the canonical domain state", () => {
     const replacement = {
         ...stateStore.getState().domain,
         ending: {
-            "ending.test": {
-                reached: true,
-            },
+            endingId: "ending.test",
+            resolved: true,
         },
     };
 

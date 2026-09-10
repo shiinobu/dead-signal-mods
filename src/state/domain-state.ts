@@ -3,7 +3,8 @@ import type {
     DialogueState,
     NarrativeState,
     ProgressionState,
-    RewardState
+    RewardState,
+    EndingState
 } from "../domain/index.js";
 
 import type {
@@ -25,7 +26,7 @@ export interface DomainState {
     readonly progression: ProgressionState;
     readonly narrative: NarrativeState;
     readonly reward: RewardState;
-    readonly ending: Readonly<Record<string, unknown>>;
+    readonly ending: EndingState;
 }
 
 export interface RuntimeState {

@@ -33,7 +33,10 @@ const createEmptyDomainState = (): DomainState => ({
     reward: {
         claimedRewardIds: [],
     },
-    ending: {},
+    ending: {
+        endingId: null,
+        resolved: false,
+    },
 });
 
 export const createDefaultRuntimeState = (): RuntimeState => ({
