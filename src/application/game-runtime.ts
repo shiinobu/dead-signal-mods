@@ -25,7 +25,12 @@ import {
     EndingService,
 } from "./ending-service.js";
 
+import {
+    QuestService,
+} from "./quest-service.js";
+
 export interface RuntimeServices {
+    readonly quest: QuestService;
     readonly narrativeState: NarrativeStateService;
     readonly ending: EndingService;
     readonly access: AccessService;
@@ -42,6 +47,7 @@ export class GameRuntime {
     readonly ending: EndingService;
     readonly access: AccessService;
     readonly reward: RewardService;
+    readonly quest: QuestService;
 
     constructor(
         stateStore: StateStore = new StateStore(
@@ -63,6 +69,7 @@ export class GameRuntime {
                 this.conditionEvaluator,
             );
 
+        this.quest = runtimeServices.quest;
         this.narrativeState =
             runtimeServices.narrativeState;
         this.ending = runtimeServices.ending;
@@ -75,6 +82,11 @@ const createDefaultRuntimeServices = (
     domainState: DomainStateAccess,
     conditionEvaluator: ConditionEvaluator,
 ): RuntimeServices => ({
+    quest: new QuestService(
+        domainState,
+        conditionEvaluator,
+    ),
+
     narrativeState: new NarrativeStateService(
         domainState,
     ),
