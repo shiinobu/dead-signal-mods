@@ -40,7 +40,6 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         setTimeout(() => {
             Events.emit("Terminal.NmapScan", {
                 ip: this.Data.targetIp,
-                ports: [],
             });
         }, 500);
     }
