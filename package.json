@@ -6,15 +6,15 @@
   "type": "module",
   "scripts": {
     "build": "tsx esbuild.config.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "tsx --test"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
     "@hotbunny/hackhub-content-sdk": "^0.21.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.20.2",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }

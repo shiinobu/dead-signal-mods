@@ -6,6 +6,7 @@
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
+    "types": ["node"],
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -17,7 +18,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules", "coverage"]
