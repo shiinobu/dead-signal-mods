@@ -11,3 +11,5 @@ export * from "./entity/index.js";
 export * from "./evidence/index.js";
 export * from "./character/index.js";
 export * from "./relationship/index.js";
+export * from "./database/index.js";
+export * from "./terminal/index.js";

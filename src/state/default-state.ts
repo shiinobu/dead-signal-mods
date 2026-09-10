@@ -31,8 +31,12 @@ const createEmptyDomainState = (): DomainState => ({
         activeNodeId: null,
         history: [],
     },
-    terminal: {},
-    database: {},
+    terminal: {
+        discoveredTerminalIds: [],
+    },
+    database: {
+        discoveredDatabaseIds: [],
+    },
     hacking: {},
     access: {
         grants: {}
