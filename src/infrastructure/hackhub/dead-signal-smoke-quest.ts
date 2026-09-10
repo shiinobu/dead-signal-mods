@@ -6,8 +6,8 @@ import {
 
 import { GameRuntime } from "../../application/index.js";
 import { asId } from "../../core/index.js";
-import { flagEquals } from "../../domain/shared/index.js";
 import type { Quest as DomainQuest } from "../../domain/quest/index.js";
+import { flagEquals } from "../../domain/shared/index.js";
 
 interface SmokeQuestData {
     readonly targetIp: string;
@@ -44,8 +44,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             description: "Scan the smoke-test target",
             trigger: {
                 event: "Terminal.NmapScan",
-                condition: (data: { ip: string }) =>
-                    data.ip === this.Data.targetIp,
+                condition: (data) => data.ip === this.Data.targetIp,
             },
         },
     ];
