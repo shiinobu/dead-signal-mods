@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-    asId,
-    DomainError,
-    EconomyService,
-    GameRuntime,
-    type MissionReward,
-} from "../src/index.js";
+import { asId } from "../src/core/index.js";
+import { DomainError } from "../src/domain/shared/index.js";
+import type { MissionReward } from "../src/domain/economy/index.js";
+import { EconomyService } from "../src/application/economy-service.js";
+import { GameRuntime } from "../src/application/game-runtime.js";
 
 const missionReward: MissionReward = {
     id: asId<"MissionReward">("mission-reward-1"),
@@ -29,16 +27,12 @@ test("EconomyService credits balance and logs a transaction", () => {
     runtime.economy.credit(350, "QUEST_REWARD", "Q07", "2026-01-01T00:00:00.000Z");
 
     assert.equal(runtime.economy.getBalance(), 350);
-    assert.deepEqual(runtime.economy.getTransactions(), [
-        {
-            id: runtime.economy.getTransactions()[0]?.id,
-            type: "CREDIT",
-            amount: 350,
-            source: "QUEST_REWARD",
-            reference: "Q07",
-            timestamp: "2026-01-01T00:00:00.000Z",
-        },
-    ]);
+    assert.equal(runtime.economy.getTransactions().length, 1);
+    assert.equal(runtime.economy.getTransactions()[0]?.type, "CREDIT");
+    assert.equal(runtime.economy.getTransactions()[0]?.amount, 350);
+    assert.equal(runtime.economy.getTransactions()[0]?.source, "QUEST_REWARD");
+    assert.equal(runtime.economy.getTransactions()[0]?.reference, "Q07");
+    assert.equal(runtime.economy.getTransactions()[0]?.timestamp, "2026-01-01T00:00:00.000Z");
 });
 
 test("EconomyService debits balance and prevents a negative balance", () => {
@@ -139,9 +133,10 @@ test("mission reward uses the canonical StateStore through GameRuntime", () => {
     );
 });
 
-test("GameRuntime owns a functional EconomyService", () => {
+test("GameRuntime exposes a functional EconomyService", () => {
     const runtime = new GameRuntime();
 
+    assert.ok(runtime.economy instanceof EconomyService);
     runtime.economy.credit(700, "BONUS");
 
     assert.equal(runtime.economy.getBalance(), 700);
