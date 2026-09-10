@@ -1,0 +1,10 @@
+{
+  "id": "dead-signal",
+  "name": "DEAD SIGNAL",
+  "version": "0.1.0",
+  "author": "Shiinobu",
+  "description": "DEAD SIGNAL story and gameplay expansion for HackHub.",
+  "apiVersion": 1,
+  "permissions": [],
+  "tags": ["story", "quest", "investigation", "mystery"]
+}
