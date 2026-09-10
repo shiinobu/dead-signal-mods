@@ -9,24 +9,21 @@ interface SmokeQuestData {
 }
 
 const SMOKE_TARGET_IP = "10.42.0.81";
+const CUSTOM_EVENT = "DeadSignal.CustomEvent" as any;
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTestV9";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test V9";
-    override Description = "Control test: manually emit Terminal.NmapScan into the declarative objective trigger.";
+    override Name = "DeadSignalRuntimeSmokeTestV10";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test V10";
+    override Description = "Control test: isolate the SDK custom Events bus from Terminal.NmapScan.";
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = false;
 
     override Objectives = [
         {
-            name: "nmap-event",
-            description: `Wait for a synthetic Terminal.NmapScan event for ${SMOKE_TARGET_IP}.`,
-            trigger: {
-                event: "Terminal.NmapScan",
-                condition: (data: { ip: string }) => data.ip === SMOKE_TARGET_IP,
-            },
+            name: "custom-event",
+            description: "Wait for a synthetic DEAD SIGNAL custom event. Completion proves the Events bus callback works.",
         },
     ];
 
@@ -37,9 +34,15 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     }
 
     override OnObjectivesStart() {
+        Events.on(CUSTOM_EVENT, () => {
+            console.log("[DEAD SIGNAL] CUSTOM EVENT RECEIVED");
+            this.completeObjective("custom-event");
+        });
+
         setTimeout(() => {
-            Events.emit("Terminal.NmapScan", {
-                ip: this.Data.targetIp,
+            console.log("[DEAD SIGNAL] EMITTING CUSTOM EVENT");
+            Events.emit(CUSTOM_EVENT, {
+                source: "dead-signal-smoke-test",
             });
         }, 500);
     }
