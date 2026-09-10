@@ -4,6 +4,7 @@ export type Id<T extends string> = Brand<string, `${T}Id`>;
 
 export type EntityId = Id<"Entity">;
 export type QuestId = Id<"Quest">;
+export type InvestigationId = Id<"Investigation">;
 export type CharacterId = Id<"Character">;
 export type EvidenceId = Id<"Evidence">;
 export type DialogueId = Id<"Dialogue">;
