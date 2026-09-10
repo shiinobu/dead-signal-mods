@@ -6,6 +6,9 @@ import {
     createDefaultRuntimeState,
     DomainStateAccess,
     FlagStore,
+    SaveLoadService,
+    SaveStorage,
+    StateSerializer,
     StateStore,
 } from "../state/index.js";
 
@@ -47,6 +50,7 @@ export class GameRuntime {
     readonly flagStore: FlagStore;
     readonly domainState: DomainStateAccess;
     readonly conditionEvaluator: ConditionEvaluator;
+    readonly persistence: SaveLoadService;
 
     readonly narrativeState: NarrativeStateService;
     readonly ending: EndingService;
@@ -60,12 +64,18 @@ export class GameRuntime {
             createDefaultRuntimeState(),
         ),
         services?: RuntimeServices,
+        storage: SaveStorage = new InMemorySaveStorage(),
     ) {
         this.stateStore = stateStore;
         this.flagStore = new FlagStore(stateStore);
         this.domainState = new DomainStateAccess(stateStore);
         this.conditionEvaluator = new ConditionEvaluator(
             this.flagStore,
+        );
+        this.persistence = new SaveLoadService(
+            stateStore,
+            new StateSerializer(),
+            storage,
         );
 
         const runtimeServices =
@@ -82,6 +92,18 @@ export class GameRuntime {
         this.access = runtimeServices.access;
         this.reward = runtimeServices.reward;
         this.economy = runtimeServices.economy;
+    }
+}
+
+class InMemorySaveStorage implements SaveStorage {
+    private serializedState: string | null = null;
+
+    write(serializedState: string): void {
+        this.serializedState = serializedState;
+    }
+
+    read(): string | null {
+        return this.serializedState;
     }
 }
 
