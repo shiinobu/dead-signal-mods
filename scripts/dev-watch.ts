@@ -5,7 +5,6 @@ import { resolve } from "node:path";
 const root = process.cwd();
 const watchedPaths = [
     resolve(root, "src"),
-    resolve(root, "esbuild.config.ts"),
     resolve(root, "manifest.json"),
 ];
 
@@ -23,8 +22,6 @@ function runBuild() {
     building = true;
     console.log("[DEAD SIGNAL] Building mod...");
 
-    // Spawn Node directly instead of npm.cmd. On Windows, spawning the
-    // .cmd shim can fail with EINVAL under newer Node runtimes.
     const tsxCli = resolve(root, "node_modules/tsx/dist/cli.mjs");
     buildProcess = spawn(process.execPath, [tsxCli, "esbuild.config.ts"], {
         cwd: root,
