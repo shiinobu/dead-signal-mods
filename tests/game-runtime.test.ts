@@ -10,7 +10,7 @@ test("GameRuntime creates canonical runtime state", () => {
 
     assert.deepEqual(runtime.stateStore.getState().flags, {});
     assert.deepEqual(
-        state.domain.quests,
+        runtime.stateStore.getState().domain.quests,
         {
             activeQuestId: null,
             completedQuestIds: [],
