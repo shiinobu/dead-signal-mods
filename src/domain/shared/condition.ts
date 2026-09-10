@@ -1,4 +1,4 @@
-import type { FlagKey, FlagValue } from "./flag.js";
+import type { FlagKey, FlagValue } from "./flags.js";
 
 export type ConditionNode =
     | { readonly kind: "all"; readonly conditions: readonly ConditionNode[] }
