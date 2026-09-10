@@ -6,6 +6,7 @@ export type EntityId = Id<"Entity">;
 export type QuestId = Id<"Quest">;
 export type InvestigationId = Id<"Investigation">;
 export type CharacterId = Id<"Character">;
+export type RelationshipId = Id<"Relationship">;
 export type EvidenceId = Id<"Evidence">;
 export type DialogueId = Id<"Dialogue">;
 export type TerminalId = Id<"Terminal">;

@@ -9,3 +9,5 @@ export * from "./reward/index.js";
 export * from "./shared/index.js";
 export * from "./entity/index.js";
 export * from "./evidence/index.js";
+export * from "./character/index.js";
+export * from "./relationship/index.js";

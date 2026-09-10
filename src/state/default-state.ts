@@ -20,7 +20,12 @@ const createEmptyDomainState = (): DomainState => ({
     entity: {
         discoveredEntityIds: [],
     },
-    relationships: {},
+    character: {
+        discoveredCharacterIds: [],
+    },
+    relationships: {
+        discoveredRelationshipIds: [],
+    },
     dialogue: {
         activeDialogueId: null,
         activeNodeId: null,
