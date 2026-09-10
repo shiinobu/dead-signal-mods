@@ -31,31 +31,32 @@ const smokeQuest: DomainQuest = {
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    Name = "DeadSignalRuntimeSmokeTest";
-    Title = "DEAD SIGNAL — Runtime Smoke Test";
-    Description = "Scan the target to verify the DEAD SIGNAL runtime is connected to HackHub.";
-    Group = "storyline" as const;
-    AutoStart = true;
-    AutoComplete = true;
+    override Name = "DeadSignalRuntimeSmokeTest";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test";
+    override Description = "Scan the target to verify the DEAD SIGNAL runtime is connected to HackHub.";
+    override Group = "storyline" as const;
+    override AutoStart = true;
+    override AutoComplete = true;
 
-    Objectives = [
+    override Objectives = [
         {
             name: "scan-target",
             description: "Scan the smoke-test target",
             trigger: {
                 event: "Terminal.NmapScan",
-                condition: (data) => data.ip === this.Data.targetIp,
+                condition: (data: { ip: string }) =>
+                    data.ip === this.Data.targetIp,
             },
         },
     ];
 
-    CreateData(): SmokeQuestData {
+    override CreateData(): SmokeQuestData {
         return {
             targetIp: Network.randomIp(),
         };
     }
 
-    OnStart() {
+    override OnStart() {
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
             type: Network.Type.Router,
@@ -83,7 +84,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         );
     }
 
-    OnComplete() {
+    override OnComplete() {
         runtime.flagStore.set(
             "dead_signal.smoke.scan_complete",
             true,
