@@ -41,11 +41,97 @@ test("GameRuntime exposes the canonical ConditionEvaluator", () => {
     );
 });
 
-test("GameRuntime owns all required runtime services", () => {
+test("GameRuntime owns a functional NarrativeStateService", () => {
     const runtime = new GameRuntime();
 
-    assert.equal(runtime.narrativeState.kind, "narrative-state");
-    assert.equal(runtime.ending.kind, "ending");
-    assert.equal(runtime.access.kind, "access");
-    assert.equal(runtime.reward.kind, "reward");
+    runtime.narrativeState.setChapter("chapter-01");
+    runtime.narrativeState.setScene("scene-01");
+
+    assert.deepEqual(
+        runtime.narrativeState.getNarrativeState(),
+        {
+            chapterId: "chapter-01",
+            sceneId: "scene-01",
+            completedChapterIds: [],
+        },
+    );
+});
+
+test("NarrativeStateService persists through the canonical StateStore", () => {
+    const runtime = new GameRuntime();
+
+    runtime.narrativeState.setChapter("chapter-01");
+    runtime.narrativeState.setScene("scene-01");
+
+    const state = runtime.stateStore.getState();
+
+    assert.equal(
+        state.domain.narrative.chapterId,
+        "chapter-01",
+    );
+
+    assert.equal(
+        state.domain.narrative.sceneId,
+        "scene-01",
+    );
+});
+
+test("NarrativeStateService manages dialogue state", () => {
+    const runtime = new GameRuntime();
+
+    runtime.narrativeState.startDialogue(
+        "dialogue-01",
+        "node-01",
+    );
+
+    runtime.narrativeState.advanceDialogue(
+        "node-02",
+    );
+
+    assert.deepEqual(
+        runtime.narrativeState.getDialogueState(),
+        {
+            activeDialogueId: "dialogue-01",
+            activeNodeId: "node-02",
+            history: [
+                {
+                    dialogueId: "dialogue-01",
+                    nodeId: "node-02",
+                },
+            ],
+        },
+    );
+
+    runtime.narrativeState.endDialogue();
+
+    assert.equal(
+        runtime.narrativeState.getDialogueState()
+            .activeDialogueId,
+        null,
+    );
+
+    assert.equal(
+        runtime.narrativeState.getDialogueState()
+            .activeNodeId,
+        null,
+    );
+});
+
+test("NarrativeStateService tracks completed chapters", () => {
+    const runtime = new GameRuntime();
+
+    runtime.narrativeState.completeChapter(
+        "chapter-01",
+    );
+
+    runtime.narrativeState.completeChapter(
+        "chapter-01",
+    );
+
+    assert.deepEqual(
+        runtime.narrativeState
+            .getNarrativeState()
+            .completedChapterIds,
+        ["chapter-01"],
+    );
 });

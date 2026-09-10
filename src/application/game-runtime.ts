@@ -9,15 +9,15 @@ import {
     StateStore,
 } from "../state/index.js";
 
+import {
+    NarrativeStateService,
+} from "./narrative-state-service.js";
+
 export interface RuntimeServices {
     readonly narrativeState: NarrativeStateService;
     readonly ending: EndingService;
     readonly access: AccessService;
     readonly reward: RewardService;
-}
-
-export interface NarrativeStateService {
-    readonly kind: "narrative-state";
 }
 
 export interface EndingService {
@@ -47,7 +47,7 @@ export class GameRuntime {
         stateStore: StateStore = new StateStore(
             createDefaultRuntimeState(),
         ),
-        services: RuntimeServices = createDefaultRuntimeServices(),
+        services?: RuntimeServices,
     ) {
         this.stateStore = stateStore;
         this.flagStore = new FlagStore(stateStore);
@@ -56,17 +56,26 @@ export class GameRuntime {
             this.flagStore,
         );
 
-        this.narrativeState = services.narrativeState;
-        this.ending = services.ending;
-        this.access = services.access;
-        this.reward = services.reward;
+        const runtimeServices =
+            services ??
+            createDefaultRuntimeServices(
+                this.domainState,
+            );
+
+        this.narrativeState =
+            runtimeServices.narrativeState;
+        this.ending = runtimeServices.ending;
+        this.access = runtimeServices.access;
+        this.reward = runtimeServices.reward;
     }
 }
 
-const createDefaultRuntimeServices = (): RuntimeServices => ({
-    narrativeState: {
-        kind: "narrative-state",
-    },
+const createDefaultRuntimeServices = (
+    domainState: DomainStateAccess,
+): RuntimeServices => ({
+    narrativeState: new NarrativeStateService(
+        domainState,
+    ),
     ending: {
         kind: "ending",
     },

@@ -9,14 +9,22 @@ const createEmptyDomainState = (): DomainState => ({
     evidence: {},
     entities: {},
     relationships: {},
-    dialogue: {},
+    dialogue: {
+        activeDialogueId: null,
+        activeNodeId: null,
+        history: [],
+    },
     terminal: {},
     database: {},
     hacking: {},
     access: {},
     economy: {},
     progression: {},
-    narrative: {},
+    narrative: {
+        chapterId: null,
+        sceneId: null,
+        completedChapterIds: [],
+    },
     ending: {},
 });
 
