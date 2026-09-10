@@ -80,6 +80,10 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             children: [],
         });
 
+        // Nmap performs host discovery before reporting ports. The SDK
+        // exposes ping command data specifically to force a host up/down
+        // result for dynamic quest targets.
+        Shell.addCommandData("ping", this.Data.targetIp, true);
         Shell.addCommandData("nmap", this.Data.targetIp, [
             {
                 port: 22,
@@ -128,6 +132,7 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             );
         }
 
+        Shell.removeCommandData("ping", this.Data.targetIp);
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Network.destroyNetwork(this.Data.targetIp);
 
