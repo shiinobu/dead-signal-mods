@@ -5,6 +5,7 @@ import {
     createDefaultRuntimeState,
     FlagStore,
     StateStore,
+    DomainStateAccess
 } from "../src/state/index.js";
 
 test("StateStore owns the canonical runtime state", () => {
@@ -140,4 +141,67 @@ test("default runtime states are independent", () => {
     assert.notEqual(first.domain, second.domain);
     assert.notEqual(first.domain.quests, second.domain.quests);
     assert.notEqual(first.domain.evidence, second.domain.evidence);
+});
+
+test("DomainStateAccess reads canonical domain state", () => {
+    const stateStore = new StateStore(
+        createDefaultRuntimeState(),
+    );
+
+    const domainAccess = new DomainStateAccess(stateStore);
+
+    assert.strictEqual(
+        domainAccess.get(),
+        stateStore.getState().domain,
+    );
+});
+
+test("DomainStateAccess updates through StateStore", () => {
+    const stateStore = new StateStore(
+        createDefaultRuntimeState(),
+    );
+
+    const domainAccess = new DomainStateAccess(stateStore);
+
+    domainAccess.update((current) => ({
+        ...current,
+        quests: {
+            "quest.test": {
+                status: "active",
+            },
+        },
+    }));
+
+    assert.deepEqual(
+        stateStore.getState().domain.quests,
+        {
+            "quest.test": {
+                status: "active",
+            },
+        },
+    );
+});
+
+test("DomainStateAccess can replace the canonical domain state", () => {
+    const stateStore = new StateStore(
+        createDefaultRuntimeState(),
+    );
+
+    const domainAccess = new DomainStateAccess(stateStore);
+
+    const replacement = {
+        ...stateStore.getState().domain,
+        ending: {
+            "ending.test": {
+                reached: true,
+            },
+        },
+    };
+
+    domainAccess.replace(replacement);
+
+    assert.strictEqual(
+        stateStore.getState().domain,
+        replacement,
+    );
 });
