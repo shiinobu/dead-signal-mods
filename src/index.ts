@@ -5,11 +5,11 @@ import {
 
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {
-    OnModPackageLoaded() {
+    override OnModPackageLoaded() {
         console.log("DEAD SIGNAL mod loaded!");
     }
 
-    OnModPackageUnloaded() {
+    override OnModPackageUnloaded() {
         console.log("DEAD SIGNAL mod unloaded.");
     }
 }
