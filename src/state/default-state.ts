@@ -4,7 +4,11 @@ import type {
 } from "./domain-state.js";
 
 const createEmptyDomainState = (): DomainState => ({
-    quests: {},
+    quests: {
+        activeQuestId: null,
+        completedQuestIds: [],
+        failedQuestIds: [],
+    },
     investigation: {},
     evidence: {},
     entities: {},

@@ -5,3 +5,4 @@ export * from "./narrative/index.js";
 export * from "./progression/index.js";
 export * from "./reward/index.js";
 export * from "./shared/index.js";
+export * from "./quest/index.js";

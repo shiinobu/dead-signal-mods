@@ -4,6 +4,7 @@ import type {
     NarrativeState,
     ProgressionState,
     RewardState,
+    QuestState,
     EndingState
 } from "../domain/index.js";
 
@@ -12,7 +13,7 @@ import type {
 } from "../domain/shared/index.js";
 
 export interface DomainState {
-    readonly quests: Readonly<Record<string, unknown>>;
+    readonly quests: QuestState;
     readonly investigation: Readonly<Record<string, unknown>>;
     readonly evidence: Readonly<Record<string, unknown>>;
     readonly entities: Readonly<Record<string, unknown>>;

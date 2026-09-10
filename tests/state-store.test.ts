@@ -8,6 +8,10 @@ import {
     DomainStateAccess
 } from "../src/state/index.js";
 
+import {
+    asId,
+} from "../src/core/index.js";
+
 test("StateStore owns the canonical runtime state", () => {
     const initialState = createDefaultRuntimeState();
     const stateStore = new StateStore(initialState);
@@ -169,9 +173,9 @@ test("DomainStateAccess updates through StateStore", () => {
     domainAccess.update((current) => ({
         ...current,
         quests: {
-            "quest.test": {
-                status: "active",
-            },
+            activeQuestId: null,
+    completedQuestIds: [],
+    failedQuestIds: [],
         },
     }));
 
