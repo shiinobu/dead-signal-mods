@@ -1,27 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-    asId,
-} from "../src/core/index.js";
-import type {
-    CharacterId,
-} from "../src/core/index.js";
-import {
-    GameRuntime,
-} from "../src/application/index.js";
-import {
-    flagEquals,
-} from "../src/domain/shared/index.js";
-import type {
-    Ending,
-} from "../src/domain/ending/index.js";
-import type {
-    Quest,
-} from "../src/domain/quest/index.js";
-import type {
-    SaveStorage,
-} from "../src/state/index.js";
+import { asId } from "../src/core/index.js";
+import type { CharacterId } from "../src/core/index.js";
+import { GameRuntime } from "../src/application/index.js";
+import { flagEquals } from "../src/domain/shared/index.js";
+import type { Ending } from "../src/domain/ending/index.js";
+import type { Quest } from "../src/domain/quest/index.js";
+import type { SaveStorage } from "../src/state/index.js";
 
 class SharedStorage implements SaveStorage {
     private serializedState: string | null = null;
@@ -42,13 +28,11 @@ const quest: Quest = {
     chapterId: "04",
     title: "Full Validation Quest",
     description: "Exercise the complete runtime integration surface.",
-    objectives: [
-        {
-            id: "objective.full-validation",
-            description: "Enable the final condition.",
-            condition: flagEquals("final_condition", true),
-        },
-    ],
+    objectives: [{
+        id: "objective.full-validation",
+        description: "Enable the final condition.",
+        condition: flagEquals("final_condition", true),
+    }],
 };
 
 const ending: Ending = {
@@ -61,8 +45,12 @@ test("full runtime integration preserves all canonical services through save and
     const source = new GameRuntime(undefined, undefined, storage);
 
     source.flagStore.set("final_condition", true);
-    source.narrativeState.setCurrentChapter("04");
-    source.narrativeState.recordDialogue("dialogue.full-validation");
+    source.narrativeState.setChapter("04");
+    source.narrativeState.startDialogue(
+        "dialogue.full-validation",
+        "node.start",
+    );
+    source.narrativeState.advanceDialogue("node.evidence");
     source.narrativeState.completeChapter("04");
 
     source.quest.start(quest);
@@ -87,7 +75,7 @@ test("full runtime integration preserves all canonical services through save and
         capability: "OVERRIDE_OPERATOR",
     });
 
-    assert.equal(source.ending.resolve([ending]), true);
+    assert.equal(source.ending.resolve([ending]), ending.id);
 
     const expectedState = source.stateStore.getState();
     source.persistence.save();
@@ -97,13 +85,17 @@ test("full runtime integration preserves all canonical services through save and
 
     assert.deepEqual(restored.stateStore.getState(), expectedState);
     assert.equal(restored.quest.isCompleted(quest), true);
-    assert.equal(restored.reward.hasClaimed(asId("reward.full-validation")), true);
+    assert.equal(
+        restored.reward.hasClaimed(asId("reward.full-validation")),
+        true,
+    );
     assert.equal(restored.economy.getBalance(), 700);
     assert.equal(
         restored.access.hasCapability(actorId, "OVERRIDE_OPERATOR"),
         true,
     );
     assert.equal(restored.ending.isResolved(), true);
+    assert.equal(restored.ending.getEndingId(), ending.id);
 });
 
 test("full runtime integration does not replay rewards, transactions, or ending resolution on restore", () => {
@@ -125,7 +117,7 @@ test("full runtime integration does not replay rewards, transactions, or ending 
         "no-replay",
         "2026-09-11T00:00:00.000Z",
     );
-    assert.equal(source.ending.resolve([ending]), true);
+    assert.equal(source.ending.resolve([ending]), ending.id);
     source.persistence.save();
 
     const restored = new GameRuntime(undefined, undefined, storage);
@@ -137,7 +129,7 @@ test("full runtime integration does not replay rewards, transactions, or ending 
     assert.equal(stateAfterLoad.domain.economy.balance, 400);
     assert.equal(stateAfterLoad.domain.progression.experience, 50);
     assert.equal(stateAfterLoad.domain.ending.endingId, ending.id);
-    assert.equal(restored.ending.resolve([ending]), false);
+    assert.equal(restored.ending.resolve([ending]), ending.id);
 
     assert.deepEqual(restored.stateStore.getState(), stateAfterLoad);
 });
