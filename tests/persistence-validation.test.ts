@@ -21,10 +21,16 @@ class TestSaveStorage implements SaveStorage {
     }
 }
 
-const createPayload = () => ({
-    schemaVersion: 1,
-    state: createDefaultRuntimeState(),
-});
+const createPayload = () =>
+    JSON.parse(
+        JSON.stringify({
+            schemaVersion: 1,
+            state: createDefaultRuntimeState(),
+        }),
+    ) as {
+        schemaVersion: number;
+        state: ReturnType<typeof createDefaultRuntimeState>;
+    };
 
 test("serializer rejects an unsupported save schema version", () => {
     const serializer = new StateSerializer();
@@ -49,7 +55,10 @@ test("serializer rejects a missing runtime state", () => {
 test("serializer rejects invalid flag values", () => {
     const serializer = new StateSerializer();
     const payload = createPayload();
-    payload.state.flags.invalid = { nested: true } as never;
+    const mutableState = payload.state as unknown as {
+        flags: Record<string, unknown>;
+    };
+    mutableState.flags.invalid = { nested: true };
 
     assert.throws(
         () => serializer.deserialize(JSON.stringify(payload)),
@@ -60,7 +69,11 @@ test("serializer rejects invalid flag values", () => {
 test("serializer rejects incomplete domain state", () => {
     const serializer = new StateSerializer();
     const payload = createPayload();
-    delete (payload.state.domain as Record<string, unknown>).quests;
+    const mutableDomain = payload.state.domain as unknown as Record<
+        string,
+        unknown
+    >;
+    delete mutableDomain.quests;
 
     assert.throws(
         () => serializer.deserialize(JSON.stringify(payload)),
@@ -71,10 +84,11 @@ test("serializer rejects incomplete domain state", () => {
 test("serializer rejects invalid economy balance", () => {
     const serializer = new StateSerializer();
     const payload = createPayload();
-    payload.state.domain.economy = {
-        ...payload.state.domain.economy,
-        balance: -1,
-    };
+    const mutableEconomy = payload.state.domain.economy as unknown as Record<
+        string,
+        unknown
+    >;
+    mutableEconomy.balance = -1;
 
     assert.throws(
         () => serializer.deserialize(JSON.stringify(payload)),
@@ -85,10 +99,12 @@ test("serializer rejects invalid economy balance", () => {
 test("serializer accepts a pending ending ID before resolution", () => {
     const serializer = new StateSerializer();
     const payload = createPayload();
-    payload.state.domain.ending = {
-        endingId: "ending.test",
-        resolved: false,
-    };
+    const mutableEnding = payload.state.domain.ending as unknown as Record<
+        string,
+        unknown
+    >;
+    mutableEnding.endingId = "ending.test";
+    mutableEnding.resolved = false;
 
     assert.doesNotThrow(() => serializer.deserialize(JSON.stringify(payload)));
 });
@@ -96,10 +112,12 @@ test("serializer accepts a pending ending ID before resolution", () => {
 test("serializer rejects a resolved ending without an ending ID", () => {
     const serializer = new StateSerializer();
     const payload = createPayload();
-    payload.state.domain.ending = {
-        endingId: null,
-        resolved: true,
-    };
+    const mutableEnding = payload.state.domain.ending as unknown as Record<
+        string,
+        unknown
+    >;
+    mutableEnding.endingId = null;
+    mutableEnding.resolved = true;
 
     assert.throws(
         () => serializer.deserialize(JSON.stringify(payload)),
@@ -125,10 +143,11 @@ test("load rejects an invalid save without replacing canonical state", () => {
 
     const before = stateStore.getState();
     const invalidPayload = createPayload();
-    invalidPayload.state.domain.economy = {
-        ...invalidPayload.state.domain.economy,
-        balance: -500,
-    };
+    const mutableEconomy = invalidPayload.state.domain.economy as unknown as Record<
+        string,
+        unknown
+    >;
+    mutableEconomy.balance = -500;
     storage.write(JSON.stringify(invalidPayload));
 
     assert.throws(
