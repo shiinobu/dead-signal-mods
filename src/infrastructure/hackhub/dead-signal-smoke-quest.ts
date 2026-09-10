@@ -80,9 +80,17 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             children: [],
         });
 
-        // Nmap performs host discovery before reporting ports. The SDK
-        // exposes ping command data specifically to force a host up/down
-        // result for dynamic quest targets.
+        runtime.quest.start(smokeQuest);
+
+        console.log(
+            `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
+        );
+    }
+
+    override OnObjectivesStart() {
+        // Objective-scoped infrastructure must be restored on every load.
+        // OnStart() is intentionally not used for this because HackHub only
+        // invokes OnStart() when the quest is first claimed.
         Shell.addCommandData("ping", this.Data.targetIp, true);
         Shell.addCommandData("nmap", this.Data.targetIp, [
             {
@@ -93,16 +101,6 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
             },
         ]);
 
-        runtime.quest.start(smokeQuest);
-
-        UI.notify(`DEAD SIGNAL target ready: ${this.Data.targetIp}`);
-
-        console.log(
-            `[DEAD SIGNAL] Smoke target created: ${this.Data.targetIp}`,
-        );
-    }
-
-    override OnObjectivesStart() {
         UI.notify(`DEAD SIGNAL target: ${this.Data.targetIp}`);
 
         console.log(
