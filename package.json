@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsx esbuild.config.ts",
-    "dev": "tsx watch esbuild.config.ts",
+    "dev": "tsx scripts/dev-watch.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "tsx --test"
   },
