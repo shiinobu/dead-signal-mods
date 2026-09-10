@@ -5,7 +5,7 @@ import {
     createDefaultRuntimeState,
     FlagStore,
     StateStore,
-    DomainStateAccess
+    DomainStateAccess,
 } from "../src/state/index.js";
 
 import {
@@ -23,7 +23,11 @@ test("StateStore owns the canonical runtime state", () => {
 
     assert.deepEqual(
         stateStore.getState().domain.quests,
-        {},
+        {
+            activeQuestId: null,
+            completedQuestIds: [],
+            failedQuestIds: [],
+        },
     );
 
     assert.deepEqual(
@@ -173,18 +177,18 @@ test("DomainStateAccess updates through StateStore", () => {
     domainAccess.update((current) => ({
         ...current,
         quests: {
-            activeQuestId: null,
-    completedQuestIds: [],
-    failedQuestIds: [],
+            activeQuestId: asId<"Quest">("quest.test"),
+            completedQuestIds: [],
+            failedQuestIds: [],
         },
     }));
 
     assert.deepEqual(
         stateStore.getState().domain.quests,
         {
-            "quest.test": {
-                status: "active",
-            },
+            activeQuestId: asId<"Quest">("quest.test"),
+            completedQuestIds: [],
+            failedQuestIds: [],
         },
     );
 });
