@@ -1,5 +1,4 @@
 import type { Quest } from "../domain/quest/index.js";
-import type { QuestId } from "../core/index.js";
 import type { ConditionEvaluator } from "../domain/shared/index.js";
 import type { DomainStateAccess } from "../state/index.js";
 
