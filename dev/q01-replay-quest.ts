@@ -161,7 +161,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnStart() {
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
-            type: Network.Type.Device,
+            type: Network.Type.Router,
             users: [
                 Network.createUser({
                     username: Q01_SSH_USERNAME,
@@ -188,6 +188,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                     service: "https",
                 },
             ],
+            children: [],
         });
 
         this.sendMail(0);
@@ -201,8 +202,8 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             this.handleTerminalCommand(data);
         });
 
-        this.Events.on("Terminal.SSHConnect", (data) => {
-            this.handleSshConnection(data);
+        this.Events.on("Terminal.SSH.Connected", (ip) => {
+            this.handleSshConnection(ip);
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -261,10 +262,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
     }
 
-    private handleSshConnection(data: { ip: string; username: string }): void {
+    private handleSshConnection(ip: string): void {
         if (
-            data.ip !== this.Data.targetIp ||
-            data.username !== Q01_SSH_USERNAME ||
+            ip !== this.Data.targetIp ||
             !this.Data.servicesIdentified
         ) {
             return;
@@ -272,7 +272,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
         if (!this.Data.sshConnected) {
             this.SetData("sshConnected", true);
-            this.completeObjective(Q01_OBJECTIVE_IDS.basicVulnerabilityChecks);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
+            );
         }
     }
 
