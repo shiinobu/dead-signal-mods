@@ -74,7 +74,7 @@ Supporting guidance:
 
 - Terminal affordance for `nmap 203.0.113.42`.
 - Short hint for the expected exposed services.
-- Terminal affordance for `ssh -h audit@203.0.113.42`.
+- Terminal affordance for `ssh -h audit@203.0.113.42 -p 22`.
 - Short hint that Adrian supplied an authorized audit account.
 - Short hint for the report destination/action.
 
@@ -84,28 +84,24 @@ No internal mod paths are exposed in hints.
 
 ### Network
 
-The quest creates a dedicated public router with a private child device for the SSH landing point. This mirrors the working modding pattern used for SSH-enabled targets: the public router exposes the audit ports, while the child device owns the SSH-capable user and service.
+The quest creates the public audit target directly as a `Network.Type.Device`. No router-hacking step, child-device routing, or additional network mechanic is required for Q01.
 
 ```text
-203.0.113.42  (public router)
+203.0.113.42  (audit target)
 ├── 22 / ssh
+│   └── user: audit
 ├── 80 / http
 └── 443 / https
-        │
-        └── 10.0.0.2  (SSH child device)
-            └── 22 / ssh
-                └── user: audit
 ```
 
 The SSH account is explicitly authorized by the mission brief:
 
 ```text
 username: audit
+password: meridian-audit
 ```
 
-The implementation keeps the target credential inside the network user object; the player-facing terminal syntax does not accept a password argument.
-
-The production manifest therefore requires the `network` permission.
+The implementation keeps the password inside the network user definition; the player-facing SSH command does not pass a password argument. The production manifest therefore requires the `network` permission.
 
 ### Reconnaissance
 
@@ -134,13 +130,13 @@ Repeating Nmap does not satisfy Objective 04.
 
 ### Authorized SSH Verification
 
-The player-facing SSH syntax follows the current HackHub Handbook, using the default SSH port because `-p` is optional:
+The player-facing SSH syntax follows the current HackHub Handbook:
 
 ```bash
-ssh -h audit@203.0.113.42
+ssh -h audit@203.0.113.42 -p 22
 ```
 
-Objective 04 is completed only after the real in-game `Terminal.SSH.Connected` event is received for `203.0.113.42`.
+`-h` contains `username@ip` without a port; `-p` supplies the port. Objective 04 is completed only after the real in-game `Terminal.SSH.Connected` event is received for `203.0.113.42`.
 
 The implementation does not simulate the SSH result with a fake terminal command.
 
