@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-replay/
 coverage/
 .env
 .env.*
@@ -8,3 +9,5 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
+/dev/replay-id.generated.ts
+/.dev-q01-replay-run
