@@ -8,7 +8,7 @@ import {
 import {
     Q01_OBJECTIVE_IDS,
     Q01_SSH_COMMAND,
-    Q01_SSH_INTERNAL_IP,
+    Q01_SSH_PASSWORD,
     Q01_SSH_PORT,
     Q01_SSH_USERNAME,
     Q01_TARGET_IP,
@@ -158,14 +158,15 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     }
 
     override OnStart() {
-        const auditUser = Network.createUser({
-            username: Q01_SSH_USERNAME,
-        });
-
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
-            type: Network.Type.Router,
-            users: [],
+            type: Network.Type.Device,
+            users: [
+                Network.createUser({
+                    username: Q01_SSH_USERNAME,
+                    password: Q01_SSH_PASSWORD,
+                }),
+            ],
             ports: [
                 {
                     external: Q01_SSH_PORT,
@@ -186,26 +187,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                     service: "https",
                 },
             ],
-            children: [
-                {
-                    ip: Q01_SSH_INTERNAL_IP,
-                    type: Network.Type.Device,
-                    users: [auditUser],
-                    ports: [
-                        {
-                            external: Q01_SSH_PORT,
-                            internal: Q01_SSH_PORT,
-                            active: true,
-                            service: "ssh",
-                        },
-                    ],
-                    ssh: true,
-                },
-            ],
         });
-
-        Network.openPort(this.Data.targetIp, Q01_SSH_PORT);
-        Network.openPort(Q01_SSH_INTERNAL_IP, Q01_SSH_PORT);
 
         this.sendMail(0);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
