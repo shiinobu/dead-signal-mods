@@ -107,10 +107,12 @@ export class QuestService {
     }
 
     areObjectivesComplete(quest: Quest): boolean {
-        return quest.objectives.every((objective) =>
-            this.conditionEvaluator.evaluate(
-                objective.condition,
-            ),
-        );
+        return quest.objectives
+            .filter((objective) => !objective.optional)
+            .every((objective) =>
+                this.conditionEvaluator.evaluate(
+                    objective.condition,
+                ),
+            );
     }
 }
