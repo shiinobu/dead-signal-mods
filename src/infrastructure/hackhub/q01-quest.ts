@@ -9,10 +9,10 @@ import {
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
+    Q01_SSH_COMMAND,
     Q01_SSH_PASSWORD,
     Q01_SSH_PORT,
     Q01_SSH_USERNAME,
-    Q01_SSH_COMMAND,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
 } from "../../content/index.js";
@@ -44,11 +44,6 @@ interface Q01NmapPort {
 interface TerminalCommandData {
     readonly command: string;
     readonly args: string[];
-}
-
-interface TerminalSshConnectData {
-    readonly ip: string;
-    readonly username: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -246,7 +241,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             this.handleTerminalCommand(data);
         });
 
-        this.Events.on("Terminal.SSHConnect", (data: TerminalSshConnectData) => {
+        this.Events.on("Terminal.SSHConnect", (data) => {
             this.handleSshConnection(data);
         });
 
@@ -357,7 +352,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
     }
 
-    private handleSshConnection(data: TerminalSshConnectData): void {
+    private handleSshConnection(data: { ip: string; username: string }): void {
         if (
             data.ip !== this.Data.targetIp ||
             data.username !== Q01_SSH_USERNAME ||
