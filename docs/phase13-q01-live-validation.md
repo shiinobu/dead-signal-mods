@@ -22,7 +22,7 @@ Install the generated `dist/` package into the HackHub `mods/` directory and res
 2. Open HackHub feed and locate the Adrian Cole Q01 job post.
 3. Claim `THE CONTRACT`.
 4. Confirm Adrian's `Security Audit — Jakarta` email arrives.
-5. Confirm the Q01 objective list exposes the audit flow.
+5. Confirm all five Q01 objectives are visible in the quest UI, with later objectives becoming actionable as the preceding progression advances.
 6. Review the Meridian Logistics scope and target `203.0.113.42`.
 7. Open Terminal and run:
 
@@ -38,7 +38,7 @@ nmap 203.0.113.42
 443/tcp open  https
 ```
 
-9. Confirm the scan and exposed-service objectives advance.
+9. Confirm the scan, exposed-service, and basic-assessment objectives advance. After the successful scan, the UI should clearly leave **Submit the audit report** as the remaining action.
 10. Submit the audit report using the source-defined report facts, including:
 
 ```text
@@ -49,11 +49,15 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-11. Confirm the basic-assessment and report objectives complete.
+11. Confirm the audit-report objective completes.
 12. Confirm Q01 completes and Q02 becomes the next campaign target.
 13. Confirm the player receives `$200` and `80 XP` maximum according to the locked Phase 8 allocation.
 14. Restart/reload and confirm the completed Q01 state persists.
 15. Confirm no Q14 or Phase 12 diagnostic content is exposed by the production package.
+
+## Objective UX Rule
+
+Q01 intentionally does **not** require an exploit or a separate vulnerability tool. The basic vulnerability assessment is represented by review of the successful reconnaissance result; the player should not be left guessing which command to run next.
 
 ## Expected Canonical State
 
