@@ -109,27 +109,39 @@ Repeating Nmap does not satisfy Objective 04.
 
 ### Authorized SSH Verification
 
-Q01 uses the minimal native SSH network pattern documented by HackHub: a Router target with the authorized audit user directly on that Router and an active SSH port 22. No child device or router-specific hacking route is required.
+Q01 uses the native SSH network topology required for a real HackHub SSH connection: the public target is a Router, the public router exposes port 22, and an internal Device behind the Router owns SSH plus the authorized user account.
 
 ```text
 203.0.113.42
-├── 22 / ssh
-│   └── user: audit
-├── 80 / http
-└── 443 / https
+├── Router
+│   ├── 22 / ssh
+│   ├── 80 / http
+│   └── 443 / https
+│
+└── 10.0.0.2
+    └── Device
+        ├── ssh: true
+        ├── 22 / ssh
+        └── user: audit
 ```
 
-The player-facing SSH syntax follows the current HackHub Handbook:
+The public router exposes the same services needed for reconnaissance, while the child device is the actual SSH endpoint. This follows the working community pattern for modded SSH targets. citeturn963255view0turn963255view1
+
+The player-facing SSH syntax follows the current HackHub flow:
 
 ```bash
 ssh -h audit@203.0.113.42
 ```
 
-The player does not pass a password as a terminal argument. The authorized password is stored on the virtual network user for the native SSH interaction.
+The player does not pass a password as a terminal argument. The authorized password is stored on the virtual network user for the SSH interaction.
 
-Objective 04 is completed only after the native SSH connection event is received for `203.0.113.42` and username `audit`.
+Objective 04 is completed only after the native `Terminal.SSH.Connected` event is received for the Q01 public target. citeturn963255view1
 
-No `Shell.addCommandData("ssh", ...)` response is used for completion, because that path produced false positives while the native terminal still displayed `Connection could not be established.` during live testing.
+No `Shell.addCommandData("ssh", ...)` response is used for completion. The SSH interaction must reach the native network target instead of being converted into a synthetic success response.
+
+### Port Activation
+
+The target explicitly activates SSH on both the public router and child device with `Network.openPort()`. Newer HackHub builds support port management on child devices as well as routers. citeturn880921search7
 
 ## Completion
 
