@@ -46,13 +46,13 @@ nmap 203.0.113.42
 
 8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. Use the credentials supplied by Adrian and connect to the target:
+10. Use the temporary audit account from Adrian's brief and connect with the current HackHub syntax:
 
 ```bash
-ssh audit@203.0.113.42
+ssh -h audit@203.0.113.42 -p 22
 ```
 
-11. Confirm the SSH connection succeeds against the virtual target and Objective 04 completes only after the `Terminal.SSHConnect` event for `203.0.113.42` / `audit`.
+11. Confirm the SSH connection succeeds against the virtual target and Objective 04 completes only after the `Terminal.SSH.Connected` event for `203.0.113.42`.
 12. Submit the audit report using the source-defined facts, including:
 
 ```text
@@ -69,7 +69,7 @@ Further internal assessment is recommended.
 
 ## Objective UX Contract
 
-The main objective text follows the locked Phase 8 names. The UI may add selective affordances without renaming the objective:
+The main objective text follows the locked Phase 8 names. Supporting affordances remain selective:
 
 ```text
 Review audit scope
