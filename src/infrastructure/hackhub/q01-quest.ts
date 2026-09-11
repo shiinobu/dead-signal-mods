@@ -54,6 +54,8 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
 ];
 
 const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
+const Q01_CERTIFICATE_COMMAND = "openssl";
+const Q01_CERTIFICATE_TARGET = `${Q01_TARGET_IP}:443`;
 
 const Q01_REPORT_REQUIRED_CONTENT = [
     "Meridian Logistics",
@@ -62,6 +64,7 @@ const Q01_REPORT_REQUIRED_CONTENT = [
     "80",
     "443",
     "No critical vulnerabilities identified.",
+    "Further internal assessment is recommended.",
 ];
 
 const markCanonicalCompletion = (): void => {
@@ -97,23 +100,25 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         },
         {
             name: Q01_OBJECTIVE_IDS.scanNetwork,
-            description: `Scan ${Q01_TARGET_IP}.`,
+            description: `Run nmap ${Q01_TARGET_IP} in Terminal.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.reviewScope],
         },
         {
             name: Q01_OBJECTIVE_IDS.identifyServices,
-            description: "Identify the exposed services.",
+            description:
+                "Confirm that ports 22, 80, and 443 are exposed and identify their services.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.scanNetwork],
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description:
-                "Review the scan results for basic security issues; no exploitation is required.",
+                `Inspect the HTTPS certificate on port 443. Use: ${Q01_CERTIFICATE_COMMAND} s_client -connect ${Q01_CERTIFICATE_TARGET}`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Send the completed audit report to Adrian.",
+            unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
 
@@ -177,8 +182,6 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     }
 
     override OnObjectivesStart() {
-        // Re-register the deterministic Nmap response on every game start so
-        // the terminal interaction survives a HackHub reload.
         Shell.addCommandData(
             "nmap",
             this.Data.targetIp,
@@ -187,35 +190,53 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         this.Events.on("Terminal.Command", (data) => {
             if (
-                data.command !== "nmap" ||
-                data.args[0] !== this.Data.targetIp
+                data.command === "nmap" &&
+                data.args[0] === this.Data.targetIp
+            ) {
+                const result = Shell.getCommandData(
+                    "nmap",
+                    this.Data.targetIp,
+                );
+
+                if (!this.isExpectedNmapResult(result)) {
+                    return;
+                }
+
+                if (!this.Data.networkScanned) {
+                    this.SetData("networkScanned", true);
+                    this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
+                }
+
+                if (!this.Data.servicesIdentified) {
+                    this.SetData("servicesIdentified", true);
+                    this.completeObjective(
+                        Q01_OBJECTIVE_IDS.identifyServices,
+                    );
+                }
+
+                return;
+            }
+
+            if (
+                data.command !== Q01_CERTIFICATE_COMMAND ||
+                !this.Data.servicesIdentified
             ) {
                 return;
             }
 
-            const result = Shell.getCommandData(
-                "nmap",
-                this.Data.targetIp,
-            );
+            const connectIndex = data.args.indexOf("-connect");
+            const connectTarget =
+                connectIndex >= 0
+                    ? data.args[connectIndex + 1]
+                    : undefined;
 
-            if (!this.isExpectedNmapResult(result)) {
+            if (
+                !data.args.includes("s_client") ||
+                connectTarget !== Q01_CERTIFICATE_TARGET
+            ) {
                 return;
             }
 
-            if (!this.Data.networkScanned) {
-                this.SetData("networkScanned", true);
-                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-            }
-
-            if (!this.Data.servicesIdentified) {
-                this.SetData("servicesIdentified", true);
-                this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
-            }
-
-            // Q01 is intentionally a non-exploit reconnaissance mission.
-            // Reviewing the successful scan result is the basic vulnerability
-            // assessment boundary defined by the story, so no extra exploit
-            // command is required before submitting the audit.
             if (!this.Data.basicVulnerabilityChecksCompleted) {
                 this.SetData(
                     "basicVulnerabilityChecksCompleted",
@@ -228,11 +249,10 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         });
 
         this.Events.on("Mail.Sent", (data) => {
-            if (!this.isAuditReport(data.subject, data.content)) {
-                return;
-            }
-
-            if (!this.Data.basicVulnerabilityChecksCompleted) {
+            if (
+                !this.isAuditReport(data.subject, data.content) ||
+                !this.Data.basicVulnerabilityChecksCompleted
+            ) {
                 return;
             }
 
@@ -294,11 +314,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             Q01_FINAL_STATE_FLAG,
         );
 
-        // HackHub has no native Relay surface. Preserve the source's
-        // post-submission Adrian response through the available in-game mail
-        // channel rather than inventing a second social subsystem.
         this.sendMail(1);
-
         Shell.removeCommandData("nmap", this.Data.targetIp);
         gameRuntime.persistence.save();
     }
