@@ -107,13 +107,13 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-            description: "Perform basic vulnerability checks.",
+            description:
+                "Review the scan results for basic security issues; no exploitation is required.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
-            description: "Submit the audit report.",
-            unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
+            description: "Send the completed audit report to Adrian.",
         },
     ];
 
@@ -211,17 +211,11 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 this.SetData("servicesIdentified", true);
                 this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
             }
-        });
 
-        this.Events.on("Mail.Sent", (data) => {
-            if (!this.isAuditReport(data.subject, data.content)) {
-                return;
-            }
-
-            if (!this.Data.servicesIdentified) {
-                return;
-            }
-
+            // Q01 is intentionally a non-exploit reconnaissance mission.
+            // Reviewing the successful scan result is the basic vulnerability
+            // assessment boundary defined by the story, so no extra exploit
+            // command is required before submitting the audit.
             if (!this.Data.basicVulnerabilityChecksCompleted) {
                 this.SetData(
                     "basicVulnerabilityChecksCompleted",
@@ -230,6 +224,16 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 this.completeObjective(
                     Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
                 );
+            }
+        });
+
+        this.Events.on("Mail.Sent", (data) => {
+            if (!this.isAuditReport(data.subject, data.content)) {
+                return;
+            }
+
+            if (!this.Data.basicVulnerabilityChecksCompleted) {
+                return;
             }
 
             if (!this.Data.reportSubmitted) {
@@ -302,7 +306,10 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     private isExpectedNmapResult(
         result: unknown,
     ): result is readonly Q01NmapPort[] {
-        if (!Array.isArray(result) || result.length !== Q01_NMAP_RESULT.length) {
+        if (
+            !Array.isArray(result) ||
+            result.length !== Q01_NMAP_RESULT.length
+        ) {
             return false;
         }
 
