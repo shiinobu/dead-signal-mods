@@ -6,8 +6,6 @@ import {
 
 import { DeadSignalSmokeQuest } from "./infrastructure/hackhub/dead-signal-smoke-quest.js";
 
-const SMOKE_TARGET_IP = "10.42.0.81";
-
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {
     override OnModPackageLoaded() {
@@ -18,9 +16,7 @@ export default class DeadSignalMod extends Bootstrap {
             UI.notify("DEAD SIGNAL V17: attempting Quest.claim()...");
 
             try {
-                DeadSignalSmokeQuest.claim({
-                    targetIp: SMOKE_TARGET_IP,
-                });
+                DeadSignalSmokeQuest.claim(DeadSignalSmokeQuest);
                 console.log("[DEAD SIGNAL] V17 Quest.claim() EXECUTED");
                 UI.notify("DEAD SIGNAL V17: Quest.claim() executed");
             } catch (error) {
