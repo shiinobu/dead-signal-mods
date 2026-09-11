@@ -52,8 +52,8 @@ nmap 203.0.113.42
 ssh -h audit@203.0.113.42
 ```
 
-11. Confirm the terminal uses the Q01-scoped shell response without a real connection failure and Objective 04 completes.
-12. If HackHub emits `Terminal.SSH.Connected`, confirm that event also completes Objective 04 for the same target.
+11. Confirm the terminal establishes a real HackHub SSH session through the Q01 network target and does not display `Connection could not be established.`
+12. Confirm `Terminal.SSH.Connected` completes Objective 04 for the same target.
 13. Submit the audit report using the source-defined facts, including:
 
 ```text
@@ -84,15 +84,9 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Runtime Interaction Detail
 
-Q01 uses quest-scoped `Shell.addCommandData()` responses for Nmap and SSH so the player-facing terminal remains deterministic and does not depend on native modded-network SSH transport.
+Q01 uses a real HackHub `Network` topology for SSH. The public target is a Router at `203.0.113.42` with port 22 exposed and an internal `Device` at `10.0.0.2` configured with `ssh: true` and the authorized `audit` user. Nmap remains quest-scoped through `Shell.addCommandData()` because its result is deterministic for the quest.
 
-The SSH command data is scoped to:
-
-```text
-host: audit@203.0.113.42
-key: empty
-response: 203.0.113.42 / OPEN
-```
+SSH completion is event-driven through `Terminal.SSH.Connected`; the quest does not synthesize SSH success from a generic `Terminal.Command` event.
 
 ## Expected Canonical State (production only)
 
