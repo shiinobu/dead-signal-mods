@@ -56,7 +56,7 @@ export function runRuntimeServicesSmokeTest(): void {
             throw new Error("RewardService did not record the claimed reward.");
         }
 
-        if (runtime.stateStore.getState().progression.experience !== 250) {
+        if (runtime.stateStore.getState().domain.progression.experience !== 250) {
             throw new Error("RewardService wrote an unexpected experience total.");
         }
 
@@ -76,7 +76,7 @@ export function runRuntimeServicesSmokeTest(): void {
             throw new Error("Claimed reward did not survive SaveStorage restore.");
         }
 
-        if (restoredRuntime.stateStore.getState().progression.experience !== 250) {
+        if (restoredRuntime.stateStore.getState().domain.progression.experience !== 250) {
             throw new Error("Progression experience did not survive SaveStorage restore.");
         }
 
