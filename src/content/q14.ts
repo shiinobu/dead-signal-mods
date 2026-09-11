@@ -16,8 +16,7 @@ export const Q14_THE_OWNER: Quest = {
     id: asId<"Quest">("dead_signal.q14"),
     chapterId: "04",
     title: "THE OWNER",
-    description:
-        "Investigation into who was authorized to use the OVERRIDE_OPERATOR delegated identity.",
+    description: "Who was authorized to use OVERRIDE_OPERATOR?",
     objectives: [
         {
             id: "q14.objective.01",
