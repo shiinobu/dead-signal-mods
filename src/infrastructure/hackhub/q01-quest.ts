@@ -117,19 +117,18 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-            description:
-                `nmap ${Q01_SERVICE_CHECK_TARGET} ${Q01_SERVICE_CHECK_OPTION}`,
+            description: "Run a basic security check",
             terminalCommand:
                 `nmap ${Q01_SERVICE_CHECK_TARGET} ${Q01_SERVICE_CHECK_OPTION}`,
             hint:
-                "Use the service/version scan for the basic assessment. No exploitation is required.",
+                "This is a read-only service/version check. No exploitation is required.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Send the report",
             hint:
-                "Send the report to Adrian with the target, ports 22/80/443, and your finding.",
+                "Send it to Adrian. Include the target, ports 22/80/443, and your finding.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
