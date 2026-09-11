@@ -105,31 +105,30 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         },
         {
             name: Q01_OBJECTIVE_IDS.scanNetwork,
-            description: `Run nmap ${Q01_TARGET_IP} in Terminal.`,
+            description: `nmap ${Q01_TARGET_IP}`,
             terminalCommand: `nmap ${Q01_TARGET_IP}`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.reviewScope],
         },
         {
             name: Q01_OBJECTIVE_IDS.identifyServices,
-            description:
-                "Confirm that ports 22, 80, and 443 are exposed and identify their services.",
-            info: "Expected services: 22/ssh, 80/http, 443/https.",
+            description: "22/ssh • 80/http • 443/https",
+            hint: "Confirm these are the exposed services returned by the scan.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.scanNetwork],
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description:
-                `Run nmap ${Q01_TARGET_IP} ${Q01_SERVICE_CHECK_OPTION} for a basic service/security check.`,
+                `nmap ${Q01_SERVICE_CHECK_TARGET} ${Q01_SERVICE_CHECK_OPTION}`,
             terminalCommand:
                 `nmap ${Q01_SERVICE_CHECK_TARGET} ${Q01_SERVICE_CHECK_OPTION}`,
-            info:
-                "Use the service/version scan to perform the basic assessment. No exploitation is required.",
+            hint:
+                "Use the service/version scan for the basic assessment. No exploitation is required.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Send the completed audit report to Adrian.",
-            info:
+            hint:
                 "Subject: Security Audit — Jakarta. Include the target, ports 22/80/443, and the finding that no critical vulnerabilities were identified.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
