@@ -6,6 +6,8 @@ export const Q01_TARGET_IP = "203.0.113.42";
 
 export const Q01_FINAL_STATE_FLAG = "dead_signal.q01.completed";
 
+export const Q01_CERTIFICATE_FILE_PATH = "~/meridian-443-certificate.txt";
+
 export const Q01_OBJECTIVE_IDS = {
     reviewScope: "q01.objective.01",
     scanNetwork: "q01.objective.02",
