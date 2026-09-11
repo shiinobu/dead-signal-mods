@@ -29,11 +29,11 @@ Claim Q01
         ↓
 Adrian email / audit scope
         ↓
-Scan 203.0.113.42 with nmap
+Run nmap 203.0.113.42
         ↓
-Identify 22 / 80 / 443
+Confirm 22 / 80 / 443
         ↓
-Perform the basic assessment
+Inspect HTTPS certificate on 443
         ↓
 Submit the audit report
         ↓
@@ -50,7 +50,7 @@ Q02 becomes the next campaign target
 
 Q01 sends the recovered Adrian contract text through HackHub's quest mail channel when the quest is first claimed.
 
-The report is detected through the scoped `Mail.Sent` event. The implementation requires the source report subject and the essential report facts, including the target, ports, and `No critical vulnerabilities identified.`
+The report is detected through the scoped `Mail.Sent` event. The implementation requires the source report subject and the essential report facts, including the target, ports, `No critical vulnerabilities identified.`, and the recommendation to perform further internal assessment.
 
 ### Nmap
 
@@ -71,6 +71,20 @@ Q01 registers deterministic command data through `Shell.addCommandData("nmap", .
 ```
 
 No direct `Terminal.NmapScan` dependency is introduced.
+
+### Certificate / Basic Assessment
+
+The recovered Q01 technical interaction explicitly includes certificate inspection, while the locked Phase 8 objective remains `Perform basic vulnerability checks`.
+
+To make this objective actionable in-game without introducing an exploit mechanic, Q01 maps that objective to the available terminal command:
+
+```bash
+openssl s_client -connect 203.0.113.42:443
+```
+
+The player must explicitly perform this HTTPS certificate inspection after service identification. Re-running the Nmap command no longer completes the basic-assessment objective.
+
+This is an implementation mapping of the source-defined certificate inspection. The command syntax is not treated as new story canon.
 
 ### Canonical State
 
@@ -103,7 +117,27 @@ All reward IDs are deterministic and idempotent through the existing reward/econ
 
 The recovered source says Q01 uses Relay for the short post-report Adrian response, but the currently available HackHub SDK reference exposes Email as the supported communication API and no native Relay API. The implementation therefore preserves the dialogue/content beat through a second quest email. This is an infrastructure adapter choice only; it does not introduce a new story system or change the canonical story event.
 
-The recovered source does not define a dedicated vulnerability-exploitation command for Q01. The gameplay audit explicitly states that Q01 does not require vulnerability exploitation. Therefore the basic-assessment objective is completed at the valid audit-report submission boundary rather than through an invented exploit command.
+Q01 does not require vulnerability exploitation. The concrete basic-assessment action is the source-defined HTTPS certificate inspection, expressed through `openssl` because the game terminal exposes that command. No exploit or vulnerability-scanning subsystem is introduced.
+
+## UX Correction — 2026-09-11
+
+Initial implementation completed the basic-assessment objective from any valid Nmap event. During live testing, running Nmap a second time therefore advanced the quest unexpectedly and left the player unsure what action was required.
+
+That behavior is corrected:
+
+```text
+Nmap
+  ├─ completes Scan Network
+  └─ completes Identify Exposed Services
+
+OpenSSL HTTPS certificate inspection
+  └─ completes Basic Vulnerability Checks
+
+Audit email/report
+  └─ completes Submit Audit
+```
+
+This preserves the five locked Phase 8 objectives while providing a concrete, visible player action for each stage.
 
 ## Validation Gate
 
