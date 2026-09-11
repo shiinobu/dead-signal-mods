@@ -1,36 +1,33 @@
 # DEAD SIGNAL — Q01 Live Validation
 
-Status: **READY FOR LIVE TEST — UX CORRECTION PENDING VALIDATION**
+Status: **READY FOR LIVE TEST — CERTIFICATE FLOW CORRECTION PENDING VALIDATION**
 
 ## Preconditions
 
-Use a fresh/cleared DEAD SIGNAL save for the first Q01 run. Do not use a save containing superseded Q14 development state.
-
-Build the current repository with:
+Use the development replay package for repeatable Q01 testing:
 
 ```powershell
-npm run typecheck
-npm test
-npm run build
+npm run build:replay:q01
 ```
 
-Install the generated `dist/` package into the HackHub `mods/` directory and restart HackHub.
+Install `dist-replay/` into `HackHub/mods/dead-signal-dev/` and restart HackHub.
+
+Use a fresh replay build after each code change. Do not use an older replay package because every replay build intentionally receives a new quest identity.
 
 ## Live Scenario
 
-1. Confirm `DEAD SIGNAL` loads without diagnostic Phase 12 notifications.
-2. Open HackHub feed and locate the Adrian Cole Q01 job post.
-3. Claim `THE CONTRACT`.
-4. Confirm Adrian's `Security Audit — Jakarta` email arrives.
-5. Confirm the five Q01 objectives are presented in their intended order.
-6. Review the Meridian Logistics scope and target `203.0.113.42`.
-7. Open Terminal and run:
+1. Confirm `THE CONTRACT — DEV REPLAY` is visible in HackHub.
+2. Apply the development quest.
+3. Confirm Adrian's Q01 contract mail arrives.
+4. Confirm the five Q01 objectives are presented in their intended order.
+5. Review the Meridian Logistics scope and target `203.0.113.42`.
+6. Open Terminal and run:
 
 ```bash
 nmap 203.0.113.42
 ```
 
-8. Confirm the result contains:
+7. Confirm the result contains:
 
 ```text
 22/tcp  open  ssh
@@ -38,15 +35,25 @@ nmap 203.0.113.42
 443/tcp open  https
 ```
 
-9. Confirm the scan and exposed-service objectives advance. Re-running the same Nmap command must **not** complete the certificate/basic-assessment objective.
-10. Perform the basic security check by inspecting the HTTPS certificate on port 443:
+8. Confirm the scan and exposed-service objectives advance.
+9. Run the same Nmap command again. **The certificate/basic-assessment objective must not complete.**
+10. After the scan, open the generated virtual filesystem record:
 
-```bash
-openssl s_client -connect 203.0.113.42:443
+```text
+~/meridian-443-certificate.txt
 ```
 
-11. Confirm the certificate/basic-assessment objective completes and the report objective becomes the next actionable step.
-12. Submit the audit report using the source-defined report facts, including:
+11. Confirm the record contains the HTTPS certificate inspection details, including:
+
+```text
+Target: 203.0.113.42
+Port: 443/tcp
+Service: HTTPS
+Issuer: ARKA Secure Infrastructure
+```
+
+12. Confirm the certificate/basic-assessment objective completes and the report objective becomes the next actionable step.
+13. Submit the audit report using the source-defined report facts, including:
 
 ```text
 Target: Meridian Logistics
@@ -56,11 +63,9 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-13. Confirm the audit-report objective completes.
-14. Confirm Q01 completes and Q02 becomes the next campaign target.
-15. Confirm the player receives `$200` and `80 XP` maximum according to the locked Phase 8 allocation.
-16. Restart/reload and confirm the completed Q01 state persists.
-17. Confirm no Q14 or Phase 12 diagnostic content is exposed by the production package.
+14. Confirm the audit-report objective completes and the development quest finishes.
+15. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
+16. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
 
 ## Objective UX Contract
 
@@ -68,19 +73,19 @@ Further internal assessment is recommended.
 01  Review audit scope
 02  Run nmap against 203.0.113.42
 03  Confirm exposed services: 22 / 80 / 443
-04  Inspect HTTPS certificate on 443
-05  Submit the completed audit report
+04  Inspect the HTTPS certificate record for port 443
+05  Send the completed audit report to Adrian
 ```
 
-Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective and the source technical interaction's certificate inspection. The concrete terminal command is an implementation mapping chosen to make that action explicit to the player; the story canon remains the inspection itself, not the command syntax.
+Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective and the source technical interaction's certificate inspection. The HackHub `openssl` command is not used here because the in-game command is an encryption/decryption utility, not a TLS certificate inspection tool. The certificate inspection is therefore represented through the supported virtual filesystem and `Files.Open` event.
 
-## Expected Canonical State
+## Expected Canonical State (production only)
 
 ```text
 dead_signal.q01.completed = true
 ```
 
-No additional persistent Q01 story flags are required by the recovered source.
+The development replay must not set this production flag.
 
 ## PASS Gate
 
