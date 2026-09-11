@@ -20,9 +20,9 @@ Therefore a source file under `src/` is part of the production bundle only when 
 
 ## Findings
 
-### Phase 12 diagnostic / smoke files — not used by production
+### Phase 12 diagnostic / smoke files — removed from production source tree
 
-The following files are present under `src/infrastructure/hackhub/` but are not imported by the production bootstrap:
+The following Phase 12 validation artifacts were confirmed to be outside the production import graph and have now been removed:
 
 ```text
 src/infrastructure/hackhub/dead-signal-smoke-quest.ts
@@ -33,17 +33,15 @@ src/infrastructure/hackhub/runtime-services-smoke-test.ts
 src/infrastructure/hackhub/save-storage-smoke-test.ts
 ```
 
-These are historical Phase 12 validation/diagnostic artifacts. They are not production dependencies.
-
-The Phase 12 integration audit explicitly records that smoke and regression harnesses were retained as reusable diagnostics while being excluded from the production bootstrap.
+They were historical Phase 12 validation/diagnostic artifacts, not production dependencies. The Phase 12 integration audit remains the historical evidence for the validated behavior they covered.
 
 Disposition:
 
 ```text
 PRODUCTION USE:        NONE
 HISTORICAL VALUE:      YES
-SAFE TO REMOVE:        YES, after retaining the Phase 12 audit evidence
-ALTERNATIVE:            Move under a non-production diagnostics/tooling tree
+SOURCE-TREE STATUS:    REMOVED
+AUDIT EVIDENCE:        RETAINED
 ```
 
 ### Production files — keep
@@ -89,6 +87,7 @@ Disposition:
 ```text
 FUNCTIONAL VALUE:      NONE
 SAFE TO REMOVE:        YES
+STATUS:                NOT REMOVED IN THIS CLEANUP
 ```
 
 The following remain as empty-directory placeholders and are optional housekeeping rather than functional code:
@@ -102,36 +101,27 @@ Removing them would also remove those empty directories from Git. Keep them only
 
 ## Important distinction
 
-"Not used by production" does not mean "never useful". The six Phase 12 smoke/regression files document and preserve previously validated integration paths. Their retention is currently a repository-organization choice, not a runtime requirement.
+The six Phase 12 smoke/regression files were useful historical validation artifacts, but retaining them under the production source tree added noise after Phase 12 was locked. Their removal does not remove the audit evidence; the Phase 12 integration/lock documents remain in `docs/`.
 
-No source file was deleted as part of this audit.
+The cleanup intentionally did **not** alter:
 
-## Recommended cleanup
-
-Preferred clean-production layout:
-
-```text
-Production source:
-    src/**
-    └── only active runtime/content implementation
-
-Historical diagnostics:
-    either remove after preserving audit evidence
-    or move to a non-production diagnostics/tooling location
-```
-
-Do not re-import the Phase 12 diagnostic harnesses into `src/index.ts` or any production content registration path.
+- production bootstrap behavior;
+- Q14 content implementation;
+- runtime services;
+- SaveStorage adapter;
+- automated tests;
+- development watcher;
+- Phase 12 audit/lock documentation.
 
 ## Audit conclusion
 
 ```text
-Phase 12 smoke/regression harnesses not in production     ✅ CONFIRMED
-Phase 12 smoke/regression harnesses historically useful  ✅ CONFIRMED
-Six redundant .gitkeep files                             ✅ CONFIRMED
-Two empty placeholder .gitkeep files                     🟡 OPTIONAL
-Production runtime files                                 ✅ KEEP
-Development watcher                                      ✅ KEEP
-Automated tests                                           ✅ KEEP
-
-No files deleted by this audit.
+Phase 12 smoke/regression harnesses outside production import graph  ✅ CONFIRMED
+Phase 12 smoke/regression harnesses removed from source tree       ✅ DONE
+Phase 12 historical audit evidence retained                        ✅ CONFIRMED
+Production runtime files                                            ✅ KEEP
+Development watcher                                                 ✅ KEEP
+Automated tests                                                      ✅ KEEP
+Six redundant .gitkeep files                                        🟡 NOT REMOVED
+Two empty placeholder .gitkeep files                                🟡 OPTIONAL
 ```
