@@ -36,8 +36,6 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-const Q01_SSH_INTERNAL_IP = "10.0.0.2";
-
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
     { port: 22, status: "OPEN", service: "ssh" },
     { port: 80, status: "OPEN", service: "http" },
@@ -161,7 +159,6 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
             type: Network.Type.Router,
-            users: [],
             ports: [
                 {
                     external: Q01_SSH_PORT,
@@ -182,35 +179,14 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                     service: "https",
                 },
             ],
-            children: [
-                {
-                    ip: Q01_SSH_INTERNAL_IP,
-                    type: Network.Type.Device,
-                    ssh: true,
-                    ports: [
-                        {
-                            external: Q01_SSH_PORT,
-                            internal: Q01_SSH_PORT,
-                            active: true,
-                            service: "ssh",
-                        },
-                    ],
-                    users: [
-                        Network.createUser({
-                            username: Q01_SSH_USERNAME,
-                            password: Q01_SSH_PASSWORD,
-                        }),
-                    ],
-                },
+            users: [
+                Network.createUser({
+                    username: Q01_SSH_USERNAME,
+                    password: Q01_SSH_PASSWORD,
+                }),
             ],
+            children: [],
         });
-
-        try {
-            Network.openPort(this.Data.targetIp, Q01_SSH_PORT);
-            Network.openPort(Q01_SSH_INTERNAL_IP, Q01_SSH_PORT);
-        } catch {
-            // Ports are already active in the replay topology.
-        }
 
         this.sendMail(0);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
@@ -277,7 +253,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
         if (!this.Data.servicesIdentified) {
             this.SetData("servicesIdentified", true);
-            this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.identifyServices,
+            );
         }
     }
 
