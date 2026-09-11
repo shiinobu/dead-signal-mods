@@ -6,19 +6,8 @@ import {
 } from "../src/application/index.js";
 
 import {
-    all,
-    flagEquals,
-    never,
     ConditionEvaluator,
 } from "../src/domain/shared/index.js";
-
-import {
-    asId,
-} from "../src/core/index.js";
-
-import type {
-    Quest,
-} from "../src/domain/quest/index.js";
 
 import {
     DomainStateAccess,
@@ -27,66 +16,9 @@ import {
     createDefaultRuntimeState,
 } from "../src/state/index.js";
 
-const Q14_ID = asId<"Quest">("dead_signal.q14");
-
-const createQ14Slice = (): Quest => ({
-    id: Q14_ID,
-    chapterId: "04",
-    title: "THE OWNER — source-backed slice",
-    description: "Test-only executable slice for recovered Q14 state boundaries.",
-    objectives: [
-        {
-            id: "q14.objective.01",
-            description: "Find the access registry.",
-            condition: flagEquals(
-                "dead_signal.q14.override_access_registry_found",
-                true,
-            ),
-        },
-        {
-            id: "q14.objective.02",
-            description: "Trace the access window.",
-            condition: flagEquals(
-                "dead_signal.q14.override_session_found",
-                true,
-            ),
-        },
-        {
-            id: "q14.objective.03",
-            description: "Find the authorization. Source completion boundary is unresolved.",
-            condition: never(),
-        },
-        {
-            id: "q14.objective.04",
-            description: "Resolve the approver.",
-            condition: flagEquals(
-                "dead_signal.q14.marcus_reed_confirmed",
-                true,
-            ),
-        },
-        {
-            id: "q14.objective.05",
-            description: "Speak to Marcus and confirm the authority context.",
-            condition: all(
-                flagEquals("dead_signal.marcus_introduced", true),
-                flagEquals("dead_signal.marcus_authority_confirmed", true),
-            ),
-        },
-        {
-            id: "q14.objective.06",
-            description: "Ask about the session. Source completion boundary is unresolved.",
-            condition: never(),
-        },
-        {
-            id: "q14.objective.07",
-            description: "Check the access justification.",
-            condition: flagEquals(
-                "dead_signal.q14.exception_access_found",
-                true,
-            ),
-        },
-    ],
-});
+import {
+    Q14_THE_OWNER,
+} from "../src/content/index.js";
 
 const createFixture = () => {
     const stateStore = new StateStore(
@@ -110,78 +42,85 @@ const createFixture = () => {
     };
 };
 
+const setRequiredQ14State = (flagStore: FlagStore): void => {
+    flagStore.set(
+        "dead_signal.q14.override_access_registry_found",
+        true,
+    );
+    flagStore.set(
+        "dead_signal.q14.access_window_found",
+        true,
+    );
+    flagStore.set(
+        "dead_signal.q14.marcus_access_approval_confirmed",
+        true,
+    );
+    flagStore.set(
+        "dead_signal.q14.marcus_reed_confirmed",
+        true,
+    );
+    flagStore.set(
+        "dead_signal.marcus_introduced",
+        true,
+    );
+    flagStore.set(
+        "dead_signal.marcus_authority_confirmed",
+        true,
+    );
+    flagStore.set(
+        "dead_signal.q14.operator_identity_unknown",
+        true,
+    );
+};
+
 describe("Phase 13 Step 13.3 — Q14 source-backed slice", () => {
     it("starts from an incomplete Q14 state", () => {
         const { service } = createFixture();
 
-        const quest = createQ14Slice();
-
         assert.equal(
-            service.areObjectivesComplete(quest),
+            service.areObjectivesComplete(Q14_THE_OWNER),
             false,
         );
     });
 
-    it("satisfies only recovered direct objective boundaries", () => {
+    it("uses recovered persistent state for every required Q14 objective", () => {
         const { flagStore, service } = createFixture();
-        const quest = createQ14Slice();
 
-        flagStore.set(
-            "dead_signal.q14.override_access_registry_found",
+        setRequiredQ14State(flagStore);
+
+        assert.equal(
+            service.areObjectivesComplete(Q14_THE_OWNER),
             true,
         );
-        flagStore.set(
-            "dead_signal.q14.override_session_found",
+    });
+
+    it("treats the recovered access-justification objective as optional", () => {
+        const optionalObjective = Q14_THE_OWNER.objectives.find(
+            (objective) => objective.id === "q14.objective.07",
+        );
+
+        assert.equal(optionalObjective?.optional, true);
+
+        const { flagStore, service } = createFixture();
+        setRequiredQ14State(flagStore);
+
+        assert.equal(
+            flagStore.has("dead_signal.q14.exception_access_found"),
+            false,
+        );
+        assert.equal(
+            service.areObjectivesComplete(Q14_THE_OWNER),
             true,
         );
-        flagStore.set(
-            "dead_signal.q14.marcus_reed_confirmed",
-            true,
-        );
-        flagStore.set(
-            "dead_signal.marcus_introduced",
-            true,
-        );
-        flagStore.set(
-            "dead_signal.marcus_authority_confirmed",
-            true,
-        );
+
         flagStore.set(
             "dead_signal.q14.exception_access_found",
             true,
         );
 
         assert.equal(
-            service.areObjectivesComplete(quest),
-            false,
-        );
-    });
-
-    it("keeps unresolved objectives as explicit blocking boundaries", () => {
-        const { flagStore, service } = createFixture();
-        const quest = createQ14Slice();
-
-        for (const objective of quest.objectives) {
-            const isUnresolved =
-                objective.id === "q14.objective.03" ||
-                objective.id === "q14.objective.06";
-
-            if (isUnresolved) {
-                assert.equal(
-                    objective.condition.kind,
-                    "never",
-                );
-            }
-        }
-
-        flagStore.set(
-            "dead_signal.q14.override_access_registry_found",
+            service.areObjectivesComplete(Q14_THE_OWNER),
             true,
-        );
-
-        assert.equal(
-            service.areObjectivesComplete(quest),
-            false,
         );
     });
 
