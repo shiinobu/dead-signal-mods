@@ -1,82 +1,85 @@
 # DEAD SIGNAL — Q01 UX Correction
 
 Date: 2026-09-11
-Status: **IMPLEMENTED — LIVE VALIDATION PENDING**
+Status: **FINALIZED — LIVE VALIDATION PENDING**
 
 ## Problem Observed In-Game
 
-During Q01 live testing, the quest progressed from the third objective to the fourth objective after the player simply ran `nmap 203.0.113.42` a second time.
+During Q01 live testing, the objective list became too implementation-oriented and the player was asked to perform multiple variants of the same network scan. This made the opening mission feel mechanical instead of like a simple professional audit.
 
-The player-facing result was ambiguous because:
+The UI also exposed overly long clue text, including an internal mod path. Hints should help the player without exposing implementation details.
 
-- the objective `Perform basic vulnerability checks` did not name a concrete action;
-- the implementation completed that objective from the same Nmap event used by the previous objectives;
-- repeating a previous action could therefore advance the quest unexpectedly.
+## Locked Objective Names
 
-A subsequent attempt used `openssl s_client`, but HackHub's built-in `openssl` command is an encryption/decryption utility and rejected the TLS inspection syntax. A follow-up attempt using `Open <file>` was also invalid because `Open` is not a HackHub terminal command; `Files.Open` is an SDK event, not a shell command.
+The five objective names from Phase 8 are preserved exactly:
 
-A third attempt used a mod-defined `certcheck` command through `Shell.addCommandData()`. The live HackHub runtime rejected `certcheck` as `Command not found`. Although the current SDK documentation describes arbitrary command names as accepted by `addCommandData`, the live runtime behavior available to this project does not expose such a command as an executable terminal command. The project therefore treats live runtime behavior as authoritative for this implementation.
+1. `Review audit scope`
+2. `Scan 203.0.113.42`
+3. `Identify exposed services`
+4. `Perform basic vulnerability checks`
+5. `Submit audit report`
 
-## Source Reconciliation
+The presentation may add concise terminal affordances or selective hints, but these names are not renamed.
 
-The recovered Q01 source defines five required objectives in Phase 8:
-
-1. Review audit scope
-2. Scan `203.0.113.42`
-3. Identify exposed services
-4. Perform basic vulnerability checks
-5. Submit audit report
-
-The same locked technical interaction includes certificate inspection, and the Q01 gameplay source explicitly states that the mission does not require exploitation.
-
-Therefore the implementation needs a concrete, supported read-only action for the basic-assessment objective without inventing an unsupported command.
-
-## Corrected Player Flow
+## Final Player-Facing UX
 
 ```text
 Review audit scope
-        ↓
-Run nmap 203.0.113.42
-        ↓
-Confirm 22 / 80 / 443
-        ↓
-Run nmap 203.0.113.42 -sV
-        ↓
+Scan 203.0.113.42       [Terminal]
+Identify exposed services [?]
+Perform basic vulnerability checks
+Submit audit report      [?]
+```
+
+Not every objective uses a hint.
+
+- Terminal affordance is used for the concrete scan action.
+- The service objective may expose a short clue showing the expected services.
+- The basic-assessment objective is self-explanatory and does not need a second command or extra clue.
+- The report objective may expose a short clue such as `Send your findings to Adrian.`
+
+No internal mod path is shown to the player.
+
+## Final Gameplay Model
+
+Q01 is intentionally a simple opening mission. The player performs one network scan and reviews what it reveals.
+
+```text
+Review scope
+    ↓
+nmap 203.0.113.42
+    ↓
+Review exposed services / basic findings
+    ↓
 Submit audit report
 ```
 
-The current implementation uses the built-in Nmap service/version scan as the basic-assessment action because that command variant has been validated in the real HackHub terminal. The command syntax is implementation detail; the source canon remains the basic security assessment/certificate-inspection beat and the ARKA certificate breadcrumb.
-
-## Completion Trigger Contract
+The single valid Nmap result satisfies the three technical middle objectives in sequence:
 
 ```text
-plain nmap target
-  → Scan Network
-  → Identify Exposed Services
-
-nmap target -sV
-  → Basic Vulnerability Checks
-
-valid audit report
-  → Submit Audit
+Scan 203.0.113.42
+Identify exposed services
+Perform basic vulnerability checks
 ```
 
-A repeated plain Nmap command must not complete the basic-assessment objective.
+This avoids forcing the player to repeat a scan or run unsupported/extra commands solely to move the objective list.
 
-## Regression Rule
+## Runtime Rule
 
-For all future DEAD SIGNAL quests:
+A repeated Nmap command must not produce additional progress after objectives 2–4 are already complete.
 
-> An objective must not be completed by repeating an earlier objective's action unless the story specification explicitly defines that behavior.
+## Source Boundary
 
-Also:
+The locked Phase 8 technical specification still contains certificate inspection as part of Q01's technical interaction. That evidence remains a narrative breadcrumb in the implementation notes; the live opening mission does not require an additional player command solely to expose it.
 
-> Do not use a general-purpose OS command or syntax merely because the command exists outside HackHub; validate the exact in-game command contract first.
+## General Rule for Future Quests
 
-And:
+> Objective text should describe the player's task in natural language. Commands, icons, hints, and other affordances should support the task rather than replace it.
 
-> A documented SDK capability is not considered production-usable until the exact behavior is validated in the live game runtime used by the project.
+> Use a hint only when the player benefits from additional context. Do not turn every objective into a tooltip.
+
+> Do not create a new player-facing command unless the exact command is supported and validated in the live HackHub runtime.
 
 ## Scope
 
-This is a runtime/UX correction only. It does not reopen Phase 8 canon or change the locked five-objective Q01 structure.
+This correction changes player-facing presentation and resolves the redundant-scan interaction. It does not reopen Phase 8 canon or change the five-objective Q01 structure.
