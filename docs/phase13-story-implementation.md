@@ -4,13 +4,13 @@ Date: 2026-09-11
 
 ## Status
 
-**STEP 13.2 COMPLETE FOR RECOVERED CONTENT — EXECUTION BLOCKED ONLY BY EXPLICIT SOURCE/RUNTIME GAPS**
+**STEP 13.3 COMPLETE — SOURCE-BACKED EXECUTION GATE ESTABLISHED**
 
 Phase 13 begins after Phase 12 has been locked. The purpose of this phase is to turn the locked DEAD SIGNAL story/design outputs from Phases 1–8 into concrete game content while preserving the locked runtime contracts established by Phases 9–12.
 
 ## Cross-phase verification baseline
 
-Before continuing story implementation, the project was re-audited across Phases 1–12 against the currently recoverable source artifacts, repository history, and locked runtime/integration documents.
+Before continuing story implementation, the project was re-audited across Phases 1–12 using the four exported conversation histories as the directly readable historical source chain, together with repository implementation history and lock artifacts.
 
 Audit artifact:
 
@@ -18,11 +18,14 @@ Audit artifact:
 
 The cross-phase audit establishes:
 
-- Phase 1–8 historical provenance is incomplete in the current environment because the original shared conversations cannot be independently retrieved here.
-- Recoverable story artifacts such as the Q01–Q16 flowchart and locked Q14/Q15 specifications remain valid implementation inputs.
-- Phase 9–12 runtime architecture and integration contracts are strongly verified by repository implementation/history and the Phase 12 lock.
-- No earlier story canon is to be reconstructed from runtime behavior.
-- Existing Phase 12 contracts remain locked while Phase 13 consumes recovered story content.
+- Phase 1–8 lock status is verified from exported project history.
+- Phase 8 is the locked technical quest source of truth for Q01–Q16.
+- Phase 9 and Phase 10 locks are directly auditable from exported history and repository implementation.
+- Phase 11 runtime implementation is supported by exported history and Git history.
+- Phase 12 is verified and locked, including production-bootstrap isolation.
+- Detailed source gaps are tracked separately from phase lock status.
+- No earlier story canon is reconstructed from runtime behavior.
+- Existing Phase 9–12 contracts remain locked while Phase 13 consumes recovered story content.
 
 This audit does **not** reopen or rewrite any previously locked project decision.
 
@@ -62,6 +65,12 @@ Before implementing gameplay content, establish the exact set of locked Phase 1�
 
 The audit must distinguish source-backed canon from implementation inference. Missing source material must be surfaced rather than reconstructed silently.
 
+Artifact:
+
+`docs/phase13-step13.1-story-source-audit.md`
+
+Status: **COMPLETE — SOURCE INVENTORY ESTABLISHED WITH PARTIAL COVERAGE**
+
 ## Step 13.2 — Quest Implementation Mapping
 
 Step 13.2 maps the recovered locked story content onto the canonical runtime contracts before executable quest wiring is introduced.
@@ -75,8 +84,8 @@ Current recovered implementation coverage:
 ```text
 Q14 — THE OWNER       mapped
 Q15 — THE EVIDENCE    mapped
-Q01–Q13               SOURCE-GAP
-Q16                   SOURCE-GAP
+Q01–Q13               SOURCE DETAIL GAP
+Q16                   SOURCE DETAIL GAP
 ```
 
 The mapping preserves the following ownership boundaries:
@@ -102,20 +111,68 @@ The remaining execution gaps are explicit rather than inferred:
 - Q14 Objective 06 has no exact dedicated completion state named by the locked story artifact.
 - Q15 Objective 04 has no exact dedicated completion state named by the locked story artifact.
 - Exact runtime dialogue IDs for Q14/Q15 are not defined by the recovered locked sources.
-- Detailed quest sources for Q01–Q13 and Q16 are unavailable.
+- Detailed quest sources for Q01–Q13 and Q16 are not currently reproduced in the readable source set.
 
 Therefore Step 13.2 does **not** introduce placeholder canon, invented flags, or guessed HackHub event dependencies merely to make every quest compile.
 
-## Implementation direction after Step 13.2
+Status: **COMPLETE FOR RECOVERED CONTENT — EXECUTION BLOCKED ONLY WHERE SOURCE OR RUNTIME CONTRACT IS INSUFFICIENT**
+
+## Step 13.3 — Source-Backed Executable Slice Validation
+
+Step 13.3 validates the smallest safe implementation slice from the recovered Q14 source before any production quest registration is introduced.
+
+The slice uses only source-backed Q14 state boundaries:
+
+```text
+Q14 Objective 01 → dead_signal.q14.override_access_registry_found
+Q14 Objective 02 → dead_signal.q14.override_session_found
+Q14 Objective 04 → dead_signal.q14.marcus_reed_confirmed
+Q14 Objective 05 → dead_signal.marcus_introduced
+                    + dead_signal.marcus_authority_confirmed
+Q14 Objective 07 → dead_signal.q14.exception_access_found
+```
+
+The unresolved Q14 objectives remain explicit blocking boundaries:
+
+```text
+Q14 Objective 03 → unresolved completion state
+Q14 Objective 06 → unresolved completion state
+```
+
+A test-only fixture was added:
+
+`tests/phase13-step13.3-q14-source-backed-slice.test.ts`
+
+The fixture verifies:
+
+- direct Q14 objective conditions use canonical `ConditionNode` constructors;
+- completion is evaluated through `ConditionEvaluator` and `QuestService`;
+- unresolved objectives remain blocking rather than being guessed;
+- negative Marcus/operator states remain absent;
+- no production bootstrap registration is introduced.
+
+This is a validation fixture, not a second story engine and not a new canonical state owner.
+
+Artifact:
+
+`docs/phase13-step13.3-source-backed-executable-slice.md`
+
+Status: **COMPLETE — SAFE TO PROCEED TO THE NEXT IMPLEMENTATION STEP**
+
+## Implementation direction after Step 13.3
 
 ```text
 Recovered locked story
           ↓
-Step 13.2 implementation map
+Step 13.1 source audit
           ↓
-Smallest fully source-backed executable quest slice
+Step 13.2 implementation mapping
           ↓
-Canonical StateStore / application services
+Step 13.3 source-backed executable slice
+          ↓
+Close remaining content/runtime contract gaps
+          ↓
+Canonical production quest registration
           ↓
 HackHub adapter integration
           ↓
@@ -136,6 +193,8 @@ Phase 14 full integration / release audit
 - Do not reintroduce Phase 12 diagnostic execution into production bootstrap.
 - Do not use undocumented HackHub event behavior as a required story dependency when a validated SDK boundary exists.
 - Do not fabricate missing Phase 1–8 story artifacts.
+- Test-only story fixtures must not become production content by accident.
+- Semantic changes to locked contracts require explicit change-control.
 
 ## Phase 14 handoff
 
