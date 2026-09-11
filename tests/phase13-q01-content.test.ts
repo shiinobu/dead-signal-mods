@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+    Q01_CERTIFICATE_FILE_PATH,
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
@@ -29,6 +30,13 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_THE_CONTRACT.id, "dead_signal.q01");
         assert.equal(Q01_THE_CONTRACT.title, "THE CONTRACT");
         assert.equal(Q01_TARGET_IP, "203.0.113.42");
+    });
+
+    it("defines the source-backed certificate inspection record path", () => {
+        assert.equal(
+            Q01_CERTIFICATE_FILE_PATH,
+            "~/meridian-443-certificate.txt",
+        );
     });
 
     it("exposes the five required player objectives", () => {
