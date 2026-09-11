@@ -1,8 +1,10 @@
 import { buildMod } from "@hotbunny/hackhub-content-sdk/build";
 import {
+    cp,
     mkdir,
     readFile,
     rm,
+    stat,
     writeFile,
 } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -18,6 +20,10 @@ const replayManifestPath = resolve(
     replayOutputDir,
     "manifest.json",
 );
+const sourceManifestPath = resolve(projectRoot, "manifest.json");
+const sourceAssetsDir = resolve(projectRoot, "public/assets");
+const replayAssetsDir = resolve(replayOutputDir, "assets");
+const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
 
 const previousRun = Number.parseInt(
     await readFile(replayStatePath, "utf8").catch(() => "0"),
@@ -41,15 +47,18 @@ await buildMod({
     outfile: "dist-replay/mod.js",
 });
 
-const manifest = JSON.parse(
-    await readFile(replayManifestPath, "utf8"),
+const sourceManifest = JSON.parse(
+    await readFile(sourceManifestPath, "utf8"),
 ) as Record<string, unknown>;
 
-manifest.id = "dead-signal-dev";
-manifest.name = "DEAD SIGNAL (Development)";
-manifest.version = `0.1.0-dev.${replayId}`;
-manifest.description =
-    `Development build for repeating Q01 live tests (${replayId}).`;
+const manifest: Record<string, unknown> = {
+    ...sourceManifest,
+    id: "dead-signal-dev",
+    name: "DEAD SIGNAL (Development)",
+    version: `0.1.0-dev.${replayId}`,
+    description:
+        `Development build for repeating Q01 live tests (${replayId}).`,
+};
 
 await writeFile(
     replayManifestPath,
@@ -57,8 +66,34 @@ await writeFile(
     "utf8",
 );
 
+await mkdir(replayAssetsDir, { recursive: true });
+await cp(sourceAssetsDir, replayAssetsDir, {
+    recursive: true,
+    force: true,
+});
+
+const requiredFiles = [
+    resolve(replayOutputDir, "mod.js"),
+    replayManifestPath,
+    replayAvatarPath,
+];
+
+for (const requiredFile of requiredFiles) {
+    const fileInfo = await stat(requiredFile).catch(() => null);
+
+    if (!fileInfo?.isFile()) {
+        throw new Error(
+            `Q01 replay package is incomplete: missing ${requiredFile}`,
+        );
+    }
+}
+
 console.log(`Q01 replay build created: ${replayId}`);
 console.log(`Output: ${replayOutputDir}`);
+console.log("Package contents:");
+console.log("  - mod.js");
+console.log("  - manifest.json");
+console.log("  - assets/adrian-cole.png");
 console.log(
-    "Install dist-replay into HackHub/mods/dead-signal-dev and restart HackHub.",
+    "Install the complete dist-replay contents into HackHub/mods/dead-signal-dev and restart HackHub.",
 );
