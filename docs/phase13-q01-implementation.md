@@ -74,7 +74,7 @@ Supporting guidance:
 
 - Terminal affordance for `nmap 203.0.113.42`.
 - Short hint for the expected exposed services.
-- Terminal affordance for `ssh -h audit@203.0.113.42`.
+- Terminal affordance for `ssh -h audit@203.0.113.42 -p 22`.
 - Short hint that Adrian supplied an authorized audit account.
 - Short hint for the report destination/action.
 
@@ -82,26 +82,7 @@ No internal mod paths are exposed in hints.
 
 ## Technical Interaction
 
-### Network
-
-The quest creates the public audit target directly as a `Network.Type.Device` so Nmap can expose the contracted services while avoiding router-specific gameplay in Q01.
-
-```text
-203.0.113.42  (audit target)
-├── 22 / ssh
-│   └── user: audit
-├── 80 / http
-└── 443 / https
-```
-
-The SSH account is explicitly authorized by the mission brief:
-
-```text
-username: audit
-password: meridian-audit
-```
-
-The password remains inside the virtual user definition and is not passed as a player-facing command argument.
+Q01 does not require HackHub's simulated `Network` layer. During live validation the simulator accepted the Nmap command but did not establish SSH even when a port 22/user topology was defined. The player-facing interaction therefore uses native terminal commands with quest-scoped response data supplied through the Shell API.
 
 ### Reconnaissance
 
@@ -128,17 +109,15 @@ Identify exposed services
 
 Repeating Nmap does not satisfy Objective 04.
 
-### Hybrid Authorized SSH Verification
+### Authorized SSH Verification
 
-The modded network target did not establish a live SSH session reliably during validation even though port 22 was declared and Nmap exposed it. Q01 therefore keeps the native SSH player action but provides the command's scoped success response through `Shell.addCommandData()`.
-
-Player-facing command:
+The player-facing SSH syntax follows the current HackHub Handbook:
 
 ```bash
-ssh -h audit@203.0.113.42
+ssh -h audit@203.0.113.42 -p 22
 ```
 
-Q01 supplies the native SSH command with this scoped response:
+Q01 registers native SSH response data through `Shell.addCommandData()`:
 
 ```text
 input.host = audit@203.0.113.42
@@ -148,9 +127,9 @@ response.ip     = 203.0.113.42
 response.status = OPEN
 ```
 
-Objective 04 is completed only for the expected SSH command and an `OPEN` response for the Q01 target. A real `Terminal.SSH.Connected` event is also accepted when the game runtime emits one.
+The Objective 04 completion handler accepts the expected SSH command only when the scoped SSH response is `OPEN` for the Q01 target. A real `Terminal.SSH.Connected` event remains accepted as an additional runtime path if the game emits one.
 
-This does not add a new terminal verb and does not require a password argument.
+This does not add a new terminal verb, does not require a password argument, and does not perform a real network connection.
 
 ## Completion
 
@@ -191,11 +170,11 @@ $200
 
 ## Cleanup
 
-The Nmap and SSH command response data are removed when Q01 completes or is abandoned. The target network is also destroyed at that boundary.
+The Nmap and SSH command response data are removed when Q01 completes or is abandoned. No Q01 `Network` object is created or destroyed.
 
 ## Boundary
 
-Q01 does not require exploitation, credential attacks, data extraction, or internal access. The SSH interaction is an authorized service-verification step inside the virtual target network.
+Q01 does not require exploitation, credential attacks, data extraction, or internal access. The SSH interaction is an authorized service-verification step represented through HackHub's native terminal command-data mechanism.
 
 ## Validation Gate
 
@@ -216,7 +195,7 @@ Verify one-scan flow
         ↓
 Verify Nmap cannot complete Objective 04
         ↓
-Verify `ssh -h audit@203.0.113.42` receives the scoped OPEN response
+Verify `ssh -h audit@203.0.113.42 -p 22` produces the scoped OPEN response
         ↓
 Verify Objective 04 completes
         ↓
