@@ -8,6 +8,24 @@ Date: 2026-09-11
 
 Phase 13 begins after Phase 12 has been locked. The purpose of this phase is to turn the locked DEAD SIGNAL story/design outputs from Phases 1–8 into concrete game content while preserving the locked runtime contracts established by Phases 9–12.
 
+## Cross-phase verification baseline
+
+Before continuing story implementation, the project was re-audited across Phases 1–12 against the currently recoverable source artifacts, repository history, and locked runtime/integration documents.
+
+Audit artifact:
+
+`docs/phase01-12-cross-phase-audit.md`
+
+The cross-phase audit establishes:
+
+- Phase 1–8 historical provenance is incomplete in the current environment because the original shared conversations cannot be independently retrieved here.
+- Recoverable story artifacts such as the Q01–Q16 flowchart and locked Q14/Q15 specifications remain valid implementation inputs.
+- Phase 9–12 runtime architecture and integration contracts are strongly verified by repository implementation/history and the Phase 12 lock.
+- No earlier story canon is to be reconstructed from runtime behavior.
+- Existing Phase 12 contracts remain locked while Phase 13 consumes recovered story content.
+
+This audit does **not** reopen or rewrite any previously locked project decision.
+
 ## Implementation boundary
 
 Phase 13 must consume the locked story/design decisions from Phases 1–8 as the source of truth. It must not silently rewrite story canon, quest dependencies, character relationships, global-state semantics, dialogue flow, gameplay interactions, economy/progression rules, or ending logic that were previously locked.
