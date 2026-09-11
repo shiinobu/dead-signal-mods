@@ -33,7 +33,7 @@ export function runSaveStorageSmokeTest(): void {
             return;
         }
 
-        HackHubSaveStorage.set<PersistenceProbe>(PROBE_KEY, {
+        HackHubSaveStorage.set(PROBE_KEY, {
             schema: 1,
             createdAt: new Date().toISOString(),
         });
