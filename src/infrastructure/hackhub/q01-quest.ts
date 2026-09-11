@@ -29,20 +29,26 @@ interface Q01QuestData {
     readonly reportSubmitted: boolean;
 }
 
-const Q01_NMAP_RESULT = [
+interface Q01NmapPort {
+    readonly port: number;
+    readonly status: string;
+    readonly service: string;
+}
+
+const Q01_NMAP_RESULT: readonly Q01NmapPort[] = [
     {
         port: 22,
-        status: "OPEN" as const,
+        status: "OPEN",
         service: "ssh",
     },
     {
         port: 80,
-        status: "OPEN" as const,
+        status: "OPEN",
         service: "http",
     },
     {
         port: 443,
-        status: "OPEN" as const,
+        status: "OPEN",
         service: "https",
     },
 ];
@@ -170,6 +176,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     }
 
     override OnObjectivesStart() {
+        // Re-register the deterministic Nmap response on every game start so
+        // the terminal interaction survives a HackHub reload.
         Shell.addCommandData(
             "nmap",
             this.Data.targetIp,
@@ -291,13 +299,22 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     }
 
     private isExpectedNmapResult(
-        result: ReturnType<typeof Shell.getCommandData>,
-    ): boolean {
+        result: unknown,
+    ): result is readonly Q01NmapPort[] {
         if (!Array.isArray(result) || result.length !== Q01_NMAP_RESULT.length) {
             return false;
         }
 
-        return Q01_NMAP_RESULT.every((expected) =>
+        return result.every((value): value is Q01NmapPort =>
+            typeof value === "object" &&
+            value !== null &&
+            "port" in value &&
+            "status" in value &&
+            "service" in value &&
+            typeof value.port === "number" &&
+            typeof value.status === "string" &&
+            typeof value.service === "string",
+        ) && Q01_NMAP_RESULT.every((expected) =>
             result.some(
                 (actual) =>
                     actual.port === expected.port &&
@@ -313,11 +330,16 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     ): boolean {
         const normalizedSubject = subject.trim().toLowerCase();
         const normalizedContent = content.toLowerCase();
+        const reportBody = normalizedContent.trimStart();
 
         if (
             normalizedSubject !== Q01_REPORT_SUBJECT.toLowerCase() &&
             normalizedSubject !== `re: ${Q01_REPORT_SUBJECT}`.toLowerCase()
         ) {
+            return false;
+        }
+
+        if (!reportBody.startsWith("target: meridian logistics")) {
             return false;
         }
 
