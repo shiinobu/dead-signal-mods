@@ -44,9 +44,16 @@ nmap 203.0.113.42
 443/tcp open  https
 ```
 
-8. Confirm objectives 2–4 are satisfied by this single audit interaction.
-9. Run the same Nmap command again. **Progress must remain unchanged.**
-10. Submit the audit report using the source-defined facts, including:
+8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
+9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
+10. Use the credentials supplied by Adrian and connect to the target:
+
+```bash
+ssh audit@203.0.113.42
+```
+
+11. Confirm the SSH connection succeeds against the virtual target and Objective 04 completes only after the `Terminal.SSHConnect` event for `203.0.113.42` / `audit`.
+12. Submit the audit report using the source-defined facts, including:
 
 ```text
 Target: Meridian Logistics
@@ -56,9 +63,9 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-11. Confirm the audit-report objective completes and the development quest finishes.
-12. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
-13. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
+13. Confirm the audit-report objective completes and the development quest finishes.
+14. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
+15. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
 
 ## Objective UX Contract
 
@@ -68,11 +75,11 @@ The main objective text follows the locked Phase 8 names. The UI may add selecti
 Review audit scope
 Scan 203.0.113.42       [Terminal]
 Identify exposed services [?]
-Perform basic vulnerability checks
+Perform basic vulnerability checks [Terminal]
 Submit audit report      [?]
 ```
 
-Not every objective requires a hint. The terminal affordance is used only where a concrete command is the player action. Hints provide short contextual help and must never expose internal mod paths.
+Hints provide short contextual help and must never expose internal mod paths.
 
 ## Expected Canonical State (production only)
 
