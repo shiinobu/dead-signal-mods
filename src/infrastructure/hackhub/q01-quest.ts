@@ -31,11 +31,11 @@ interface Q01QuestData {
 
 interface Q01NmapPort {
     readonly port: number;
-    readonly status: string;
+    readonly status: "OPEN";
     readonly service: string;
 }
 
-const Q01_NMAP_RESULT: readonly Q01NmapPort[] = [
+const Q01_NMAP_RESULT: Q01NmapPort[] = [
     {
         port: 22,
         status: "OPEN",
@@ -312,7 +312,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             "status" in value &&
             "service" in value &&
             typeof value.port === "number" &&
-            typeof value.status === "string" &&
+            value.status === "OPEN" &&
             typeof value.service === "string",
         ) && Q01_NMAP_RESULT.every((expected) =>
             result.some(
