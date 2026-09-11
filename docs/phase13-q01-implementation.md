@@ -33,7 +33,7 @@ Run nmap 203.0.113.42
         ↓
 Confirm 22 / 80 / 443
         ↓
-Inspect HTTPS certificate on 443
+Open the generated HTTPS certificate record
         ↓
 Submit the audit report
         ↓
@@ -76,15 +76,26 @@ No direct `Terminal.NmapScan` dependency is introduced.
 
 The recovered Q01 technical interaction explicitly includes certificate inspection, while the locked Phase 8 objective remains `Perform basic vulnerability checks`.
 
-To make this objective actionable in-game without introducing an exploit mechanic, Q01 maps that objective to the available terminal command:
+HackHub's built-in `openssl` command is **not** a TLS certificate inspection utility; in the in-game Handbook it is an encryption/decryption command. Therefore Q01 must not instruct the player to use `openssl s_client` or any other unsupported OpenSSL syntax.
 
-```bash
-openssl s_client -connect 203.0.113.42:443
+Instead, after the successful Nmap/service-identification step, Q01 creates the following virtual filesystem record:
+
+```text
+~/meridian-443-certificate.txt
 ```
 
-The player must explicitly perform this HTTPS certificate inspection after service identification. Re-running the Nmap command no longer completes the basic-assessment objective.
+The player-facing Objective 04 tells the player exactly to open that file. Its content records the source-backed HTTPS inspection result:
 
-This is an implementation mapping of the source-defined certificate inspection. The command syntax is not treated as new story canon.
+```text
+Target: 203.0.113.42
+Port: 443/tcp
+Service: HTTPS
+Issuer: ARKA Secure Infrastructure
+```
+
+Objective 04 completes from the supported `Files.Open` event when that certificate record is opened. The record is created only after the Nmap/service-identification gate is reached, and its existence is checked again on reload so the objective remains playable after restart.
+
+This is an implementation-level representation of the source-defined certificate inspection. It does not add a new story beat or a new persistent story flag.
 
 ### Canonical State
 
@@ -117,27 +128,29 @@ All reward IDs are deterministic and idempotent through the existing reward/econ
 
 The recovered source says Q01 uses Relay for the short post-report Adrian response, but the currently available HackHub SDK reference exposes Email as the supported communication API and no native Relay API. The implementation therefore preserves the dialogue/content beat through a second quest email. This is an infrastructure adapter choice only; it does not introduce a new story system or change the canonical story event.
 
-Q01 does not require vulnerability exploitation. The concrete basic-assessment action is the source-defined HTTPS certificate inspection, expressed through `openssl` because the game terminal exposes that command. No exploit or vulnerability-scanning subsystem is introduced.
+Q01 does not require vulnerability exploitation. The concrete basic-assessment action is the source-defined HTTPS certificate inspection, represented through the supported virtual filesystem and `Files.Open` event rather than an invented exploit command or unsupported `openssl` syntax.
 
 ## UX Correction — 2026-09-11
 
 Initial implementation completed the basic-assessment objective from any valid Nmap event. During live testing, running Nmap a second time therefore advanced the quest unexpectedly and left the player unsure what action was required.
 
-That behavior is corrected:
+A second correction was required after validating the HackHub Handbook: `openssl` in the game supports encryption/decryption, not `s_client` TLS certificate inspection. The unsupported command has been removed completely.
+
+The final objective boundaries are now:
 
 ```text
 Nmap
   ├─ completes Scan Network
   └─ completes Identify Exposed Services
 
-OpenSSL HTTPS certificate inspection
+Open ~/meridian-443-certificate.txt
   └─ completes Basic Vulnerability Checks
 
 Audit email/report
   └─ completes Submit Audit
 ```
 
-This preserves the five locked Phase 8 objectives while providing a concrete, visible player action for each stage.
+This preserves the five locked Phase 8 objectives while giving each stage a concrete player action that is actually supported by HackHub.
 
 ## Validation Gate
 
