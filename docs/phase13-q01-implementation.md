@@ -22,7 +22,7 @@ Canonical Q01:
 
 ## Locked Player Objective Names
 
-The five player-facing objective names are kept exactly as locked in Phase 8:
+The five player-facing objective names remain exactly as locked in Phase 8:
 
 1. `Review audit scope`
 2. `Scan 203.0.113.42`
@@ -30,7 +30,7 @@ The five player-facing objective names are kept exactly as locked in Phase 8:
 4. `Perform basic vulnerability checks`
 5. `Submit audit report`
 
-The implementation may add terminal actions, hints, and supporting UI data, but it does not rename these objectives.
+Supporting terminal actions and hints may be added without renaming these objectives.
 
 ## Final Player Flow
 
@@ -43,9 +43,11 @@ Review the audit scope
         ↓
 Run nmap 203.0.113.42
         ↓
-Review the returned result
+Confirm 22 / ssh, 80 / http, 443 / https
         ↓
-Objectives 2–4 are satisfied by the same audit interaction
+Connect to SSH with Adrian's authorized audit account
+        ↓
+Perform basic vulnerability checks
         ↓
 Submit the audit report
         ↓
@@ -56,11 +58,9 @@ $200 + up to 80 XP
 Q02 becomes the next campaign target
 ```
 
-Q01 is intentionally a simple opening mission. The player performs one reconnaissance action and reviews its result instead of being asked to repeat multiple variants of the same scan.
+Q01 remains a simple opening mission: one reconnaissance action, one authorized service-verification action, then reporting.
 
 ## Objective UX
-
-Main objective text is concise and player-oriented:
 
 ```text
 Review audit scope
@@ -70,24 +70,47 @@ Perform basic vulnerability checks
 Submit audit report
 ```
 
-Supporting guidance is used selectively:
+Supporting guidance:
 
-- Terminal affordance for the scan objective.
-- A short hint for the service result (`22/ssh`, `80/http`, `443/https`).
-- A short hint for the report destination/action.
-- No hint is added where the objective is already self-explanatory.
+- Terminal affordance for `nmap 203.0.113.42`.
+- Short hint for the expected exposed services.
+- Terminal affordance for `ssh audit@203.0.113.42`.
+- Short hint that Adrian supplied an authorized audit account.
+- Short hint for the report destination/action.
 
 No internal mod paths are exposed in hints.
 
 ## Technical Interaction
 
-The supported player-facing terminal interaction is:
+### Network
+
+The quest creates a dedicated virtual target network in `OnStart()`:
+
+```text
+203.0.113.42
+├── 22 / ssh
+├── 80 / http
+└── 443 / https
+```
+
+The SSH account is explicitly authorized by the mission brief:
+
+```text
+username: audit
+password: meridian-audit
+```
+
+The production manifest therefore requires the `network` permission.
+
+### Reconnaissance
+
+The player-facing scan remains:
 
 ```bash
 nmap 203.0.113.42
 ```
 
-The exact Nmap result used by Q01 is:
+Expected result:
 
 ```text
 22/tcp  OPEN  ssh
@@ -95,17 +118,30 @@ The exact Nmap result used by Q01 is:
 443/tcp OPEN  https
 ```
 
-The first valid result completes:
+This satisfies only:
 
 ```text
 Scan 203.0.113.42
 Identify exposed services
-Perform basic vulnerability checks
 ```
 
-Repeating the same Nmap command does not change progress after those objectives are complete.
+Repeating Nmap does not satisfy Objective 04.
 
-No `openssl s_client`, custom `certcheck`, shell `Open ...`, or second Nmap command is required by the player.
+### Authorized SSH Verification
+
+Objective 04 is completed only after the real in-game SSH connection event is received for the target IP and the authorized username:
+
+```text
+Terminal.SSHConnect
+        ↓
+203.0.113.42
+        ↓
+audit
+        ↓
+Perform basic vulnerability checks = complete
+```
+
+The implementation does not simulate the SSH result with a fake terminal command.
 
 ## Completion
 
@@ -129,8 +165,6 @@ dead_signal.q01.completed = true
 
 ## Rewards
 
-The locked Phase 8 allocation remains:
-
 ```text
 35 XP  — Complete external audit
 20 XP  — Network/service enumeration
@@ -146,9 +180,13 @@ Money reward:
 $200
 ```
 
+## Cleanup
+
+The target network is destroyed when Q01 completes or is abandoned. The temporary Nmap response data is also removed.
+
 ## Boundary
 
-Q01 does not require exploitation. The certificate/ARKA detail remains a narrative breadcrumb in the story source, while the playable opening mission stays focused on routine reconnaissance and reporting.
+Q01 does not require exploitation, credential attacks, data extraction, or internal access. The SSH interaction is an authorized service-verification step inside the virtual target network.
 
 ## Validation Gate
 
@@ -166,6 +204,10 @@ Install production build
 Live Q01 from clean/replay state
         ↓
 Verify one-scan flow
+        ↓
+Verify Nmap cannot complete Objective 04
+        ↓
+Verify authorized SSH completes Objective 04
         ↓
 Verify report completion
         ↓
