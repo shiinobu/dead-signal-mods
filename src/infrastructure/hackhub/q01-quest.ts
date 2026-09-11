@@ -10,6 +10,7 @@ import {
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
     Q01_SSH_COMMAND,
+    Q01_SSH_INTERNAL_IP,
     Q01_SSH_PASSWORD,
     Q01_SSH_PORT,
     Q01_SSH_USERNAME,
@@ -159,8 +160,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 "Basic vulnerability checks",
                 "",
                 "Temporary audit access:",
-                `SSH: ${Q01_SSH_USERNAME}@${Q01_TARGET_IP}:${Q01_SSH_PORT}`,
-                `Password: ${Q01_SSH_PASSWORD}`,
+                `SSH user: ${Q01_SSH_USERNAME}`,
                 "",
                 "Not Authorized:",
                 "Data extraction",
@@ -194,15 +194,15 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     override OnStart() {
         gameRuntime.quest.start(Q01_THE_CONTRACT);
 
+        const auditUser = Network.createUser({
+            username: Q01_SSH_USERNAME,
+            password: Q01_SSH_PASSWORD,
+        });
+
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
             type: Network.Type.Router,
-            users: [
-                Network.createUser({
-                    username: Q01_SSH_USERNAME,
-                    password: Q01_SSH_PASSWORD,
-                }),
-            ],
+            users: [],
             ports: [
                 {
                     external: Q01_SSH_PORT,
@@ -223,8 +223,26 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                     service: "https",
                 },
             ],
-            children: [],
+            children: [
+                {
+                    ip: Q01_SSH_INTERNAL_IP,
+                    type: Network.Type.Device,
+                    users: [auditUser],
+                    ports: [
+                        {
+                            external: Q01_SSH_PORT,
+                            internal: Q01_SSH_PORT,
+                            active: true,
+                            service: "ssh",
+                        },
+                    ],
+                    ssh: true,
+                },
+            ],
         });
+
+        Network.openPort(this.Data.targetIp, Q01_SSH_PORT);
+        Network.openPort(Q01_SSH_INTERNAL_IP, Q01_SSH_PORT);
 
         this.sendMail(0);
         this.SetData("auditScopeReviewed", true);
