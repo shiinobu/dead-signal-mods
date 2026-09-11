@@ -4,25 +4,21 @@ Date: 2026-09-11
 
 ## Scope
 
-Audit the current repository for source files that are no longer part of the production execution path, with particular attention to Phase 12 smoke/diagnostic harnesses and empty placeholder files.
+Audit the repository for source files that are no longer part of the production execution path, with particular attention to Phase 12 smoke/diagnostic harnesses, deferred Phase 13 Q14 implementation artifacts, and empty placeholder files.
 
 ## Production entrypoint
 
-The build uses:
+The production build uses:
 
 ```text
 src/index.ts
 ```
 
-as the sole esbuild entry point. The current production bootstrap imports only the Q14 HackHub quest adapter and the shared runtime bridge.
+as the esbuild entry point. The current bootstrap loads the shared runtime bridge only; no downstream quest is registered before the sequential campaign reaches it.
 
-Therefore a source file under `src/` is part of the production bundle only when reachable from that import graph.
+## Removed obsolete production-tree artifacts
 
-## Findings
-
-### Phase 12 diagnostic / smoke files — removed from production source tree
-
-The following Phase 12 validation artifacts were confirmed to be outside the production import graph and have now been removed:
+The following historical Phase 12 diagnostic files were removed from `src/infrastructure/hackhub/` because they are not production dependencies:
 
 ```text
 src/infrastructure/hackhub/dead-signal-smoke-quest.ts
@@ -33,45 +29,69 @@ src/infrastructure/hackhub/runtime-services-smoke-test.ts
 src/infrastructure/hackhub/save-storage-smoke-test.ts
 ```
 
-They were historical Phase 12 validation/diagnostic artifacts, not production dependencies. The Phase 12 integration audit remains the historical evidence for the validated behavior they covered.
+These files remain recoverable through Git history and Phase 12 audit documentation.
 
-Disposition:
+## Deferred Q14 implementation cleanup
 
-```text
-PRODUCTION USE:        NONE
-HISTORICAL VALUE:      YES
-SOURCE-TREE STATUS:    REMOVED
-AUDIT EVIDENCE:        RETAINED
-```
-
-### Production files — keep
+Q14 had previously been implemented early during Phase 13 exploration. After locking the sequential Q01 → Q16 execution strategy, those premature production artifacts were removed from the active source tree:
 
 ```text
 src/infrastructure/hackhub/q14-quest.ts
-src/infrastructure/hackhub/runtime.ts
-src/infrastructure/hackhub/save-storage-adapter.ts
-src/index.ts
+src/content/q14.ts
+src/content/index.ts
+tests/phase13-step13.3-q14-source-backed-slice.test.ts
 ```
 
-These remain part of the current production integration path.
+Reason:
 
-### Development tooling — keep
+```text
+Q01–Q13 are not yet production-validated
+        ↓
+Q14 must not be registered/executed early
+        ↓
+remove deferred implementation from active source tree
+        ↓
+recover from Git history when Q14 becomes the active quest
+```
+
+This is an execution-order cleanup, not a loss of project history.
+
+## Current production HackHub source
+
+The active `src/infrastructure/hackhub/` tree now contains only:
+
+```text
+runtime.ts
+save-storage-adapter.ts
+```
+
+Quest-specific HackHub adapters are added only when their sequential quest gate is reached.
+
+## Current production permissions
+
+Because the deferred Q14 filesystem integration is no longer active, the current manifest uses the minimal permissions required by the shared production runtime:
+
+```json
+"permissions": ["events", "shell"]
+```
+
+Filesystem permission must be reintroduced only when a later active quest actually requires it and the requirement is source-backed.
+
+## Development tooling — keep
 
 ```text
 scripts/dev-watch.ts
 ```
 
-The package `dev` script explicitly executes this watcher, so it is still used.
+The package `dev` script explicitly executes this watcher.
 
-### Tests — keep
+## Tests — keep
 
-The repository's automated test suite remains under `tests/`. The package exposes `npm test`, and the Phase 13 source-backed test is part of that suite.
+The repository's automated test suite remains under `tests/`. Generic domain/application/integration tests remain part of the regression barrier for sequential quest implementation.
 
-No current test file was classified as unused from this audit.
+## Placeholder `.gitkeep` files
 
-### Empty-directory `.gitkeep` files
-
-The following `.gitkeep` files are redundant because their directories already contain tracked source files:
+The following are functionally redundant because their directories contain tracked source files:
 
 ```text
 src/application/.gitkeep
@@ -82,46 +102,30 @@ src/state/.gitkeep
 tests/.gitkeep
 ```
 
-Disposition:
+They may be removed during a later housekeeping pass.
 
-```text
-FUNCTIONAL VALUE:      NONE
-SAFE TO REMOVE:        YES
-STATUS:                NOT REMOVED IN THIS CLEANUP
-```
-
-The following remain as empty-directory placeholders and are optional housekeeping rather than functional code:
+The following remain as optional empty-directory placeholders:
 
 ```text
 src/debug/.gitkeep
 src/presentation/.gitkeep
 ```
 
-Removing them would also remove those empty directories from Git. Keep them only if the project intentionally wants those directories pre-created.
+## Historical distinction
 
-## Important distinction
+Removed source files are not equivalent to deleted history. Their implementations remain available in Git history and can be recovered when justified by the sequential implementation roadmap.
 
-The six Phase 12 smoke/regression files were useful historical validation artifacts, but retaining them under the production source tree added noise after Phase 12 was locked. Their removal does not remove the audit evidence; the Phase 12 integration/lock documents remain in `docs/`.
-
-The cleanup intentionally did **not** alter:
-
-- production bootstrap behavior;
-- Q14 content implementation;
-- runtime services;
-- SaveStorage adapter;
-- automated tests;
-- development watcher;
-- Phase 12 audit/lock documentation.
+Production source should contain only the currently active implementation path.
 
 ## Audit conclusion
 
 ```text
-Phase 12 smoke/regression harnesses outside production import graph  ✅ CONFIRMED
-Phase 12 smoke/regression harnesses removed from source tree       ✅ DONE
-Phase 12 historical audit evidence retained                        ✅ CONFIRMED
-Production runtime files                                            ✅ KEEP
-Development watcher                                                 ✅ KEEP
-Automated tests                                                      ✅ KEEP
-Six redundant .gitkeep files                                        🟡 NOT REMOVED
-Two empty placeholder .gitkeep files                                🟡 OPTIONAL
+Phase 12 smoke/regression harnesses removed from active source tree   ✅
+Deferred Q14 production artifacts removed from active source tree    ✅
+Current HackHub production tree contains only active adapters        ✅
+Production bootstrap no longer registers Q14                        ✅
+Current manifest permissions reduced to active requirements           ✅
+Development watcher retained                                         ✅
+Generic automated tests retained                                     ✅
+Redundant .gitkeep cleanup                                            🟡 OPTIONAL
 ```
