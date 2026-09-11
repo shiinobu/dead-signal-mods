@@ -56,12 +56,14 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
 
         assert.equal(
             service.areObjectivesComplete(Q01_THE_CONTRACT),
-            true,
+            false,
         );
 
+        flagStore.set(Q01_FINAL_STATE_FLAG, true);
+
         assert.equal(
-            flagStore.has(Q01_FINAL_STATE_FLAG),
-            false,
+            service.areObjectivesComplete(Q01_THE_CONTRACT),
+            true,
         );
     });
 
