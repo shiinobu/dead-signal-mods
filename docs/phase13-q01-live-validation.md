@@ -1,6 +1,6 @@
 # DEAD SIGNAL — Q01 Live Validation
 
-Status: **READY FOR LIVE TEST — CERTIFICATE FLOW CORRECTION PENDING VALIDATION**
+Status: **READY FOR LIVE TEST — CERTCHECK FLOW CORRECTION PENDING VALIDATION**
 
 ## Preconditions
 
@@ -37,13 +37,13 @@ nmap 203.0.113.42
 
 8. Confirm the scan and exposed-service objectives advance.
 9. Run the same Nmap command again. **The certificate/basic-assessment objective must not complete.**
-10. After the scan, open the generated virtual filesystem record:
+10. After identifying HTTPS on port 443, run the mod-provided read-only certificate inspection command:
 
-```text
-~/meridian-443-certificate.txt
+```bash
+certcheck 203.0.113.42:443
 ```
 
-11. Confirm the record contains the HTTPS certificate inspection details, including:
+11. Confirm the terminal prints certificate inspection details, including:
 
 ```text
 Target: 203.0.113.42
@@ -73,11 +73,11 @@ Further internal assessment is recommended.
 01  Review audit scope
 02  Run nmap against 203.0.113.42
 03  Confirm exposed services: 22 / 80 / 443
-04  Inspect the HTTPS certificate record for port 443
+04  Inspect the HTTPS certificate on 443
 05  Send the completed audit report to Adrian
 ```
 
-Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective and the source technical interaction's certificate inspection. The HackHub `openssl` command is not used here because the in-game command is an encryption/decryption utility, not a TLS certificate inspection tool. The certificate inspection is therefore represented through the supported virtual filesystem and `Files.Open` event.
+Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective and the source technical interaction's certificate inspection. HackHub's built-in `openssl` command is not used because it is an encryption/decryption utility, not a TLS certificate inspection tool. `certcheck` is a DEAD SIGNAL development/production content command whose sole purpose is to expose the source-backed read-only certificate inspection through the terminal.
 
 ## Expected Canonical State (production only)
 
