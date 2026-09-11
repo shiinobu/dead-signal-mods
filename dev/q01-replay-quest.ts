@@ -1,4 +1,5 @@
 import {
+    Network,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
@@ -6,6 +7,10 @@ import {
 
 import {
     Q01_OBJECTIVE_IDS,
+    Q01_SSH_PASSWORD,
+    Q01_SSH_PORT,
+    Q01_SSH_USERNAME,
+    Q01_SSH_COMMAND,
     Q01_TARGET_IP,
 } from "../src/content/q01.js";
 
@@ -17,6 +22,7 @@ interface Q01ReplayData {
     readonly servicesIdentified: boolean;
     readonly basicVulnerabilityChecksCompleted: boolean;
     readonly reportSubmitted: boolean;
+    readonly sshConnected: boolean;
 }
 
 interface Q01NmapPort {
@@ -28,6 +34,11 @@ interface Q01NmapPort {
 interface TerminalCommandData {
     readonly command: string;
     readonly args: string[];
+}
+
+interface TerminalSshConnectData {
+    readonly ip: string;
+    readonly username: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -90,6 +101,8 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
+            terminalCommand: Q01_SSH_COMMAND,
+            hint: "Use the authorized audit account from the test brief.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -119,6 +132,10 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                 "Service enumeration",
                 "Basic vulnerability checks",
                 "",
+                "Temporary audit access:",
+                `SSH: ${Q01_SSH_USERNAME}@${Q01_TARGET_IP}:${Q01_SSH_PORT}`,
+                `Password: ${Q01_SSH_PASSWORD}`,
+                "",
                 "Not Authorized:",
                 "Data extraction",
                 "Internal access",
@@ -142,10 +159,42 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             servicesIdentified: false,
             basicVulnerabilityChecksCompleted: false,
             reportSubmitted: false,
+            sshConnected: false,
         };
     }
 
     override OnStart() {
+        Network.createSubnetNetwork({
+            ip: this.Data.targetIp,
+            type: Network.Type.Device,
+            users: [
+                Network.createUser({
+                    username: Q01_SSH_USERNAME,
+                    password: Q01_SSH_PASSWORD,
+                }),
+            ],
+            ports: [
+                {
+                    external: Q01_SSH_PORT,
+                    internal: Q01_SSH_PORT,
+                    active: true,
+                    service: "ssh",
+                },
+                {
+                    external: 80,
+                    internal: 80,
+                    active: true,
+                    service: "http",
+                },
+                {
+                    external: 443,
+                    internal: 443,
+                    active: true,
+                    service: "https",
+                },
+            ],
+        });
+
         this.sendMail(0);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
     }
@@ -155,6 +204,10 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data);
+        });
+
+        this.Events.on("Terminal.SSHConnect", (data: TerminalSshConnectData) => {
+            this.handleSshConnection(data);
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -175,6 +228,12 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnComplete() {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
+        Network.destroyNetwork(this.Data.targetIp);
+    }
+
+    override OnAbandon() {
+        Shell.removeCommandData("nmap", this.Data.targetIp);
+        Network.destroyNetwork(this.Data.targetIp);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
@@ -205,12 +264,20 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                 Q01_OBJECTIVE_IDS.identifyServices,
             );
         }
+    }
 
-        if (!this.Data.basicVulnerabilityChecksCompleted) {
-            this.SetData("basicVulnerabilityChecksCompleted", true);
-            this.completeObjective(
-                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-            );
+    private handleSshConnection(data: TerminalSshConnectData): void {
+        if (
+            data.ip !== this.Data.targetIp ||
+            data.username !== Q01_SSH_USERNAME ||
+            !this.Data.servicesIdentified
+        ) {
+            return;
+        }
+
+        if (!this.Data.sshConnected) {
+            this.SetData("sshConnected", true);
+            this.completeObjective(Q01_OBJECTIVE_IDS.basicVulnerabilityChecks);
         }
     }
 
