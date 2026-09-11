@@ -86,6 +86,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             "Short security audit in Jakarta. One external network, a few services, basic vulnerability assessment. Reply if interested.",
         author: {
             name: "Adrian Cole",
+            avatar: "assets/adrian-cole.png",
         },
     };
 
