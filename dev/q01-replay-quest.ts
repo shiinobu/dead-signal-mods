@@ -1,12 +1,12 @@
 import {
-    Files,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
-    Q01_CERTIFICATE_FILE_PATH,
+    Q01_CERTIFICATE_COMMAND,
+    Q01_CERTIFICATE_TARGET,
     Q01_OBJECTIVE_IDS,
     Q01_TARGET_IP,
 } from "../src/content/q01.js";
@@ -33,7 +33,6 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
     { port: 443, status: "OPEN", service: "https" },
 ];
 
-const Q01_CERTIFICATE_FILE_NAME = "meridian-443-certificate";
 const Q01_CERTIFICATE_RECORD = [
     "MERIDIAN LOGISTICS — HTTPS CERTIFICATE INSPECTION",
     "",
@@ -99,8 +98,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description:
-                `Inspect the HTTPS certificate record for port 443. Open ${Q01_CERTIFICATE_FILE_PATH}.`,
-            hint: `File: ${Q01_CERTIFICATE_FILE_PATH}`,
+                `Inspect the HTTPS certificate for port 443. Run: ${Q01_CERTIFICATE_COMMAND} ${Q01_CERTIFICATE_TARGET}`,
+            terminalCommand: `${Q01_CERTIFICATE_COMMAND} ${Q01_CERTIFICATE_TARGET}`,
+            info: "Read the returned certificate details. No exploitation is required.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -164,46 +164,57 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
-
-        if (this.Data.servicesIdentified) {
-            void this.ensureCertificateRecord();
-        }
+        Shell.addCommandData(
+            Q01_CERTIFICATE_COMMAND,
+            Q01_CERTIFICATE_TARGET,
+            Q01_CERTIFICATE_RECORD,
+        );
 
         this.Events.on("Terminal.Command", (data) => {
             if (
-                data.command !== "nmap" ||
-                data.args[0] !== this.Data.targetIp
+                data.command === "nmap" &&
+                data.args[0] === this.Data.targetIp
+            ) {
+                const result = Shell.getCommandData(
+                    "nmap",
+                    this.Data.targetIp,
+                );
+
+                if (!this.isExpectedNmapResult(result)) {
+                    return;
+                }
+
+                if (!this.Data.networkScanned) {
+                    this.SetData("networkScanned", true);
+                    this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
+                }
+
+                if (!this.Data.servicesIdentified) {
+                    this.SetData("servicesIdentified", true);
+                    this.completeObjective(
+                        Q01_OBJECTIVE_IDS.identifyServices,
+                    );
+                }
+
+                return;
+            }
+
+            if (
+                data.command !== Q01_CERTIFICATE_COMMAND ||
+                data.args[0] !== Q01_CERTIFICATE_TARGET ||
+                !this.Data.servicesIdentified
             ) {
                 return;
             }
 
             const result = Shell.getCommandData(
-                "nmap",
-                this.Data.targetIp,
+                Q01_CERTIFICATE_COMMAND,
+                Q01_CERTIFICATE_TARGET,
             );
 
-            if (!this.isExpectedNmapResult(result)) {
-                return;
-            }
-
-            if (!this.Data.networkScanned) {
-                this.SetData("networkScanned", true);
-                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-            }
-
-            if (!this.Data.servicesIdentified) {
-                this.SetData("servicesIdentified", true);
-                this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
-            }
-
-            void this.ensureCertificateRecord();
-        });
-
-        this.Events.on("Files.Open", (data) => {
             if (
-                this.Data.certificateInspected ||
-                !this.Data.servicesIdentified ||
-                !this.isCertificateOpenEvent(data)
+                result !== Q01_CERTIFICATE_RECORD ||
+                this.Data.certificateInspected
             ) {
                 return;
             }
@@ -232,37 +243,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnComplete() {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
-    }
-
-    private async ensureCertificateRecord(): Promise<void> {
-        try {
-            if (await Files.exists(Q01_CERTIFICATE_FILE_PATH)) {
-                return;
-            }
-
-            await Files.create({
-                name: Q01_CERTIFICATE_FILE_NAME,
-                extension: "txt",
-                data: Q01_CERTIFICATE_RECORD,
-                parentPath: "~",
-            });
-        } catch (error) {
-            console.error(
-                "DEAD SIGNAL Q01 replay: failed to create certificate inspection record.",
-                error,
-            );
-        }
-    }
-
-    private isCertificateOpenEvent(data: unknown): boolean {
-        const payload = data as {
-            name?: unknown;
-            path?: unknown;
-        };
-
-        return (
-            payload.name === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
-            payload.path === Q01_CERTIFICATE_FILE_PATH
+        Shell.removeCommandData(
+            Q01_CERTIFICATE_COMMAND,
+            Q01_CERTIFICATE_TARGET,
         );
     }
 
