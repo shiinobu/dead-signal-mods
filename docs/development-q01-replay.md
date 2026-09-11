@@ -104,14 +104,12 @@ nmap 203.0.113.42
   ↓
 Confirm 22 / 80 / 443
   ↓
-certcheck 203.0.113.42:443
-  ↓
-Review the certificate output
+nmap 203.0.113.42 -sV
   ↓
 Submit the audit report
 ```
 
-`certcheck` is a mod-provided read-only terminal command backed by `Shell.addCommandData()`. It represents the source-defined HTTPS certificate inspection without relying on HackHub's unrelated built-in `openssl` encryption/decryption command or on an unsupported `Open` shell command.
+`nmap -sV` is the currently validated in-game service/version scan used for the basic-assessment stage. The replay does not use `openssl`, `Open`, or the previously attempted custom `certcheck` command.
 
 ## Important
 
