@@ -27,6 +27,17 @@ The same locked technical interaction also includes certificate inspection, and 
 
 Therefore the ambiguity is resolved by mapping the basic-assessment objective to the source-defined HTTPS certificate inspection rather than inventing an exploit mechanic.
 
+## HackHub Command Constraint
+
+The in-game Handbook defines `openssl` as an encryption/decryption utility:
+
+```text
+openssl -enc [text]
+openssl -dec [text]
+```
+
+It does not provide `openssl s_client`. Therefore the earlier `openssl s_client -connect ...` mapping was invalid and has been removed.
+
 ## Corrected Player Flow
 
 ```text
@@ -36,18 +47,12 @@ Run nmap 203.0.113.42
         ↓
 Confirm 22 / 80 / 443
         ↓
-Inspect HTTPS certificate on 443
+Open ~/meridian-443-certificate.txt
         ↓
 Submit audit report
 ```
 
-Concrete certificate-inspection action:
-
-```bash
-openssl s_client -connect 203.0.113.42:443
-```
-
-The command syntax is an implementation mapping. The story canon remains the certificate inspection itself.
+The certificate record is created in HackHub's virtual filesystem after the successful service-identification step and contains the source-backed HTTPS inspection result, including the ARKA issuer breadcrumb.
 
 ## Completion Trigger Contract
 
@@ -56,7 +61,7 @@ nmap target
   → Scan Network
   → Identify Exposed Services
 
-openssl s_client -connect target:443
+Files.Open on ~/meridian-443-certificate.txt
   → Basic Vulnerability Checks
 
 valid audit report
@@ -70,6 +75,10 @@ A repeated Nmap command must not complete the basic-assessment objective.
 For all future DEAD SIGNAL quests:
 
 > An objective must not be completed by repeating an earlier objective's action unless the story specification explicitly defines that behavior.
+
+Additionally:
+
+> Never map a DEAD SIGNAL objective to a command syntax that is not actually supported by the HackHub build being targeted.
 
 ## Scope
 
