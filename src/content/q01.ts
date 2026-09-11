@@ -3,10 +3,11 @@ import { flagEquals } from "../domain/shared/index.js";
 import type { Quest } from "../domain/quest/index.js";
 
 export const Q01_TARGET_IP = "203.0.113.42";
+export const Q01_SSH_INTERNAL_IP = "10.0.0.2";
 export const Q01_SSH_USERNAME = "audit";
 export const Q01_SSH_PASSWORD = "meridian-audit";
 export const Q01_SSH_PORT = 22;
-export const Q01_SSH_COMMAND = `ssh -h ${Q01_SSH_USERNAME}@${Q01_TARGET_IP} -p ${Q01_SSH_PORT}`;
+export const Q01_SSH_COMMAND = `ssh -h ${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`;
 
 export const Q01_FINAL_STATE_FLAG = "dead_signal.q01.completed";
 
