@@ -46,11 +46,6 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-interface Q01SshConnectedEvent {
-    readonly ip: string;
-    readonly username: string;
-}
-
 const Q01_SSH_INTERNAL_IP = "10.0.0.2";
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -200,27 +195,6 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     override OnStart() {
         gameRuntime.quest.start(Q01_THE_CONTRACT);
 
-        const ports = [
-            {
-                external: Q01_SSH_PORT,
-                internal: Q01_SSH_PORT,
-                active: true,
-                service: "ssh",
-            },
-            {
-                external: 80,
-                internal: 80,
-                active: true,
-                service: "http",
-            },
-            {
-                external: 443,
-                internal: 443,
-                active: true,
-                service: "https",
-            },
-        ];
-
         const sshUser = Network.createUser({
             username: Q01_SSH_USERNAME,
             password: Q01_SSH_PASSWORD,
@@ -230,13 +204,39 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             ip: this.Data.targetIp,
             type: Network.Type.Router,
             users: [],
-            ports,
+            ports: [
+                {
+                    external: Q01_SSH_PORT,
+                    internal: Q01_SSH_PORT,
+                    active: true,
+                    service: "ssh",
+                },
+                {
+                    external: 80,
+                    internal: 80,
+                    active: true,
+                    service: "http",
+                },
+                {
+                    external: 443,
+                    internal: 443,
+                    active: true,
+                    service: "https",
+                },
+            ],
             children: [
                 {
                     ip: Q01_SSH_INTERNAL_IP,
                     type: Network.Type.Device,
                     ssh: true,
-                    ports,
+                    ports: [
+                        {
+                            external: Q01_SSH_PORT,
+                            internal: Q01_SSH_PORT,
+                            active: true,
+                            service: "ssh",
+                        },
+                    ],
                     users: [sshUser],
                 },
             ],
@@ -265,8 +265,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             this.handleTerminalCommand(data);
         });
 
-        this.Events.on("Terminal.SSH.Connected", (data) => {
-            this.handleSshConnection(data as Q01SshConnectedEvent);
+        this.Events.on("Terminal.SSH.Connected", (ip) => {
+            this.handleSshConnection(ip);
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -376,10 +376,9 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
     }
 
-    private handleSshConnection(data: Q01SshConnectedEvent): void {
+    private handleSshConnection(ip: string): void {
         if (
-            data.ip !== this.Data.targetIp ||
-            data.username !== Q01_SSH_USERNAME ||
+            ip !== this.Data.targetIp ||
             !this.Data.servicesIdentified
         ) {
             return;
