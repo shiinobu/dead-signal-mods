@@ -1,11 +1,11 @@
 # DEAD SIGNAL — Phase 13 Sequential Campaign Execution Lock
 
 Date: 2026-09-11
-Status: **LOCKED**
+Status: **LOCKED — CURRENT IMPLEMENTATION TARGET Q01**
 
 ## Purpose
 
-Phase 13 implementation is now executed strictly in canonical campaign order:
+Phase 13 implementation is executed strictly in canonical campaign order:
 
 ```text
 Q01 → Q02 → Q03 → Q04 → Q05 → Q06 → Q07 → Q08
@@ -16,11 +16,11 @@ The objective is to validate the real playable campaign incrementally, not to pr
 
 ## Relationship to Earlier Locks
 
-This lock changes only the **implementation execution strategy** of Phase 13. It does not change the locked canon or technical contracts from Phases 1–12.
+This lock changes only the implementation execution strategy of Phase 13. It does not change the locked canon or technical contracts from Phases 1–12.
 
 Phase 8 remains the source of truth for Q01–Q16 technical quest behavior, objectives, dependencies, evidence, rewards, XP allocation, state changes, character knowledge, and ending logic.
 
-Phase 9–10 remain the locked SDK/technical architecture baseline. In particular, Q01–Q16 use the common SDK/runtime and no quest-specific subsystem engines are introduced.
+Phase 9–10 remain the locked SDK/technical architecture baseline. Q01–Q16 use the common SDK/runtime and no quest-specific subsystem engines are introduced.
 
 ## Sequential Execution Rule
 
@@ -48,8 +48,6 @@ A failed gate blocks progression to the next quest.
 ## No Dependency Bypass
 
 The production campaign must never bypass a locked prerequisite merely to expose a downstream quest for testing.
-
-Examples:
 
 ```text
 Q14 must not bypass Q13.
@@ -98,43 +96,67 @@ Q16 live PASS
 Full Campaign Regression
 ```
 
-## Q14 Status Change
+## Previous Q14 Exploration
 
-Q14 was previously implemented as an early downstream slice during Phase 13 exploration. That work is now **superseded as the active production path** by this sequential execution lock.
+Q14 was previously implemented as an early downstream slice during Phase 13 exploration. That work was intentionally removed from the active production tree when the sequential strategy was locked. The implementation remains recoverable from Git history.
 
-The Q14 implementation artifacts are preserved in Git history and historical Phase 13 documentation, but Q14 is not registered in the current production bootstrap while Q01–Q13 remain unimplemented.
+Q14 must not be reintroduced into the production bootstrap until Q01–Q13 have each passed their live gates.
 
 ## Current Target — Q01
-
-The current implementation target is:
 
 ```text
 Q01 — THE CONTRACT
 ```
 
-Currently verified from the readable Phase 8 source:
+The recovered source defines:
+
+- no prerequisite;
+- Jakarta location;
+- Adrian Cole as primary character;
+- target `203.0.113.42`;
+- expected services TCP 22/80/443;
+- five required player objectives;
+- `dead_signal.q01.completed = true` as persistent story state;
+- `$200` reward;
+- maximum `80 XP`.
+
+The locked Phase 8 XP allocation is:
 
 ```text
-Maximum XP: 80
-
 Complete external audit         35 XP
 Network/service enumeration     20 XP
 Basic vulnerability assessment  10 XP
 Submit correct report           15 XP
+Maximum                         80 XP
 ```
 
-No optional XP exists for Q01.
+Current production implementation files:
 
-The exact Q01 objective/event/state/dialogue/technical interaction details must come from the locked Phase 1–8 source. Where those details are not presently readable, implementation must stop at source recovery rather than infer them.
+```text
+src/content/q01.ts
+src/content/index.ts
+src/infrastructure/hackhub/q01-quest.ts
+src/index.ts
+manifest.json
+```
+
+Q01 implementation is complete at source/runtime level and is now awaiting the live HackHub validation gate. It is not production-locked until that live gate passes.
+
+## Q01 Runtime Notes
+
+HackHub's validated terminal integration uses `Terminal.Command` plus typed `Shell.addCommandData("nmap", ...)`, matching the locked Phase 12 integration boundary rather than relying on the unstable direct `Terminal.NmapScan` path used during earlier diagnostics.
+
+Q01's basic vulnerability objective deliberately does not introduce an unsupported exploit command. The recovered gameplay audit states that Q01 does not require vulnerability exploitation; the submitted audit result therefore closes that assessment stage.
+
+Q01's recovered narrative uses Relay for Adrian's short post-report response. The available HackHub SDK reference exposes Email, but no native Relay API. The implementation preserves the narrative beat through the existing mail channel and treats that substitution as an adapter detail, not a new story-system contract.
 
 ## Phase 13 Completion Condition
 
-Phase 13 is complete only when:
+Phase 13 is complete only when the real campaign has passed live validation in order:
 
 ```text
 Q01 PASS
 Q02 PASS
-Q03 PASS
 ...
 Q16 PASS
 
