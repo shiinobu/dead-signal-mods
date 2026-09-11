@@ -3,7 +3,6 @@ import {
     RegisterModPackage,
 } from "@hotbunny/hackhub-content-sdk";
 
-import "./infrastructure/hackhub/q14-quest.js";
 import {
     gameRuntime,
 } from "./infrastructure/hackhub/runtime.js";
