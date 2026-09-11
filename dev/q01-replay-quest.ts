@@ -6,8 +6,6 @@ import {
 
 import {
     Q01_OBJECTIVE_IDS,
-    Q01_SERVICE_CHECK_OPTION,
-    Q01_SERVICE_CHECK_TARGET,
     Q01_TARGET_IP,
 } from "../src/content/q01.js";
 
@@ -75,34 +73,29 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override Objectives = [
         {
             name: Q01_OBJECTIVE_IDS.reviewScope,
-            description: "Review the scope",
+            description: "Review audit scope",
         },
         {
             name: Q01_OBJECTIVE_IDS.scanNetwork,
-            description: "Scan the IP",
+            description: `Scan ${Q01_TARGET_IP}`,
             terminalCommand: `nmap ${Q01_TARGET_IP}`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.reviewScope],
         },
         {
             name: Q01_OBJECTIVE_IDS.identifyServices,
-            description: "Check the result",
-            hint: "Look for 22/ssh, 80/http, and 443/https.",
+            description: "Identify exposed services",
+            hint: "Check the scan for 22/ssh, 80/http, and 443/https.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.scanNetwork],
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-            description: "Run a basic security check",
-            terminalCommand:
-                `nmap ${Q01_SERVICE_CHECK_TARGET} ${Q01_SERVICE_CHECK_OPTION}`,
-            hint:
-                "This is a read-only service/version check. No exploitation is required.",
+            description: "Perform basic vulnerability checks",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
-            description: "Send the report",
-            hint:
-                "Send it to Adrian. Include the target, ports 22/80/443, and your finding.",
+            description: "Submit audit report",
+            hint: "Send your findings to Adrian.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
@@ -201,25 +194,6 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             return;
         }
 
-        const isServiceCheck = data.args.includes(Q01_SERVICE_CHECK_OPTION);
-
-        if (isServiceCheck) {
-            if (
-                this.Data.servicesIdentified &&
-                !this.Data.basicVulnerabilityChecksCompleted
-            ) {
-                this.SetData(
-                    "basicVulnerabilityChecksCompleted",
-                    true,
-                );
-                this.completeObjective(
-                    Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-                );
-            }
-
-            return;
-        }
-
         if (!this.Data.networkScanned) {
             this.SetData("networkScanned", true);
             this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
@@ -229,6 +203,13 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             this.SetData("servicesIdentified", true);
             this.completeObjective(
                 Q01_OBJECTIVE_IDS.identifyServices,
+            );
+        }
+
+        if (!this.Data.basicVulnerabilityChecksCompleted) {
+            this.SetData("basicVulnerabilityChecksCompleted", true);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             );
         }
     }
