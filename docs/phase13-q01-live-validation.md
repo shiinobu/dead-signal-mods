@@ -1,6 +1,6 @@
 # DEAD SIGNAL — Q01 Live Validation
 
-Status: **READY FOR LIVE TEST — CERTCHECK FLOW CORRECTION PENDING VALIDATION**
+Status: **READY FOR LIVE TEST — BASIC-ASSESSMENT FLOW CORRECTION PENDING VALIDATION**
 
 ## Preconditions
 
@@ -36,24 +36,15 @@ nmap 203.0.113.42
 ```
 
 8. Confirm the scan and exposed-service objectives advance.
-9. Run the same Nmap command again. **The certificate/basic-assessment objective must not complete.**
-10. After identifying HTTPS on port 443, run the mod-provided read-only certificate inspection command:
+9. Run the same plain Nmap command again. **The basic-assessment objective must not complete.**
+10. Run the supported service/version check:
 
 ```bash
-certcheck 203.0.113.42:443
+nmap 203.0.113.42 -sV
 ```
 
-11. Confirm the terminal prints certificate inspection details, including:
-
-```text
-Target: 203.0.113.42
-Port: 443/tcp
-Service: HTTPS
-Issuer: ARKA Secure Infrastructure
-```
-
-12. Confirm the certificate/basic-assessment objective completes and the report objective becomes the next actionable step.
-13. Submit the audit report using the source-defined report facts, including:
+11. Confirm the basic-assessment objective completes and the report objective becomes the next actionable step.
+12. Submit the audit report using the source-defined report facts, including:
 
 ```text
 Target: Meridian Logistics
@@ -63,9 +54,9 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-14. Confirm the audit-report objective completes and the development quest finishes.
-15. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
-16. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
+13. Confirm the audit-report objective completes and the development quest finishes.
+14. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
+15. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
 
 ## Objective UX Contract
 
@@ -73,11 +64,11 @@ Further internal assessment is recommended.
 01  Review audit scope
 02  Run nmap against 203.0.113.42
 03  Confirm exposed services: 22 / 80 / 443
-04  Inspect the HTTPS certificate on 443
+04  Run nmap 203.0.113.42 -sV for the basic security/service check
 05  Send the completed audit report to Adrian
 ```
 
-Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective and the source technical interaction's certificate inspection. HackHub's built-in `openssl` command is not used because it is an encryption/decryption utility, not a TLS certificate inspection tool. `certcheck` is a DEAD SIGNAL development/production content command whose sole purpose is to expose the source-backed read-only certificate inspection through the terminal.
+Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective. The recovered story/technical source includes certificate inspection, but HackHub's built-in `openssl` command does not provide TLS inspection and custom terminal command registration has not been validated in the live runtime. The current Q01 implementation therefore uses the supported `nmap -sV` service/version scan as the concrete, read-only assessment action. No exploitation is required.
 
 ## Expected Canonical State (production only)
 
