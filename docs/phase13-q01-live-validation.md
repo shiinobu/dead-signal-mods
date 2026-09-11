@@ -46,10 +46,10 @@ nmap 203.0.113.42
 
 8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. Use the temporary audit account from Adrian's brief and connect with the current HackHub syntax:
+10. Connect using the current HackHub SSH syntax and the authorized audit user:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
 
 11. Confirm the SSH connection succeeds against the virtual target and Objective 04 completes only after the `Terminal.SSH.Connected` event for `203.0.113.42`.
@@ -80,6 +80,22 @@ Submit audit report      [?]
 ```
 
 Hints provide short contextual help and must never expose internal mod paths.
+
+## Network Validation Detail
+
+The replay target uses the same public-router/private-child SSH topology as production:
+
+```text
+203.0.113.42
+  ├── 22 / ssh
+  ├── 80 / http
+  └── 443 / https
+        ↓
+      10.0.0.2
+        └── 22 / ssh
+```
+
+The SSH user is attached to the SSH-enabled child device. Port 22 is explicitly opened on both the public router and child before the player connects.
 
 ## Expected Canonical State (production only)
 
