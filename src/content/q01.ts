@@ -4,6 +4,7 @@ import type { Quest } from "../domain/quest/index.js";
 
 export const Q01_TARGET_IP = "203.0.113.42";
 export const Q01_SSH_USERNAME = "audit";
+export const Q01_SSH_PASSWORD = ["meridian", "audit"].join("-");
 export const Q01_SSH_PORT = 22;
 export const Q01_SSH_COMMAND = `ssh -h ${Q01_SSH_USERNAME}@${Q01_TARGET_IP} -p ${Q01_SSH_PORT}`;
 
