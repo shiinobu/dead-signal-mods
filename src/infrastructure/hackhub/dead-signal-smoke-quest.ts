@@ -12,17 +12,17 @@ const SMOKE_TARGET_IP = "10.42.0.81";
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTestV14";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test V14";
-    override Description = "Control test: isolate the HackHub quest lifecycle without the Events API.";
+    override Name = "DeadSignalRuntimeSmokeTestV15";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test V15";
+    override Description = "Control test: programmatic Quest.claim() followed by direct objective completion.";
     override Group = "storyline" as const;
-    override AutoStart = true;
+    override AutoStart = false;
     override AutoComplete = false;
 
     override Objectives = [
         {
             name: "direct-complete",
-            description: "This objective should complete after the quest lifecycle reaches OnObjectivesStart.",
+            description: "This objective should complete after the quest is explicitly claimed and reaches OnObjectivesStart.",
         },
     ];
 
@@ -33,17 +33,17 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     }
 
     override OnStart() {
-        console.log("[DEAD SIGNAL] V14 OnStart EXECUTED");
-        UI.notify("DEAD SIGNAL V14: OnStart executed");
+        console.log("[DEAD SIGNAL] V15 OnStart EXECUTED");
+        UI.notify("DEAD SIGNAL V15: OnStart executed");
     }
 
     override OnObjectivesStart() {
-        console.log("[DEAD SIGNAL] V14 OnObjectivesStart EXECUTED");
-        UI.notify("DEAD SIGNAL V14: OnObjectivesStart executed");
+        console.log("[DEAD SIGNAL] V15 OnObjectivesStart EXECUTED");
+        UI.notify("DEAD SIGNAL V15: OnObjectivesStart executed");
 
         setTimeout(() => {
-            console.log("[DEAD SIGNAL] V14 DIRECT COMPLETE");
-            UI.notify("DEAD SIGNAL V14: completing objective...");
+            console.log("[DEAD SIGNAL] V15 DIRECT COMPLETE");
+            UI.notify("DEAD SIGNAL V15: completing objective...");
             this.completeObjective("direct-complete");
         }, 1000);
     }
