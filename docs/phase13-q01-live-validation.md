@@ -49,10 +49,10 @@ nmap 203.0.113.42
 10. Run the authorized SSH audit check using the current HackHub syntax:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
 
-11. Confirm the terminal displays the Q01-scoped SSH response without a real connection failure and Objective 04 completes.
+11. Confirm the terminal uses the Q01-scoped shell response without a real connection failure and Objective 04 completes.
 12. If HackHub emits `Terminal.SSH.Connected`, confirm that event also completes Objective 04 for the same target.
 13. Submit the audit report using the source-defined facts, including:
 
@@ -84,7 +84,7 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Runtime Interaction Detail
 
-Q01 does not create a HackHub `Network` target. Nmap and SSH both use quest-scoped `Shell.addCommandData()` responses so the player-facing terminal remains deterministic and does not surface the previously observed native SSH transport failure.
+Q01 uses quest-scoped `Shell.addCommandData()` responses for Nmap and SSH so the player-facing terminal remains deterministic and does not depend on native modded-network SSH transport.
 
 The SSH command data is scoped to:
 
