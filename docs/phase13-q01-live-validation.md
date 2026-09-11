@@ -49,10 +49,10 @@ nmap 203.0.113.42
 10. Connect using the current HackHub SSH syntax and the authorized audit user:
 
 ```bash
-ssh -h audit@203.0.113.42
+ssh -h audit@203.0.113.42 -p 22
 ```
 
-11. Confirm the SSH connection succeeds against the virtual target and Objective 04 completes only after the `Terminal.SSH.Connected` event for `203.0.113.42`.
+11. Confirm the SSH connection succeeds against the direct virtual target and Objective 04 completes only after the `Terminal.SSH.Connected` event for `203.0.113.42`.
 12. Submit the audit report using the source-defined facts, including:
 
 ```text
@@ -83,19 +83,15 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Network Validation Detail
 
-The replay target uses the same public-router/private-child SSH topology as production:
+The target is intentionally implemented as a direct `Network.Type.Device`, matching the simple public target shape used for the audit. There is no router/child-device hop in Q01.
 
 ```text
 203.0.113.42
-  ├── 22 / ssh
-  ├── 80 / http
-  └── 443 / https
-        ↓
-      10.0.0.2
-        └── 22 / ssh
+├── 22 / ssh
+│   └── audit
+├── 80 / http
+└── 443 / https
 ```
-
-The SSH user is attached to the SSH-enabled child device. Port 22 is explicitly opened on both the public router and child before the player connects.
 
 ## Expected Canonical State (production only)
 
