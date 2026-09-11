@@ -33,9 +33,7 @@ Run nmap 203.0.113.42
         ↓
 Confirm 22 / 80 / 443
         ↓
-Run certcheck 203.0.113.42:443
-        ↓
-Review certificate inspection output
+Run nmap 203.0.113.42 -sV
         ↓
 Submit the audit report
         ↓
@@ -72,35 +70,19 @@ Q01 registers deterministic command data through `Shell.addCommandData("nmap", .
 443/tcp OPEN  https
 ```
 
-No direct `Terminal.NmapScan` dependency is introduced.
+The first plain `nmap` invocation completes the scan and exposed-service objectives. Repeating plain `nmap` does not complete the basic-assessment objective.
 
-### Certificate / Basic Assessment
+### Basic Assessment
 
-The recovered Q01 technical interaction explicitly includes certificate inspection, while the locked Phase 8 objective remains `Perform basic vulnerability checks`.
+The recovered technical specification requires `Perform basic vulnerability checks` and includes certificate inspection, but HackHub's in-game `openssl` command is an encryption/decryption utility rather than a TLS inspection tool. The previously attempted `openssl s_client` path is therefore invalid in HackHub.
 
-The in-game `openssl` command is not a TLS certificate inspection utility. HackHub documents it for encryption/decryption, so `openssl s_client` is not a valid Q01 player action.
-
-Q01 therefore provides a small mod-owned read-only terminal command:
+The live-tested terminal capability is `nmap -sV`, which HackHub accepts as an Nmap service/version scan. Q01 maps the basic-assessment objective to this explicit second-stage command:
 
 ```bash
-certcheck 203.0.113.42:443
+nmap 203.0.113.42 -sV
 ```
 
-The command output represents the source-defined HTTPS certificate inspection:
-
-```text
-MERIDIAN LOGISTICS — HTTPS CERTIFICATE INSPECTION
-
-Target: 203.0.113.42
-Port: 443/tcp
-Service: HTTPS
-
-Issuer: ARKA Secure Infrastructure
-```
-
-The command response is injected through the supported custom-command path `Shell.addCommandData()`. The basic-assessment objective is completed only when the player explicitly runs the expected `certcheck` command after identifying the HTTPS service. Re-running Nmap cannot complete Objective 04.
-
-This is an implementation-level representation of the source-defined certificate inspection. The custom command name is not new story canon.
+This is a read-only reconnaissance/service check. No exploitation is required. The command is an implementation mapping for the locked basic-assessment objective; it does not add new story canon.
 
 ### Canonical State
 
@@ -133,29 +115,29 @@ All reward IDs are deterministic and idempotent through the existing reward/econ
 
 The recovered source says Q01 uses Relay for the short post-report Adrian response, but the currently available HackHub SDK reference exposes Email as the supported communication API and no native Relay API. The implementation therefore preserves the dialogue/content beat through a second quest email. This is an infrastructure adapter choice only; it does not introduce a new story system or change the canonical story event.
 
-Q01 does not require vulnerability exploitation. The concrete basic-assessment action is the source-defined HTTPS certificate inspection, expressed through the supported custom terminal command path rather than unsupported `openssl s_client` syntax or an invented exploit mechanic.
+Q01 does not require vulnerability exploitation. The concrete basic-assessment action is the supported `nmap -sV` service/version check. No custom terminal command, filesystem interaction, or unsupported `openssl` syntax is introduced.
 
-## UX Corrections — 2026-09-11
+## UX Correction — 2026-09-11
 
 Initial implementation completed the basic-assessment objective from any valid Nmap event. During live testing, running Nmap a second time therefore advanced the quest unexpectedly and left the player unsure what action was required.
 
-A second correction followed after validating the HackHub Handbook: `openssl` in the game supports encryption/decryption, not `s_client` TLS certificate inspection. A third attempt using a terminal `Open` command was also invalid because `Open` is not a HackHub terminal command.
+A second correction was required after validating the HackHub Handbook: `openssl` in the game supports encryption/decryption, not `s_client` TLS certificate inspection. That path has been removed completely.
 
 The final objective boundaries are now:
 
 ```text
-Nmap
+Plain Nmap
   ├─ completes Scan Network
   └─ completes Identify Exposed Services
 
-certcheck 203.0.113.42:443
+Nmap with -sV
   └─ completes Basic Vulnerability Checks
 
 Audit email/report
   └─ completes Submit Audit
 ```
 
-This preserves the five locked Phase 8 objectives while giving each stage a concrete player action that is actually executable through HackHub's terminal/custom-command model.
+This preserves the five locked Phase 8 objectives while giving each stage a concrete player action that is actually supported by HackHub.
 
 ## Validation Gate
 
