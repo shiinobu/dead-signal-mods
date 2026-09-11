@@ -37,6 +37,11 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
+interface TerminalCommandData {
+    readonly command: string;
+    readonly args: string[];
+}
+
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
     {
         port: 22,
@@ -208,35 +213,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
 
         this.Events.on("Terminal.Command", (data) => {
-            if (
-                data.command !== "nmap" ||
-                data.args[0] !== this.Data.targetIp
-            ) {
-                return;
-            }
-
-            const result = Shell.getCommandData(
-                "nmap",
-                this.Data.targetIp,
-            );
-
-            if (!this.isExpectedNmapResult(result)) {
-                return;
-            }
-
-            if (!this.Data.networkScanned) {
-                this.SetData("networkScanned", true);
-                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-            }
-
-            if (!this.Data.servicesIdentified) {
-                this.SetData("servicesIdentified", true);
-                this.completeObjective(
-                    Q01_OBJECTIVE_IDS.identifyServices,
-                );
-            }
-
-            void this.ensureCertificateRecord();
+            void this.handleTerminalCommand(data);
         });
 
         this.Events.on("Files.Open", (data) => {
@@ -328,6 +305,39 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         gameRuntime.persistence.save();
     }
 
+    private async handleTerminalCommand(
+        data: TerminalCommandData,
+    ): Promise<void> {
+        if (
+            data.command !== "nmap" ||
+            data.args[0] !== this.Data.targetIp
+        ) {
+            return;
+        }
+
+        const result = Shell.getCommandData(
+            "nmap",
+            this.Data.targetIp,
+        );
+
+        if (!this.isExpectedNmapResult(result)) {
+            return;
+        }
+
+        if (!this.Data.networkScanned) {
+            this.SetData("networkScanned", true);
+            this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
+        }
+
+        if (!this.Data.servicesIdentified) {
+            this.SetData("servicesIdentified", true);
+            await this.ensureCertificateRecord();
+            this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
+        } else {
+            await this.ensureCertificateRecord();
+        }
+    }
+
     private async ensureCertificateRecord(): Promise<void> {
         try {
             if (await Files.exists(Q01_CERTIFICATE_FILE_PATH)) {
@@ -350,15 +360,17 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
     private isCertificateOpenEvent(data: unknown): boolean {
         const payload = data as {
-            fileId?: unknown;
-            id?: unknown;
             name?: unknown;
             path?: unknown;
+            fileName?: unknown;
+            filePath?: unknown;
         };
 
         return (
             payload.name === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
-            payload.path === Q01_CERTIFICATE_FILE_PATH
+            payload.path === Q01_CERTIFICATE_FILE_PATH ||
+            payload.fileName === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
+            payload.filePath === Q01_CERTIFICATE_FILE_PATH
         );
     }
 
