@@ -1,7 +1,6 @@
 import {
     Quest as HackHubQuest,
     RegisterQuest,
-    UI,
 } from "@hotbunny/hackhub-content-sdk";
 
 interface SmokeQuestData {
@@ -12,17 +11,21 @@ const SMOKE_TARGET_IP = "10.42.0.81";
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTestV17";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test V17";
-    override Description = "Control test: programmatic Quest.claim() followed by direct objective completion.";
+    override Name = "DeadSignalRuntimeSmokeTest";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test";
+    override Description = "In-game smoke test for the HackHub quest and Terminal event integration.";
     override Group = "storyline" as const;
-    override AutoStart = false;
+    override AutoStart = true;
     override AutoComplete = false;
 
     override Objectives = [
         {
-            name: "direct-complete",
-            description: "This objective should complete after the quest is explicitly claimed and reaches OnObjectivesStart.",
+            name: "ping-event",
+            description: `Run ping against ${SMOKE_TARGET_IP}. The objective should complete from Terminal.Ping.`,
+            trigger: {
+                event: "Terminal.Ping",
+                condition: (data: { ip: string }) => data.ip === SMOKE_TARGET_IP,
+            },
         },
     ];
 
@@ -30,21 +33,5 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
         return {
             targetIp: SMOKE_TARGET_IP,
         };
-    }
-
-    override OnStart() {
-        console.log("[DEAD SIGNAL] V17 OnStart EXECUTED");
-        UI.notify("DEAD SIGNAL V17: OnStart executed");
-    }
-
-    override OnObjectivesStart() {
-        console.log("[DEAD SIGNAL] V17 OnObjectivesStart EXECUTED");
-        UI.notify("DEAD SIGNAL V17: OnObjectivesStart executed");
-
-        setTimeout(() => {
-            console.log("[DEAD SIGNAL] V17 DIRECT COMPLETE");
-            UI.notify("DEAD SIGNAL V17: completing objective...");
-            this.completeObjective("direct-complete");
-        }, 1000);
     }
 }
