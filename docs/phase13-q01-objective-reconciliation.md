@@ -24,7 +24,7 @@ Phase 8 remains the immutable technical quest source of truth for Q01–Q16, so 
 
 ## Technical Mapping
 
-The executable Q01 interaction is now mapped as:
+The executable Q01 interaction is mapped as:
 
 ```text
 203.0.113.42
@@ -35,22 +35,42 @@ Nmap
   ↓
 Service identification
   ↓
-Authorized SSH service verification
+Authorized SSH audit check
 ```
 
-Objective 04 remains the locked player-facing objective `Perform basic vulnerability checks`. Its runtime completion boundary is the actual SSH connection event to `203.0.113.42` using the authorized `audit` account supplied by Adrian.
+Objective 04 remains the locked player-facing objective `Perform basic vulnerability checks`.
 
-The current HackHub Handbook syntax is:
+## Player-facing SSH Interaction
+
+The current HackHub Handbook syntax used by the quest is:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
 
-The `-h` argument contains `username@ip` without the port; the port is supplied separately with `-p`.
+The `-h` argument contains `username@ip`; no password is passed as a command argument.
+
+## Hybrid Runtime Mapping
+
+The modded network did not establish the SSH session reliably during live validation. Q01 therefore keeps the native `ssh` command as the player action and supplies a scoped successful response through `Shell.addCommandData()`.
+
+```text
+Player command
+    ↓
+ssh -h audit@203.0.113.42
+    ↓
+Q01 scoped SSH response
+    ↓
+203.0.113.42 / OPEN
+    ↓
+Perform basic vulnerability checks = complete
+```
+
+A real `Terminal.SSH.Connected` event is also accepted when the game runtime emits it. The command path is limited to the exact Q01 target and authorized account.
 
 ## Target Topology
 
-The target is implemented directly as a `Network.Type.Device` with the public IP and the audit user attached to that device. No Router, child device, router model, recovery mechanic, or internal hop is required for Q01.
+The target remains a direct `Network.Type.Device` with the contracted services and audit user:
 
 ```text
 203.0.113.42
@@ -60,28 +80,24 @@ The target is implemented directly as a `Network.Type.Device` with the public IP
 └── 443 / https
 ```
 
+No router-hacking, child-device hop, exploit, or credential-attack mechanic is required for Q01.
+
 ## Resulting Player Flow
 
 ```text
 01  Review audit scope
 02  Run nmap 203.0.113.42
 03  Confirm 22 / 80 / 443
-04  Connect to the authorized SSH audit account
+04  Run the authorized SSH audit check
 05  Submit audit report
 ```
-
-## Runtime Constraint
-
-The previous Router + child-device experiment did not establish SSH connectivity in the live game. The implementation is therefore aligned with the simpler direct-device network shape described by the Handbook's `Network.Type.Device` example.
-
-This is an implementation correction, not a change to Q01 story canon.
 
 ## Regression Rules
 
 The implementation must never complete Objective 04 from a repeated Nmap action.
 
-An Nmap result may only satisfy the scan/service objectives. Objective 04 requires the target SSH connection event.
+An Nmap result may only satisfy the scan/service objectives. Objective 04 requires the expected SSH player interaction and a scoped `OPEN` response.
 
 ## Canon Boundary
 
-This document does not modify Phase 8 canon. It records the executable runtime mapping used to reconcile the locked five-objective structure with the Q01 security-assessment gameplay.
+This document does not modify Phase 8 canon. It records the executable runtime mapping used to reconcile the locked five-objective structure with Q01 security-assessment gameplay.
