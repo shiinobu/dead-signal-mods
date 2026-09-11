@@ -1,106 +1,56 @@
-# DEAD SIGNAL — Q01 Source-Backed Implementation Gate
+# DEAD SIGNAL — Phase 13 Q01 Source Gate
 
 Date: 2026-09-11
-Status: **OPEN — Q01 IS CURRENT TARGET**
+Status: **SOURCE RECOVERED — IMPLEMENTATION IN PROGRESS**
 
-## Quest
+## Source Authority
 
-`dead_signal.q01`
+Q01 is fully specified in the recovered Chapter 1 / Phase 8 source history. The source defines `dead_signal.q01`, THE CONTRACT, Jakarta, Adrian Cole, no prerequisite, and the Q01 technical flow.
 
-Title: **Q01 — THE CONTRACT**
+## Canonical Story Contract
 
-High-level story position:
+- Trigger: player receives/accepts the contract from Adrian.
+- Target: `203.0.113.42`.
+- Required player objectives:
+  1. Review audit scope.
+  2. Scan `203.0.113.42`.
+  3. Identify exposed services.
+  4. Perform basic vulnerability checks.
+  5. Submit audit report.
+- Expected exposed services: TCP 22/SSH, 80/HTTP, 443/HTTPS.
+- ARKA certificate issuer is a non-required breadcrumb.
+- Completion: audit report submitted.
+- Persistent story state: `dead_signal.q01.completed = true`.
+- Reward: `$200`, up to `80 XP`.
 
-```text
-Chapter 1 — DEAD SIGNAL
-Q01 → Q02 → Q03 → Q04
-```
+## Phase 8 XP Authority
 
-Q01 is the campaign entry point and starts the audit around ARKA.
+The locked Phase 8 allocation is authoritative:
 
-## Verified Source Facts
+| XP component | XP |
+|---|---:|
+| Complete external audit | 35 |
+| Network/service enumeration | 20 |
+| Basic vulnerability assessment | 10 |
+| Submit correct report | 15 |
+| **Total** | **80** |
 
-The readable Phase 8 history establishes the Q01 XP contract:
+## Implementation Boundary
 
-```text
-Complete external audit         35 XP
-Network/service enumeration     20 XP
-Basic vulnerability assessment  10 XP
-Submit correct report           15 XP
-Maximum                         80 XP
-Optional XP                      0 XP
-```
+The player-facing objective state remains in HackHub's quest/objective lifecycle. The canonical DEAD SIGNAL state receives only the source-defined completion flag; no new persistent Q01 story flags are invented.
 
-These values are locked and must not be rebalanced during implementation.
+The source does not define a dedicated vulnerability-exploitation command for Q01. The gameplay audit explicitly says Q01 does not require vulnerability exploitation. Therefore the implementation uses the submitted audit result as the completion boundary for the basic-assessment objective rather than inventing a new tool or command.
 
-## Architecture Constraints
+HackHub's current native communication surface provides Email but no native `Relay` API in the available SDK reference. The source's short post-report Adrian response is therefore represented through the existing in-game mail channel as an implementation adapter detail; the narrative content itself is unchanged.
 
-Q01 must use the shared DEAD SIGNAL runtime/SDK architecture.
+## Production Files
 
-It must not introduce:
+- `src/content/q01.ts`
+- `src/content/index.ts`
+- `src/infrastructure/hackhub/q01-quest.ts`
+- `src/index.ts`
+- `manifest.json`
 
-- a Q01-specific engine;
-- a second state/flag owner;
-- a second condition model;
-- direct canonical state mutation outside the approved service/application boundary;
-- diagnostic-only bootstrap behavior;
-- invented prerequisites or downstream dependency shortcuts.
+## Validation Status
 
-## Source Gate
-
-The current readable source set does **not** expose the complete Q01 technical quest definition required to safely implement production behavior.
-
-Not yet source-backed at the required granularity:
-
-```text
-Exact objective definitions
-Exact objective completion triggers/events
-Exact evidence/files/data to create or expose
-Exact persistent Q01 state/flag keys
-Exact dialogue/event sequence
-Exact technical interaction details
-Exact reward dispatch behavior beyond the locked XP allocation
-Exact Q01 → Q02 completion transition state
-```
-
-The high-level flow and XP matrix are not sufficient evidence to invent these semantics.
-
-## Gate Decision
-
-```text
-Q01 is the active implementation target        ✅
-Q01 production implementation may be invented  ❌
-Q01 source recovery is required                ✅
-Q02 production implementation                  ❌ BLOCKED BY SEQUENCE
-Q14 production implementation                  ❌ DEFERRED
-```
-
-## Required Next Input
-
-Recover the locked Phase 1–8 Q01 detail from the original story/design source before creating production Q01 objectives or event handlers.
-
-Once the missing Q01 detail is available, implementation must follow:
-
-```text
-Q01 source recovery
-      ↓
-Q01 implementation mapping
-      ↓
-Q01 domain/content implementation
-      ↓
-automated tests
-      ↓
-typecheck + build
-      ↓
-HackHub installation
-      ↓
-focused live Q01 test
-      ↓
-PASS
-      ↓
-LOCK Q01
-      ↓
-start Q02
-```
-
-No downstream quest is permitted to bypass this gate.
+Automated verification must pass before the live in-game gate. Q01 is not marked production-locked until the real HackHub campaign path has been played successfully and the result is recorded under the Phase 13 sequential campaign lock.
