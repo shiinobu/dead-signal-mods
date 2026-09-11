@@ -16,7 +16,7 @@ export default class DeadSignalMod extends Bootstrap {
             UI.notify("DEAD SIGNAL V17: attempting Quest.claim()...");
 
             try {
-                DeadSignalSmokeQuest.claim(DeadSignalSmokeQuest);
+                DeadSignalSmokeQuest.claim("DeadSignalRuntimeSmokeTestV17");
                 console.log("[DEAD SIGNAL] V17 Quest.claim() EXECUTED");
                 UI.notify("DEAD SIGNAL V17: Quest.claim() executed");
             } catch (error) {
