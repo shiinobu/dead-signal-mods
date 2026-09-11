@@ -46,14 +46,14 @@ nmap 203.0.113.42
 
 8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. For the development replay, run the Q01-scoped SSH audit command:
+10. Run the authorized SSH audit check using the locked Q01 command:
 
 ```bash
-ssh-audit -h audit@203.0.113.42
+ssh -h audit@203.0.113.42
 ```
 
-11. Confirm the terminal returns the Q01 deterministic audit result without invoking HackHub's engine-owned native `ssh` transport.
-12. Confirm Objective 04 completes only after the Q01 SSH-audit command returns the expected `203.0.113.42 / OPEN` result.
+11. Confirm the `ssh` command is recognized by the Q01 replay and the scoped SSH response is returned as `203.0.113.42 / OPEN`.
+12. Confirm Objective 04 completes from the valid SSH interaction. Native `Terminal.SSH.Connected` remains supported as a secondary success path when the HackHub runtime emits it.
 13. Submit the audit report using the source-defined facts, including:
 
 ```text
@@ -84,17 +84,15 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Runtime Interaction Detail
 
-Q01 Nmap and SSH-audit interactions use quest-scoped `Shell.addCommandData()` responses. The built-in `ssh` command is engine-owned and, in the current live HackHub runtime, can report `Connection could not be established` even when a modded target advertises port 22 as OPEN. The replay therefore uses the distinct `ssh-audit` command so the Q01 validation path is deterministic and does not rely on native SSH transport.
-
-The SSH-audit command data is scoped to:
+Q01 uses quest-scoped `Shell.addCommandData()` for both deterministic Nmap and the authorized SSH command contract. The SSH registration uses the built-in command name `ssh`, with input:
 
 ```text
-command: ssh-audit
 host: audit@203.0.113.42
+key: empty
 response: 203.0.113.42 / OPEN
 ```
 
-The production adapter uses the same deterministic command-data contract until native modded SSH transport is proven functional in the target HackHub runtime.
+The replay also listens for `Terminal.SSH.Connected` as a secondary native success event. The quest does not require a separate `ssh-audit` command.
 
 ## Expected Canonical State (production only)
 
