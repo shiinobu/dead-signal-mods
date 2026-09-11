@@ -15,6 +15,8 @@ The player-facing result was ambiguous because:
 
 A subsequent attempt used `openssl s_client`, but HackHub's built-in `openssl` command is an encryption/decryption utility and rejected the TLS inspection syntax. A follow-up attempt using `Open <file>` was also invalid because `Open` is not a HackHub terminal command; `Files.Open` is an SDK event, not a shell command.
 
+A third attempt used a mod-defined `certcheck` command through `Shell.addCommandData()`. The live HackHub runtime rejected `certcheck` as `Command not found`. Although the current SDK documentation describes arbitrary command names as accepted by `addCommandData`, the live runtime behavior available to this project does not expose such a command as an executable terminal command. The project therefore treats live runtime behavior as authoritative for this implementation.
+
 ## Source Reconciliation
 
 The recovered Q01 source defines five required objectives in Phase 8:
@@ -27,7 +29,7 @@ The recovered Q01 source defines five required objectives in Phase 8:
 
 The same locked technical interaction includes certificate inspection, and the Q01 gameplay source explicitly states that the mission does not require exploitation.
 
-Therefore the ambiguity is resolved by mapping the basic-assessment objective to the source-defined HTTPS certificate inspection through a mod-provided read-only terminal command.
+Therefore the implementation needs a concrete, supported read-only action for the basic-assessment objective without inventing an unsupported command.
 
 ## Corrected Player Flow
 
@@ -38,36 +40,28 @@ Run nmap 203.0.113.42
         ↓
 Confirm 22 / 80 / 443
         ↓
-Run certcheck 203.0.113.42:443
-        ↓
-Review certificate output
+Run nmap 203.0.113.42 -sV
         ↓
 Submit audit report
 ```
 
-Concrete certificate-inspection action:
-
-```bash
-certcheck 203.0.113.42:443
-```
-
-`certcheck` is a DEAD SIGNAL command implemented through HackHub's supported custom-command response-data path. The command name and syntax are implementation details; the story canon remains the HTTPS certificate inspection and the evidence it reveals.
+The current implementation uses the built-in Nmap service/version scan as the basic-assessment action because that command variant has been validated in the real HackHub terminal. The command syntax is implementation detail; the source canon remains the basic security assessment/certificate-inspection beat and the ARKA certificate breadcrumb.
 
 ## Completion Trigger Contract
 
 ```text
-nmap target
+plain nmap target
   → Scan Network
   → Identify Exposed Services
 
-certcheck target:443
+nmap target -sV
   → Basic Vulnerability Checks
 
 valid audit report
   → Submit Audit
 ```
 
-A repeated Nmap command must not complete the basic-assessment objective.
+A repeated plain Nmap command must not complete the basic-assessment objective.
 
 ## Regression Rule
 
@@ -78,6 +72,10 @@ For all future DEAD SIGNAL quests:
 Also:
 
 > Do not use a general-purpose OS command or syntax merely because the command exists outside HackHub; validate the exact in-game command contract first.
+
+And:
+
+> A documented SDK capability is not considered production-usable until the exact behavior is validated in the live game runtime used by the project.
 
 ## Scope
 
