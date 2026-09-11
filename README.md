@@ -47,6 +47,12 @@ Type-check the mod:
 npm run typecheck
 ```
 
+Run the automated test suite:
+
+```bash
+npm test
+```
+
 Build the distributable HackHub package:
 
 ```bash
@@ -57,7 +63,13 @@ The HackHub SDK build produces `dist/mod.js` and copies the manifest and support
 
 ## Permissions
 
-The manifest currently declares no gated SDK permissions. Permissions will be added only when DEAD SIGNAL actually uses a gated API, following HackHub's least-privilege guidance.
+The production manifest currently requests only the SDK permissions exercised by the production-facing integration: `events` and `shell`. Diagnostic Phase 12 harnesses may use additional SDK APIs such as `ui`, but those harnesses are not imported by the production bootstrap.
+
+## Phase 12 integration audit
+
+Phase 12 was validated in-game across quest/objective triggering, Terminal.Ping, Nmap command routing, SaveStorage, access grants, rewards, economy, ending resolution, and a full canonical-state regression. The diagnostic harnesses remain in `src/infrastructure/hackhub/` for repeatable testing but are intentionally excluded from the production bootstrap after Phase 12 lock.
+
+Nmap integration uses the SDK's `Terminal.Command` quest trigger together with typed `Shell.addCommandData("nmap", ...)` response data. The `Terminal.NmapScan` event path is not part of the production contract because its runtime/type behavior was not reliable during Phase 12 validation.
 
 ## Architecture contract
 
