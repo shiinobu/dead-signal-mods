@@ -1,10 +1,12 @@
 import {
+    Files,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
+    Q01_CERTIFICATE_FILE_PATH,
     Q01_OBJECTIVE_IDS,
     Q01_TARGET_IP,
 } from "../src/content/q01.js";
@@ -31,9 +33,18 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
     { port: 443, status: "OPEN", service: "https" },
 ];
 
+const Q01_CERTIFICATE_FILE_NAME = "meridian-443-certificate";
+const Q01_CERTIFICATE_RECORD = [
+    "MERIDIAN LOGISTICS — HTTPS CERTIFICATE INSPECTION",
+    "",
+    `Target: ${Q01_TARGET_IP}`,
+    "Port: 443/tcp",
+    "Service: HTTPS",
+    "",
+    "Issuer: ARKA Secure Infrastructure",
+].join("\n");
+
 const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
-const Q01_CERTIFICATE_COMMAND = "openssl";
-const Q01_CERTIFICATE_TARGET = `${Q01_TARGET_IP}:443`;
 
 const Q01_REPORT_REQUIRED_CONTENT = [
     "Meridian Logistics",
@@ -75,23 +86,28 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.scanNetwork,
             description: `Run nmap ${Q01_TARGET_IP} in Terminal.`,
+            terminalCommand: `nmap ${Q01_TARGET_IP}`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.reviewScope],
         },
         {
             name: Q01_OBJECTIVE_IDS.identifyServices,
             description:
                 "Confirm ports 22, 80, and 443 are exposed and identify their services.",
+            info: "Expected services: 22/ssh, 80/http, 443/https.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.scanNetwork],
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description:
-                `Inspect the HTTPS certificate on port 443. Use: ${Q01_CERTIFICATE_COMMAND} s_client -connect ${Q01_CERTIFICATE_TARGET}`,
+                `Inspect the HTTPS certificate record for port 443. Open ${Q01_CERTIFICATE_FILE_PATH}.`,
+            hint: `File: ${Q01_CERTIFICATE_FILE_PATH}`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Send the completed audit report to Adrian.",
+            info:
+                "Subject: Security Audit — Jakarta. Include the target, ports 22/80/443, and the finding that no critical vulnerabilities were identified.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
@@ -149,57 +165,53 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
 
+        if (this.Data.servicesIdentified) {
+            void this.ensureCertificateRecord();
+        }
+
         this.Events.on("Terminal.Command", (data) => {
             if (
-                data.command === "nmap" &&
-                data.args[0] === this.Data.targetIp
+                data.command !== "nmap" ||
+                data.args[0] !== this.Data.targetIp
             ) {
-                const result = Shell.getCommandData(
-                    "nmap",
-                    this.Data.targetIp,
-                );
-
-                if (!this.isExpectedNmapResult(result)) {
-                    return;
-                }
-
-                if (!this.Data.networkScanned) {
-                    this.SetData("networkScanned", true);
-                    this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-                }
-
-                if (!this.Data.servicesIdentified) {
-                    this.SetData("servicesIdentified", true);
-                    this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
-                }
-
                 return;
             }
 
+            const result = Shell.getCommandData(
+                "nmap",
+                this.Data.targetIp,
+            );
+
+            if (!this.isExpectedNmapResult(result)) {
+                return;
+            }
+
+            if (!this.Data.networkScanned) {
+                this.SetData("networkScanned", true);
+                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
+            }
+
+            if (!this.Data.servicesIdentified) {
+                this.SetData("servicesIdentified", true);
+                this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
+            }
+
+            void this.ensureCertificateRecord();
+        });
+
+        this.Events.on("Files.Open", (data) => {
             if (
-                data.command !== Q01_CERTIFICATE_COMMAND ||
-                !this.Data.servicesIdentified
+                this.Data.certificateInspected ||
+                !this.Data.servicesIdentified ||
+                !this.isCertificateOpenEvent(data)
             ) {
                 return;
             }
 
-            const connectIndex = data.args.indexOf("-connect");
-            const connectTarget =
-                connectIndex >= 0 ? data.args[connectIndex + 1] : undefined;
-
-            if (
-                !data.args.includes("s_client") ||
-                connectTarget !== Q01_CERTIFICATE_TARGET
-            ) {
-                return;
-            }
-
-            if (!this.Data.certificateInspected) {
-                this.SetData("certificateInspected", true);
-                this.completeObjective(
-                    Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-                );
-            }
+            this.SetData("certificateInspected", true);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
+            );
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -220,6 +232,38 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnComplete() {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
+    }
+
+    private async ensureCertificateRecord(): Promise<void> {
+        try {
+            if (await Files.exists(Q01_CERTIFICATE_FILE_PATH)) {
+                return;
+            }
+
+            await Files.create({
+                name: Q01_CERTIFICATE_FILE_NAME,
+                extension: "txt",
+                data: Q01_CERTIFICATE_RECORD,
+                parentPath: "~",
+            });
+        } catch (error) {
+            console.error(
+                "DEAD SIGNAL Q01 replay: failed to create certificate inspection record.",
+                error,
+            );
+        }
+    }
+
+    private isCertificateOpenEvent(data: unknown): boolean {
+        const payload = data as {
+            name?: unknown;
+            path?: unknown;
+        };
+
+        return (
+            payload.name === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
+            payload.path === Q01_CERTIFICATE_FILE_PATH
+        );
     }
 
     private isExpectedNmapResult(
