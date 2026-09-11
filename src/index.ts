@@ -1,3 +1,5 @@
+import "./infrastructure/hackhub/q01-quest.js";
+
 import {
     Bootstrap,
     RegisterModPackage,
