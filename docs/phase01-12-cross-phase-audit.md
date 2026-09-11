@@ -4,210 +4,228 @@ Date: 2026-09-11
 
 ## Status
 
-**COMPLETE WITH PROVENANCE LIMITS**
+**RECONCILED — EXPORTED SOURCE HISTORY VERIFIED**
 
-This document is a cross-phase audit performed before continuing Phase 13 story implementation. It compares the available source material, locked project decisions, repository history, current runtime architecture, and Phase 12 integration lock.
+This document is the authoritative cross-phase provenance audit used by Phase 13. It reconciles the four user-exported conversation histories with the existing repository implementation history and locked documents.
 
-The audit deliberately distinguishes:
+The four exported TXT conversations are now treated as the primary historical source chain supplied for this audit. Repository code, Git commits, Library artifacts, and phase lock documents are implementation/verification evidence.
 
-- source that is directly verifiable from the current repository or Library;
-- historical decisions carried forward from prior project sessions;
-- source that was supplied by the user but could not be independently fetched in the current environment.
+No missing story canon is reconstructed in this audit.
 
-No missing canon is reconstructed in this audit.
+## Exported source chain
 
-## Source set audited
+The supplied conversation exports are:
 
-### User-supplied original conversation sources
+1. `ChatGPT-6aa177f9-ba74-83ec-976a-1a554ed42342.txt` — Phase 8 source / transition into Phase 9.
+2. `ChatGPT-6aa2a3a5-2778-83ec-8f50-eb22e2b58242.txt` — Phase 9 source.
+3. `ChatGPT-6aa2b46c-fe14-83ec-95d3-17374d10f916.txt` — Phase 10 source.
+4. `ChatGPT-6aa2c517-f4dc-83ec-b26f-7c1ca135e38c.txt` — Phase 11–12 source and transition into Phase 13.
 
-The following four shared conversations were supplied as the original project source:
+The four original `chatgpt.com/share/...` URLs remain useful as historical references, but the exported TXT files are the directly readable evidence for this audit.
 
-1. https://chatgpt.com/share/6aa3bdca-006c-83ec-b293-fcddc59b2d48
-2. https://chatgpt.com/share/6aa3bc83-e5cc-83ec-9b73-bf21fe83408a
-3. https://chatgpt.com/share/6aa3bde0-4bc0-83ec-85b9-0d3ebb9de606
-4. https://chatgpt.com/share/6aa3bdf8-59a8-83ec-a01f-18a78cb1bea2
-
-The current web connector returned `cache miss` for all four share URLs, and web search produced no indexed result for the share IDs. Therefore these conversations are treated as **user-declared primary sources that are not independently retrievable in this environment**, not as directly verified evidence.
-
-### Repository source
-
-Repository: `shiinobu/dead-signal-mods`
-
-Current audited branch: `main`
-
-Current HEAD at audit creation: `fb3fd50eea16543cd6cefca3765f80fdf9de57a2`
-
-### Library source artifacts
-
-Directly recoverable DEAD SIGNAL artifacts include:
-
-- `Dead Signal Story Flowchart.png`
-- `DEAD_SIGNAL_Q14_THE_OWNER_LOCKED_v1.0.docx`
-- `DEAD_SIGNAL_Q15_THE_EVIDENCE_LOCKED_v1.0.docx`
-- multiple repository/runtime snapshots and validation logs from prior implementation work.
-
-## Audit rating model
+## Evidence classification
 
 | Rating | Meaning |
 |---|---|
-| VERIFIED | Direct evidence exists in repository, locked artifact, or auditable implementation history. |
-| PARTIAL | Some authoritative material is available, but the complete phase artifact is not currently recoverable. |
-| HISTORICAL | Project decision is known from prior session context but is not represented by a current phase-specific repository lock document. |
-| SOURCE-GAP | Required original source is not currently retrievable; no canon should be inferred. |
+| VERIFIED | Direct evidence is readable in an exported source file, repository, lock artifact, or auditable Git history. |
+| LOCK STATUS VERIFIED | The phase's locked status is explicitly stated in the exported project history, even if all underlying design detail is not reproduced in the export. |
+| PARTIAL | Some phase-specific material is directly available, but not the full artifact set. |
+| HISTORICAL | The phase is represented by project history but does not have a standalone repository lock artifact. |
+| SOURCE DETAIL GAP | Required detailed design material is not currently represented in the readable evidence set. |
 
 ## Phase-by-phase audit
 
 ### Phase 1 — Full Story Audit Q01–Q16
 
-**Status: PARTIAL / SOURCE-GAP**
+**Status: LOCK STATUS VERIFIED / SOURCE DETAIL GAP**
 
-The current Library contains the story flowchart covering the canonical high-level Q01–Q16 sequence and ending topology. The current Step 13.1 audit records the high-level quest inventory and progression.
+The exported Phase 8 history explicitly records Phase 1 — Full Story Audit as **LOCKED** alongside the other upstream design phases. The same source states that Phase 8 is based on those locked story/design outputs.
 
-However, the original Phase 1 conversation itself could not be independently fetched from the supplied share URL, and a dedicated Phase 1 lock artifact is not present in the repository.
-
-Conclusion:
-
-- Q01–Q16 high-level flow is recoverable.
-- Full original Phase 1 narrative audit is not currently independently verifiable.
-- No missing Q01–Q16 details should be invented.
-
-### Phase 2 — Quest Dependency / Character & Relationship Design
-
-**Status: SOURCE-GAP**
-
-The locked Phase 13 workflow identifies Quest Dependency Map and Character & Relationship Matrix as required upstream design outputs. Current accessible repository artifacts do not contain a complete Phase 2 lock document, and the supplied conversation share could not be fetched.
-
-Some character references are independently visible in Q14/Q15 and the recovered story flow, including Maya Hart, Daniel Ward, Adrian Cole, Marcus Reed, and Rizky Pratama. This is not sufficient to recreate the complete Phase 2 matrix.
+The current evidence therefore proves the lock status and its role as upstream canon, but the complete original Phase 1 audit content is not reproduced in the currently supplied readable export set.
 
 Conclusion:
 
-- Some Phase 2 facts are recoverable from later locked artifacts.
-- The complete Phase 2 dependency/relationship source remains unavailable.
-- Do not synthesize a full matrix from later-phase references.
+- Phase 1 lock status is verified.
+- Q01–Q16 are established as locked canon.
+- Full original Phase 1 narrative detail is not independently re-derived here.
 
-### Phase 3 — Global State / Flag System and Downstream Story Design
+### Phase 2 — Quest Dependency Map
 
-**Status: SOURCE-GAP**
+**Status: LOCK STATUS VERIFIED / SOURCE DETAIL GAP**
 
-The Phase 13 workflow explicitly requires the canonical Global State / Flag System, Dialogue Flow, Gameplay / Hack Interaction Design, Economy & Progression, and the complete implementation-design output from the earlier workflow.
-
-The current Library contains explicit Q14/Q15 state keys, while the repository provides the generic `FlagStore`, `ConditionNode`, and related runtime contracts. These later runtime constructs are implementation evidence, not proof of the original Phase 3 story-state specification.
+The exported Phase 8 history explicitly records Phase 2 — Quest Dependency Map as **LOCKED**. Phase 9 subsequently treats quest dependencies as part of the locked design baseline.
 
 Conclusion:
 
-- Q14/Q15 explicit state keys are verified.
-- The complete original Phase 3 story-state artifact is not independently retrievable.
-- Runtime capabilities must not be used to infer missing Phase 3 canon.
+- Phase 2 lock status is verified.
+- Dependency design remains immutable under the current project baseline.
+- Full original dependency matrix is not reproduced in the supplied readable export set.
 
-### Phase 4 — Dialogue / Gameplay / Hack Interaction Design
+### Phase 3 — Character & Relationship Matrix
 
-**Status: SOURCE-GAP / PARTIAL RECOVERY**
+**Status: LOCK STATUS VERIFIED / SOURCE DETAIL GAP**
 
-Later locked Q14/Q15 artifacts contain detailed dialogue and technical investigation interactions, so those specific interactions are source-backed. The complete Phase 4 artifact is not currently present as a dedicated repository lock and the original supplied conversation was not retrievable.
+The exported Phase 8 history explicitly records Phase 3 — Character & Relationship Matrix as **LOCKED**.
 
-Conclusion:
-
-- Q14/Q15 dialogue and technical interaction details are recoverable.
-- The complete Phase 4 design source remains unavailable.
-
-### Phase 5 — Economy & Progression Design
-
-**Status: SOURCE-GAP / PARTIAL RECOVERY**
-
-Q14/Q15 provide explicit reward information. Q15 defines `$700`, `+90 XP`, optional `+25 XP`, maximum `115 XP`; Q14 defines optional `+20 XP`.
-
-The repository runtime independently supports XP rewards through `RewardService` and monetary quest rewards through `EconomyService`, but these are implementation mechanisms rather than a reconstruction of the full Phase 5 economy matrix.
+Later locked material references Maya Hart, Daniel Ward, Adrian Cole, Marcus Reed, Rizky Pratama, and the OVERRIDE_OPERATOR identity. Those later references are consistent with the locked baseline but are not a replacement for the original Phase 3 matrix.
 
 Conclusion:
 
-- Recovered quest rewards are source-backed.
-- Complete story-wide economy/progression rules are not currently verifiable.
+- Phase 3 lock status is verified.
+- Later artifacts may confirm individual relationships but must not be used to recreate the entire matrix.
 
-### Phase 6 — Complete Implementation Design Output
+### Phase 4 — Global State / Flag System
 
-**Status: SOURCE-GAP**
+**Status: LOCK STATUS VERIFIED / SOURCE DETAIL GAP**
 
-No complete original Phase 6 implementation-design artifact is currently present in the repository, and the supplied source conversation cannot be independently fetched here.
+The exported Phase 8 history explicitly records Phase 4 — Global State / Flag System as **LOCKED**.
 
-The current Phase 13 implementation map is therefore intentionally limited to recovered content and does not claim to reproduce the missing design artifact.
-
-### Phase 7 — Pre-implementation Consolidation / Locked Design Continuity
-
-**Status: SOURCE-GAP / HISTORICAL**
-
-The project workflow requires earlier locked design decisions to remain the source of truth. Current repository documentation preserves the rule but does not contain a standalone Phase 7 lock artifact.
+Phase 9 later defines the SDK-level flag namespaces and Phase 10/11 define the canonical runtime state architecture, but those later technical models must not be treated as a reconstruction of the original story-state specification.
 
 Conclusion:
 
-- Continuity rule is preserved.
-- Original Phase 7 source is not independently retrievable.
+- Phase 4 lock status is verified.
+- Runtime `FlagStore`/`StateStore` behavior is technical implementation evidence, not a substitute for the original Phase 4 design artifact.
 
-### Phase 8 — Final Design Consolidation
+### Phase 5 — Dialogue Flow
 
-**Status: SOURCE-GAP / HISTORICAL**
+**Status: LOCK STATUS VERIFIED / SOURCE DETAIL GAP**
 
-Phase 13 explicitly consumes the complete Phase 1–8 implementation-design output in order. The current repository does not contain a standalone Phase 8 lock artifact.
+The exported Phase 8 history explicitly records Phase 5 — Dialogue Flow as **LOCKED**.
+
+Q14 and Q15 later provide detailed dialogue that is directly readable and can be used for implementation. The complete Q01–Q13/Q16 dialogue flow is not reproduced in the currently supplied readable export set.
 
 Conclusion:
 
-- The Phase 13 workflow correctly treats Phase 1–8 as upstream source-of-truth.
-- Full Phase 8 source remains unavailable for independent audit.
+- Phase 5 lock status is verified.
+- Q14/Q15 dialogue is source-backed.
+- Missing lower-coverage dialogue must not be invented.
 
-## Phase 9 — Runtime Architecture Correction / Integration Audit
+### Phase 6 — Gameplay / Hack Interaction
 
-**Status: VERIFIED BY CURRENT ARCHITECTURE + HISTORICAL PROJECT RECORD**
+**Status: LOCK STATUS VERIFIED / SOURCE DETAIL GAP**
 
-The current runtime and project history confirm the core architectural direction carried into later phases:
+The exported Phase 8 history explicitly records Phase 6 — Gameplay / Hack Interaction as **LOCKED**.
 
-- `StateStore` is the canonical runtime state owner.
-- `FlagStore` is a facade over canonical state flags.
-- `ConditionNode` is the canonical condition representation.
-- `AccessService` owns capability/access grants.
-- `EndingService` owns ending resolution through `EndingState`.
-- `GameRuntime` owns the canonical application services used by the runtime.
+Phase 9 defines SDK capabilities required to realize these interactions, and Phase 12 verifies a subset of the HackHub runtime integration. These technical layers are implementation evidence rather than a rewrite of the Phase 6 design.
 
-The repository contains the concrete implementations and test coverage for these boundaries. The original Phase 9 conversation source itself is not independently retrievable from the supplied share links, so the phase label is treated as historical context while the technical claims are verified from the repository.
+Conclusion:
 
-## Phase 10 — Repository Architecture Contract
+- Phase 6 lock status is verified.
+- Only directly evidenced gameplay interactions may be implemented without further source recovery.
 
-**Status: VERIFIED**
+### Phase 7 — Economy & Progression
 
-Commit `c8d0ecb99909fa0e88fa054b29416b3c8368ed96` added the repository architecture guide and explicitly records the locked Phase 10 implementation contract.
+**Status: LOCK STATUS VERIFIED / PARTIAL DETAIL VERIFIED**
 
-The contract defines:
+The exported Phase 8 history explicitly records Phase 7 — Economy & Progression as **LOCKED**.
 
-- `src/core` for framework-agnostic primitives;
-- `src/domain` for canonical domain model/rules;
-- `src/state` for canonical runtime state ownership;
-- `src/application` for use cases/orchestration;
-- `src/infrastructure` for persistence/external adapters;
-- `src/presentation` for UI/game-facing adapters;
-- `src/debug` for development diagnostics;
-- `tests` for automated tests.
+Phase 8 then records deterministic XP allocation for Q01–Q16 and the final campaign maximum of 1,905 XP. The same history states that XP measures investigation quality, is capped per mission at 150 XP, does not depend on moral choice, and does not alter story branching.
 
-It also establishes `src/index.ts` as the public SDK boundary and prohibits runtime-state ownership there.
+Examples directly verified from the export include Q14 max 140 XP, Q15 max 150 XP, Q16 max 150 XP, and the full Q01–Q16 matrix. The exact matrix is preserved in the Phase 8 source history and must remain immutable.
 
-This remains consistent with the current README and Phase 13 implementation rules.
+Conclusion:
 
-## Phase 11 — Runtime Domain/Application Implementation
+- Phase 7 lock status is verified.
+- The deterministic XP allocation is directly verified through Phase 8 revision/lock.
+- The complete original Phase 7 economy artifact is not separately reproduced.
 
-**Status: VERIFIED BY IMPLEMENTATION HISTORY**
+### Phase 8 — Complete Technical Quest Spec v1.1
 
-The repository history shows the runtime foundation being implemented incrementally across state, domain, application, and persistence boundaries.
+**Status: VERIFIED — LOCKED**
 
-Verified implementation milestones include:
+The exported Phase 8 history explicitly states:
 
-- canonical state store and domain-state access;
-- condition model and evaluator;
-- investigation and quest domain/state;
-- quest orchestration and progression tests;
-- narrative/dialogue runtime;
-- access/capability system;
-- reward/progression system;
-- economy system;
-- persistence contract, serializer, validation, and integration.
+- `PHASE 8 — COMPLETE TECHNICAL QUEST SPEC v1.1`
+- `STATUS: LOCKED`
+- Q01–Q16 Technical Quest Spec — LOCKED
+- Objectives & Player Actions — LOCKED
+- Technical Interaction — LOCKED
+- Evidence & Optional Investigation — LOCKED
+- Dialogue Events — LOCKED
+- State Changes — LOCKED
+- Rewards — LOCKED
+- Exact XP Allocation Q01–Q16 — LOCKED
+- Economy — LOCKED
+- Quest Dependencies — LOCKED
+- Character Knowledge — LOCKED
+- Ending Logic — LOCKED
+- Gameplay Authenticity — LOCKED
+- No unresolved audit findings
 
-Representative commits include:
+The source also explicitly states that Phase 8 becomes the source of truth for subsequent phases and that changes require an explicit revision.
+
+The exported source further verifies the exact Q01–Q16 XP matrix, including 1,905 XP total campaign maximum and equal Q16 XP for DESTROY / EXPOSE / OVERRIDE.
+
+### Phase 9 — SDK Implementation Plan
+
+**Status: VERIFIED — LOCKED**
+
+The exported Phase 9 history establishes that Phase 9 translates the Phase 8 Technical Quest Spec into an SDK implementation plan without changing canon.
+
+The source verifies the required SDK domains, including Core, Event, Quest, State/Flag, Investigation, Evidence, Dialogue, Character, Terminal, Hacking, Entity Resolution, Database, Economy, Progression, Save/Load, Debug, and Test.
+
+The Phase 9 integration audit identified contract/ownership gaps and produced locked fixes, including:
+
+- `StateStore` as canonical root state owner;
+- `FlagStore` as a facade over `StateStore.flags`;
+- `NarrativeStateService` and `EndingService` as first-class runtime services;
+- `AccessService` as capability/access owner;
+- `OVERRIDE_OPERATOR` as capability;
+- Marcus as authorization actor, not the capability itself;
+- one canonical condition model;
+- persistence corrections.
+
+At the end of the exported Phase 9 source:
+
+`9.13 LOCKED`
+`9.14 LOCKED`
+`9.15 LOCKED`
+`9.16 AUDIT PASSED`
+`PHASE 9 — LOCKED`
+
+The source explicitly says Phase 9 is then the technical baseline for TypeScript implementation.
+
+### Phase 10 — Technical Implementation
+
+**Status: VERIFIED — LOCKED**
+
+The exported Phase 10 source begins with the locked baseline that Phase 1–8 remain the design source of truth and Phase 9 is the SDK contract.
+
+The Phase 10 scope is explicitly defined through Steps 10.1–10.14, including architecture, domain model, GameRuntime, state/flags, conditions, narrative/dialogue, access/capability, ending, reward/progression, quest/gameplay integration, persistence, integration tests, full audit, and final lock.
+
+The final Phase 10 source records:
+
+`10.11 Persistence ✅`
+`10.12 Integration Tests ✅`
+`10.13 Full Audit ✅`
+`10.14 LOCK 🔒`
+`PHASE 10 — LOCKED`
+
+The final technical lock also verifies:
+
+- `StateStore` owns canonical `GameState`;
+- `FlagStore` owns no independent state;
+- `ConditionNode` is the only canonical condition representation;
+- `AccessService` owns access/capability behavior;
+- Marcus ≠ OVERRIDE_OPERATOR;
+- NarrativeStateService separates narrative behavior from persistent state;
+- Quest runtime orchestrates but does not own canonical state;
+- RewardService does not become an independent progression state owner;
+- EndingService resolves into canonical `EndingState`;
+- persistence stores/restores canonical GameState;
+- Save/Load does not replay gameplay events;
+- GameRuntime is the composition root and lifecycle coordinator.
+
+### Phase 11 — Runtime Architecture / Repository Implementation
+
+**Status: VERIFIED BY EXPORTED HISTORY + REPOSITORY**
+
+The exported Phase 11 history starts from the locked Phase 10 contract and defines Step 11.1 as a repository/codebase audit with explicit PASS/WARNING/VIOLATION/DEFERRED classifications.
+
+The repository history then demonstrates incremental implementation of the canonical runtime across state, domain, application, persistence, narrative, quest, access, reward, economy, and ending boundaries.
+
+Representative implementation commits include:
 
 - `24b164976eaaa2dba3eff844e382c3918007c486` — canonical state store;
 - `0746ac880c691afcccdfa69077e2acbc48f03a62` — canonical condition model;
@@ -215,139 +233,155 @@ Representative commits include:
 - `445fdb06fb63f373df263a3ebfd9e0a8231f6a16` — narrative/dialogue runtime;
 - `f7adf7820d2cc93b8089f79b03a91b151941de02` — access/capability system;
 - `09a897e1b662a87282ce99ccbaf7b24358be03d0` — reward/progression system;
-- `79b556c3f096633bbfd7302b7f380ff45d813274` — persisted-state contract;
+- `79b556c3f096633bbfd7302b7f380ff45d813274` — persistence contract;
 - `9c729186075fa97952befd28fb4de996ae2af091` — cross-service canonical-state integration.
 
-The implementation history contains transient defects during development, but the final Phase 11 validation checkpoint reached a clean runtime baseline before Phase 12 integration work continued.
+The exported source history also records the project as carrying the Phase 11 runtime architecture forward into Phase 12.
 
-## Phase 12 — HackHub Integration / In-game Validation
+### Phase 12 — HackHub Integration / In-game Validation
 
 **Status: VERIFIED — LOCKED**
 
-Phase 12 has the strongest current evidence because both an integration audit and a lock document are present in the repository.
+The exported Phase 11–12 source records the Phase 12 verification sequence and subsequent cleanup.
 
-The lock records PASS for:
+Final verified areas include:
 
-- Mod loading / Bootstrap;
-- quest registration / UI;
-- Terminal.Ping objective;
+- Mod / Quest baseline;
+- Terminal.Ping;
 - Nmap integration;
 - SaveStorage;
-- AccessService;
-- RewardService;
-- EconomyService;
-- EndingService;
-- full runtime regression;
-- production bootstrap isolation.
+- Reward + Access + Persistence;
+- Ending Integration;
+- Full Runtime Regression;
+- Production isolation / cleanup.
 
-It also explicitly records that `Terminal.NmapScan` direct-event is **not used** in the production contract. The validated route is `Terminal.Command` for `nmap` plus typed shell command data.
+The final lock source explicitly records:
 
-The final automated validation checkpoint recorded:
+`Phase 12 — LOCKED ✅`
 
-```text
-npm run typecheck   PASS
-npm test            PASS (115/115)
-npm run build       PASS
-```
+and identifies `docs/phase12-lock.md` as the repository lock artifact.
 
-The production `src/index.ts` is intentionally limited to the HackHub bootstrap contract and lifecycle hooks; Phase 12 diagnostic harnesses remain outside the production bootstrap.
+The final Nmap boundary is also explicit: production uses `Terminal.Command` plus typed `Shell.addCommandData("nmap", ...)` behavior; `Terminal.NmapScan` is not the production contract.
+
+The source also records that diagnostic regression harnesses were removed from production bootstrap and that production permissions were reduced to the APIs actually required at runtime.
 
 ## Cross-phase consistency audit
+
+### Story/design authority
+
+**PASS**
+
+The exported history explicitly establishes Phase 1–8 as locked story/design and Phase 8 as the source of truth for later technical work.
 
 ### Canonical state ownership
 
 **PASS**
 
-The Phase 10 architecture contract, current runtime, Phase 12 lock, and Phase 13 implementation map all converge on `StateStore` as the canonical root state owner.
+Phase 9/10 locks and current repository implementation converge on `StateStore` as the single canonical root state owner.
 
 ### Condition representation
 
 **PASS**
 
-The repository implements one canonical `ConditionNode` model with `always`, `never`, `flag`, `flag-exists`, `all`, `any`, and `not`. Phase 13 explicitly requires story conditions to use this representation.
+Phase 9/10 source and repository implementation converge on one canonical `ConditionNode` model.
 
-### Capability ownership
+### Authorization vs capability
 
 **PASS**
 
-Capability/access grants are owned by `AccessService`. The only capability currently defined by the runtime is `OVERRIDE_OPERATOR`, matching the recovered Q14/Q15 story requirement.
+The lock explicitly preserves:
 
-### Ending ownership
+`Marcus` → authorization actor/context
 
-**PASS FOR CURRENT RUNTIME CONTRACT; STORY PREREQUISITES PARTIAL**
+`OVERRIDE_OPERATOR` → capability
 
-`EndingService` owns resolution and `EndingState` owns persisted ending state. The detailed Q16 story prerequisites remain unavailable and therefore must not yet be encoded.
+This distinction is also reflected in Q14's locked narrative source.
+
+### Narrative state
+
+**PASS**
+
+`NarrativeStateService` is explicitly a first-class runtime service; persistent state remains in `StateStore`.
 
 ### Persistence semantics
 
 **PASS**
 
-Phase 11/12 implementation history and current tests verify canonical-state serialization/restore without replaying gameplay events. This is consistent with the Phase 12 lock and Phase 13 guardrails.
+Save/Load stores/restores canonical state and does not replay gameplay operations. This is consistent across Phase 10's technical lock and Phase 12 integration validation.
 
-### HackHub boundary
+### HackHub production boundary
 
 **PASS**
 
-The production bootstrap remains minimal. Phase 12 explicitly keeps SDK-specific behavior in infrastructure adapters and excludes diagnostic harness execution from production bootstrap.
+Phase 12 removes diagnostics from the production bootstrap and retains integration harnesses as testing artifacts.
 
 ### Story-to-runtime completeness
 
 **PARTIAL**
 
-The runtime is technically ready, but full story implementation cannot yet be declared complete because detailed Phase 1–8 artifacts and Q16 remain unrecovered, while Q14/Q15 still contain three objective-level source-to-runtime completion gaps.
+The architecture and runtime baseline are verified, but full story implementation is not yet complete. The remaining issue is not whether Phases 1–8 were locked; that is now verified. The remaining issue is whether all detailed story artifacts required for implementation are directly readable in the supplied evidence set and mapped to runtime without inference.
 
-## Critical findings
+## Corrected findings
 
-### Finding 01 — Early-phase provenance gap
+### Finding 01 — Earlier audit incorrectly conflated "not present as a standalone repository artifact" with "source gap"
 
-The supplied original conversation URLs cannot currently be independently retrieved. This prevents a forensic, line-by-line verification of the original Phase 1–8 decisions from those conversations.
+**Corrected.** The exported Phase 8 history explicitly verifies that Phase 1–8 were locked. Therefore the lock status is no longer a source-gap.
 
-This is a **source-access limitation**, not evidence that the earlier phases were incorrect.
+What remains incomplete is the availability of standalone, phase-by-phase design documents for every one of Phase 1–7 in the currently accessible evidence set.
 
-### Finding 02 — Repository documentation gap
+### Finding 02 — Phase 8 is fully auditable from exported source history
 
-The repository currently stores strong Phase 10–13 documentation, but it does not contain standalone lock artifacts for every earlier phase.
+**PASS.** The Phase 8 lock checklist and exact XP matrix are directly present in the exported source.
 
-This creates documentation/provenance debt even where implementation continuity is visible in history.
+### Finding 03 — Phase 9 and Phase 10 locks are directly auditable
 
-### Finding 03 — Q14/Q15 are the current executable story frontier
+**PASS.** The exported sources contain the Phase 9 integration audit/lock and the Phase 10 final lock with detailed ownership and architecture rules.
 
-Q14 and Q15 are the only detailed locked quest artifacts currently recoverable. Their canonical states, negative states, rewards, dialogue, and evidence chains can be used safely.
+### Finding 04 — Phase 12 lock is directly auditable
 
-### Finding 04 — Do not fabricate missing runtime completion states
+**PASS.** The exported Phase 11–12 history contains the final Phase 12 lock action and the repository lock artifact is present.
 
-The current Phase 13 Step 13.2 map correctly identifies three exact source-to-runtime gaps:
+### Finding 05 — Detailed Q01–Q13 / Q16 implementation content remains incompletely readable
 
-- Q14 Objective 03 — FIND THE AUTHORIZATION;
-- Q14 Objective 06 — ASK ABOUT THE SESSION;
-- Q15 Objective 04 — RECONSTRUCT THE SESSION.
+**OPEN.** The current evidence proves the quests are part of the locked Phase 8 technical specification and provides a detailed XP matrix, but it does not currently reproduce every detailed objective, dialogue node, state transition, and gameplay interaction for all quests.
 
-These must remain explicit gaps until the authoritative story/runtime mapping is recovered or formally defined by a locked design change.
+### Finding 06 — Q14/Q15 are detailed and source-backed
 
-### Finding 05 — Q16 must remain unimplemented at story level
+**PASS.** Locked Q14/Q15 documents provide detailed objectives, dialogue, evidence, rewards, persistent states, and explicit negative/not-created states.
 
-The story flowchart provides the three ending labels and decision topology, but the detailed Q16 prerequisites, dialogue, rewards, and exact state transitions are not currently recoverable.
+## Required Phase 13 policy
 
-## Required remediation before full Phase 13 story completion
+The historical source recovery changes the provenance state, but not the implementation safety rules:
 
-1. Recover or import the original Phase 1–8 locked design artifacts into an auditable source location.
-2. Create standalone phase lock documents for any earlier phase whose decisions are still only present in conversation history.
-3. Preserve the existing Phase 13 SOURCE-GAP policy until those artifacts are recovered.
-4. Resolve the three Q14/Q15 objective-to-runtime completion gaps without introducing invented canon.
-5. Recover the detailed Q16 artifact before implementing final decision/ending gameplay.
+```text
+Phase 1–8 LOCK STATUS = VERIFIED
+Phase 8 SOURCE OF TRUTH = VERIFIED
+Phase 9 LOCK = VERIFIED
+Phase 10 LOCK = VERIFIED
+Phase 11 RUNTIME BASELINE = VERIFIED
+Phase 12 IN-GAME LOCK = VERIFIED
+
+Detailed content still absent from the readable source set
+→ remains SOURCE DETAIL GAP
+→ do not invent canon
+→ do not derive story semantics from runtime capability alone
+```
 
 ## Overall conclusion
 
-**The DEAD SIGNAL project is architecturally coherent from the verified Phase 9–12 implementation baseline into Phase 13, but its historical story/design provenance is incomplete in the currently accessible repository.**
+**The DEAD SIGNAL project now has a verified source chain for the locked phase history from Phase 1 through Phase 12.** The previous audit's statement that Phase 1–8 were simply "source-gaps" was too broad and is corrected here.
 
-The correct engineering decision is therefore:
+The remaining limitation is narrower: not every original design artifact is present as a standalone readable document, especially for the detailed content of earlier quests. This is a documentation/source-detail limitation, not an indication that those phases were unlocked, invalid, or redesigned later.
+
+The safe implementation rule for Phase 13 remains:
 
 ```text
-Do NOT rewrite earlier canon.
-Do NOT infer missing story design from runtime capabilities.
-Do preserve verified Phase 9–12 contracts.
-Do implement only recovered story content.
-Do keep missing Phase 1–8 / Q16 material explicitly SOURCE-GAP.
+Use verified locked source.
+Preserve Phase 8 as story/technical quest truth.
+Preserve Phase 9–12 runtime contracts.
+Implement only story content whose detailed source is directly supported.
+Keep unsupported details explicitly marked as SOURCE DETAIL GAP.
+Never fabricate missing canon to satisfy implementation convenience.
 ```
 
-This audit does not invalidate the existing Phase 1–12 work. It establishes the evidence boundary under which Phase 13 may safely proceed.
+This document supersedes the previous Phase 1–12 audit classification while preserving its useful technical findings.
