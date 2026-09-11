@@ -24,6 +24,20 @@ dead-signal-dev
 
 The production mod is not modified at runtime by the replay fixture.
 
+## Replay Package Layout
+
+A successful replay build must produce a complete HackHub mod package:
+
+```text
+dist-replay/
+├── mod.js
+├── manifest.json
+└── assets/
+    └── adrian-cole.png
+```
+
+The replay build script copies the source manifest and the static assets into the package and verifies that these required files exist before reporting success.
+
 ## Why the replay id changes
 
 HackHub persists native quest progress by quest identity. A completed or partially completed Q01 cannot safely be reset by clearing only DEAD SIGNAL's own `SaveStorage`, because that would not guarantee that the native quest/objective state is reset.
@@ -42,29 +56,44 @@ dead_signal.q01
 
 ## Workflow
 
-1. Build a fresh replay package:
+1. Pull the latest repository and install dependencies:
+
+```powershell
+git pull
+npm install
+```
+
+2. Build a fresh replay package:
 
 ```powershell
 npm run build:replay:q01
 ```
 
-2. Remove/replace the local development mod folder:
+3. Confirm the command reports the package contents:
+
+```text
+- mod.js
+- manifest.json
+- assets/adrian-cole.png
+```
+
+4. Remove/replace the local development mod folder:
 
 ```text
 HackHub/mods/dead-signal-dev/
 ```
 
-Copy the complete contents of `dist-replay/` into that folder.
+Copy the **complete contents** of `dist-replay/` into that folder.
 
-3. Restart HackHub.
+5. Restart HackHub.
 
-4. Open the development Q01 post:
+6. Open the development Q01 post:
 
 ```text
 THE CONTRACT — DEV REPLAY
 ```
 
-5. Run the Q01 sequence:
+7. Run the Q01 sequence:
 
 ```text
 Apply
