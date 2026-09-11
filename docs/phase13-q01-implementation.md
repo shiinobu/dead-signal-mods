@@ -109,7 +109,12 @@ Repeating Nmap does not satisfy Objective 04.
 
 ### Authorized SSH Verification
 
-Q01 uses the native SSH network topology required for a real HackHub SSH connection: the public target is a Router, the public router exposes port 22, and an internal Device behind the Router owns SSH plus the authorized user account.
+Q01 uses two compatible SSH paths:
+
+1. A native virtual network topology with a public Router and an internal SSH-enabled Device.
+2. HackHub's typed `Shell.addCommandData("ssh", ...)` response path for the exact player command.
+
+The native topology is:
 
 ```text
 203.0.113.42
@@ -125,23 +130,32 @@ Q01 uses the native SSH network topology required for a real HackHub SSH connect
         └── user: audit
 ```
 
-The public router exposes the same services needed for reconnaissance, while the child device is the actual SSH endpoint. This follows the working community pattern for modded SSH targets. citeturn963255view0turn963255view1
+The public router exposes the services used by reconnaissance while the child device owns the authorized SSH account.
 
-The player-facing SSH syntax follows the current HackHub flow:
+The player-facing SSH syntax is:
 
 ```bash
 ssh -h audit@203.0.113.42
 ```
 
-The player does not pass a password as a terminal argument. The authorized password is stored on the virtual network user for the SSH interaction.
+The player does not pass a password as a terminal argument. The authorized password is stored on the virtual network user.
 
-Objective 04 is completed only after the native `Terminal.SSH.Connected` event is received for the Q01 public target. citeturn963255view1
+Q01 also registers the built-in SSH response shape:
 
-No `Shell.addCommandData("ssh", ...)` response is used for completion. The SSH interaction must reach the native network target instead of being converted into a synthetic success response.
+```text
+input:  { host: "audit@203.0.113.42", key: "" }
+result: { ip: "203.0.113.42", status: "OPEN" }
+```
+
+This provides deterministic command-response data for the exact SSH command and avoids treating a failed native network attempt as a successful quest action. HackHub documents `ssh` as a typed built-in command whose input is `{ host, key }` and whose response is `{ ip, status: "OPEN" | "CLOSE" }`. citeturn452808view0
+
+Objective 04 is completed only after the player has reached the Q01 SSH step and the command-data response is `OPEN`, or after a native `Terminal.SSH.Connected` event is received for the Q01 public target. HackHub documents `Terminal.Command` as the event emitted for terminal commands and `Terminal.SSH.Connected` as the event emitted for successful SSH connections. citeturn452808view1
+
+The SSH command-data registration is scoped to Q01 and removed during completion or abandonment.
 
 ### Port Activation
 
-The target explicitly activates SSH on both the public router and child device with `Network.openPort()`. Newer HackHub builds support port management on child devices as well as routers. citeturn880921search7
+The target explicitly activates SSH on both the public router and child device with `Network.openPort()`.
 
 ## Completion
 
@@ -182,7 +196,7 @@ $200
 
 ## Cleanup
 
-The temporary Nmap command data is removed when Q01 completes or is abandoned. The target network is destroyed at the same boundary.
+The temporary Nmap and SSH command data is removed when Q01 completes or is abandoned. The target network is destroyed at the same boundary.
 
 ## Boundary
 
@@ -207,7 +221,7 @@ Verify one-scan flow
         ↓
 Verify Nmap cannot complete Objective 04
         ↓
-Verify `ssh -h audit@203.0.113.42` produces a real successful SSH connection
+Verify `ssh -h audit@203.0.113.42` receives the expected SSH response
         ↓
 Verify Objective 04 completes
         ↓
