@@ -101,18 +101,18 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     override Objectives = [
         {
             name: Q01_OBJECTIVE_IDS.reviewScope,
-            description: "Review the authorized audit scope.",
+            description: "Review the scope",
         },
         {
             name: Q01_OBJECTIVE_IDS.scanNetwork,
-            description: `nmap ${Q01_TARGET_IP}`,
+            description: "Scan the IP",
             terminalCommand: `nmap ${Q01_TARGET_IP}`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.reviewScope],
         },
         {
             name: Q01_OBJECTIVE_IDS.identifyServices,
-            description: "22/ssh • 80/http • 443/https",
-            hint: "Confirm these are the exposed services returned by the scan.",
+            description: "Check the result",
+            hint: "Look for 22/ssh, 80/http, and 443/https.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.scanNetwork],
         },
         {
@@ -127,9 +127,9 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
-            description: "Send the completed audit report to Adrian.",
+            description: "Send the report",
             hint:
-                "Subject: Security Audit — Jakarta. Include the target, ports 22/80/443, and the finding that no critical vulnerabilities were identified.",
+                "Send the report to Adrian with the target, ports 22/80/443, and your finding.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
