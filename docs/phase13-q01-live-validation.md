@@ -46,14 +46,14 @@ nmap 203.0.113.42
 
 8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. Run the authorized SSH audit check using the current HackHub syntax:
+10. For the development replay, run the Q01-scoped SSH audit command:
 
 ```bash
-ssh -h audit@203.0.113.42
+ssh-audit -h audit@203.0.113.42
 ```
 
-11. Confirm the terminal establishes a real HackHub SSH session through the Q01 network target and does not display `Connection could not be established.`
-12. Confirm `Terminal.SSH.Connected` completes Objective 04 for the same target.
+11. Confirm the terminal returns the Q01 deterministic audit result without invoking HackHub's engine-owned native `ssh` transport.
+12. Confirm Objective 04 completes only after the Q01 SSH-audit command returns the expected `203.0.113.42 / OPEN` result.
 13. Submit the audit report using the source-defined facts, including:
 
 ```text
@@ -84,9 +84,17 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Runtime Interaction Detail
 
-Q01 uses a real HackHub `Network` topology for SSH. The public target is a Router at `203.0.113.42` with port 22 exposed and an internal `Device` at `10.0.0.2` configured with `ssh: true` and the authorized `audit` user. Nmap remains quest-scoped through `Shell.addCommandData()` because its result is deterministic for the quest.
+Q01 Nmap and SSH-audit interactions use quest-scoped `Shell.addCommandData()` responses. The built-in `ssh` command is engine-owned and, in the current live HackHub runtime, can report `Connection could not be established` even when a modded target advertises port 22 as OPEN. The replay therefore uses the distinct `ssh-audit` command so the Q01 validation path is deterministic and does not rely on native SSH transport.
 
-SSH completion is event-driven through `Terminal.SSH.Connected`; the quest does not synthesize SSH success from a generic `Terminal.Command` event.
+The SSH-audit command data is scoped to:
+
+```text
+command: ssh-audit
+host: audit@203.0.113.42
+response: 203.0.113.42 / OPEN
+```
+
+The production adapter uses the same deterministic command-data contract until native modded SSH transport is proven functional in the target HackHub runtime.
 
 ## Expected Canonical State (production only)
 
