@@ -12,8 +12,8 @@ const SMOKE_TARGET_IP = "10.42.0.81";
 
 @RegisterQuest
 export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
-    override Name = "DeadSignalRuntimeSmokeTestV15";
-    override Title = "DEAD SIGNAL — Runtime Smoke Test V15";
+    override Name = "DeadSignalRuntimeSmokeTestV17";
+    override Title = "DEAD SIGNAL — Runtime Smoke Test V17";
     override Description = "Control test: programmatic Quest.claim() followed by direct objective completion.";
     override Group = "storyline" as const;
     override AutoStart = false;
@@ -33,17 +33,17 @@ export class DeadSignalSmokeQuest extends HackHubQuest<SmokeQuestData> {
     }
 
     override OnStart() {
-        console.log("[DEAD SIGNAL] V15 OnStart EXECUTED");
-        UI.notify("DEAD SIGNAL V15: OnStart executed");
+        console.log("[DEAD SIGNAL] V17 OnStart EXECUTED");
+        UI.notify("DEAD SIGNAL V17: OnStart executed");
     }
 
     override OnObjectivesStart() {
-        console.log("[DEAD SIGNAL] V15 OnObjectivesStart EXECUTED");
-        UI.notify("DEAD SIGNAL V15: OnObjectivesStart executed");
+        console.log("[DEAD SIGNAL] V17 OnObjectivesStart EXECUTED");
+        UI.notify("DEAD SIGNAL V17: OnObjectivesStart executed");
 
         setTimeout(() => {
-            console.log("[DEAD SIGNAL] V15 DIRECT COMPLETE");
-            UI.notify("DEAD SIGNAL V15: completing objective...");
+            console.log("[DEAD SIGNAL] V17 DIRECT COMPLETE");
+            UI.notify("DEAD SIGNAL V17: completing objective...");
             this.completeObjective("direct-complete");
         }, 1000);
     }
