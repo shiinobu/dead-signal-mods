@@ -4,7 +4,7 @@ Date: 2026-09-11
 
 ## Status
 
-**OPEN — STARTED**
+**STEP 13.2 COMPLETE FOR RECOVERED CONTENT — EXECUTION BLOCKED ONLY BY EXPLICIT SOURCE/RUNTIME GAPS**
 
 Phase 13 begins after Phase 12 has been locked. The purpose of this phase is to turn the locked DEAD SIGNAL story/design outputs from Phases 1–8 into concrete game content while preserving the locked runtime contracts established by Phases 9–12.
 
@@ -44,22 +44,62 @@ Before implementing gameplay content, establish the exact set of locked Phase 1�
 
 The audit must distinguish source-backed canon from implementation inference. Missing source material must be surfaced rather than reconstructed silently.
 
-## Step 13.2 onward
+## Step 13.2 — Quest Implementation Mapping
 
-After Step 13.1 is complete, implementation proceeds quest-by-quest from the audited locked design, mapping each story requirement onto existing canonical services and adapters.
+Step 13.2 maps the recovered locked story content onto the canonical runtime contracts before executable quest wiring is introduced.
 
-Expected implementation direction:
+Artifact:
+
+`docs/phase13-step13.2-quest-implementation-map.md`
+
+Current recovered implementation coverage:
 
 ```text
-Locked Phase 1–8 story design
+Q14 — THE OWNER       mapped
+Q15 — THE EVIDENCE    mapped
+Q01–Q13               SOURCE-GAP
+Q16                   SOURCE-GAP
+```
+
+The mapping preserves the following ownership boundaries:
+
+```text
+Story condition     → ConditionNode / ConditionEvaluator
+Story flag          → FlagStore / StateStore
+Quest lifecycle     → QuestService / QuestState
+Narrative/dialogue  → NarrativeStateService
+Evidence            → Evidence / EvidenceState
+Capabilities        → AccessService / AccessState
+XP rewards          → RewardService
+Cash rewards        → EconomyService
+Ending state        → EndingService / EndingState
+HackHub behavior    → infrastructure adapters
+```
+
+Q14 and Q15 source-backed state keys are recorded exactly. Explicit negative/not-created states are also recorded and must not be asserted accidentally.
+
+The remaining execution gaps are explicit rather than inferred:
+
+- Q14 Objective 03 has no exact dedicated completion state named by the locked story artifact.
+- Q14 Objective 06 has no exact dedicated completion state named by the locked story artifact.
+- Q15 Objective 04 has no exact dedicated completion state named by the locked story artifact.
+- Exact runtime dialogue IDs for Q14/Q15 are not defined by the recovered locked sources.
+- Detailed quest sources for Q01–Q13 and Q16 are unavailable.
+
+Therefore Step 13.2 does **not** introduce placeholder canon, invented flags, or guessed HackHub event dependencies merely to make every quest compile.
+
+## Implementation direction after Step 13.2
+
+```text
+Recovered locked story
           ↓
-Story audit / dependency mapping
+Step 13.2 implementation map
           ↓
-Quest + narrative implementation
+Smallest fully source-backed executable quest slice
           ↓
-Canonical StateStore / services
+Canonical StateStore / application services
           ↓
-HackHub presentation/integration
+HackHub adapter integration
           ↓
 Focused in-game validation
           ↓
@@ -77,6 +117,7 @@ Phase 14 full integration / release audit
 - Do not make Save/Load replay gameplay events.
 - Do not reintroduce Phase 12 diagnostic execution into production bootstrap.
 - Do not use undocumented HackHub event behavior as a required story dependency when a validated SDK boundary exists.
+- Do not fabricate missing Phase 1–8 story artifacts.
 
 ## Phase 14 handoff
 
