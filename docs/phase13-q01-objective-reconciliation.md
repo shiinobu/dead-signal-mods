@@ -27,7 +27,7 @@ Phase 8 remains the immutable technical quest source of truth for Q01–Q16, so 
 The executable Q01 interaction is now mapped as:
 
 ```text
-203.0.113.42
+203.0.113.42 (public router)
   ↓
 Nmap
   ↓
@@ -36,17 +36,27 @@ Nmap
 Service identification
   ↓
 Authorized SSH service verification
+  ↓
+10.0.0.2 (SSH child device)
 ```
 
-Objective 04 remains the locked player-facing objective `Perform basic vulnerability checks`. Its runtime completion boundary is the actual SSH connection event to `203.0.113.42` using the authorized `audit` account supplied by Adrian.
+Objective 04 remains the locked player-facing objective `Perform basic vulnerability checks`. Its runtime completion boundary is the actual SSH connection event to `203.0.113.42` using the authorized `audit` account.
 
-The current HackHub Handbook syntax is:
+The player-facing HackHub syntax is:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
 
-The `-h` argument contains `username@ip` without the port; the port is supplied separately with `-p`.
+The port is omitted because SSH defaults to port 22 and the Handbook marks `-p` as optional.
+
+## Runtime Constraint
+
+The first implementation exposed the SSH user directly on the public router. Live testing showed that Nmap could be represented through command data while the real SSH connection still failed. The implementation now follows the observed working modding pattern: a public Router exposes the SSH port, an internal Device owns the SSH-capable user/service, and the child device is marked `ssh: true`.
+
+The implementation also explicitly opens port 22 on both the public router and the SSH child before the player attempts the connection.
+
+This is an implementation correction, not a change to Q01 story canon.
 
 ## Resulting Player Flow
 
@@ -57,12 +67,6 @@ The `-h` argument contains `username@ip` without the port; the port is supplied 
 04  Connect to the authorized SSH audit account
 05  Submit audit report
 ```
-
-## Runtime Constraint
-
-The first implementation used `Network.Type.Device` and an object-shaped SSH event payload. Live testing showed that the documented SSH syntax reached the terminal but the connection could not be established. The runtime implementation has therefore been aligned with the official SDK quest example by using `Network.Type.Router` for the public target, retaining the real port 22 and user definition, and listening for the documented string payload on `Terminal.SSH.Connected`.
-
-This is an implementation correction, not a change to Q01 story canon.
 
 ## Regression Rules
 
