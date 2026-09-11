@@ -40,13 +40,13 @@ Authorized SSH service verification
 
 Objective 04 remains the locked player-facing objective `Perform basic vulnerability checks`. Its runtime completion boundary is the actual SSH connection event to `203.0.113.42` using the authorized `audit` account supplied by Adrian.
 
-Player-facing command:
+The current HackHub Handbook syntax is:
 
 ```bash
-ssh audit@203.0.113.42
+ssh -h audit@203.0.113.42 -p 22
 ```
 
-The exact command syntax is an implementation affordance; the story canon remains the basic security assessment.
+The `-h` argument contains `username@ip` without the port; the port is supplied separately with `-p`.
 
 ## Resulting Player Flow
 
@@ -58,11 +58,17 @@ The exact command syntax is an implementation affordance; the story canon remain
 05  Submit audit report
 ```
 
+## Runtime Constraint
+
+The first implementation used `Network.Type.Device` and an object-shaped SSH event payload. Live testing showed that the documented SSH syntax reached the terminal but the connection could not be established. The runtime implementation has therefore been aligned with the official SDK quest example by using `Network.Type.Router` for the public target, retaining the real port 22 and user definition, and listening for the documented string payload on `Terminal.SSH.Connected`.
+
+This is an implementation correction, not a change to Q01 story canon.
+
 ## Regression Rules
 
 The implementation must never complete Objective 04 from a repeated Nmap action.
 
-An Nmap result may only satisfy the scan/service objectives. Objective 04 requires the target SSH connection event and the authorized username.
+An Nmap result may only satisfy the scan/service objectives. Objective 04 requires the target SSH connection event.
 
 ## Canon Boundary
 
