@@ -46,6 +46,8 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
+const Q01_SSH_INTERNAL_IP = "10.0.0.2";
+
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
     {
         port: 22,
@@ -193,15 +195,15 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     override OnStart() {
         gameRuntime.quest.start(Q01_THE_CONTRACT);
 
+        const sshUser = Network.createUser({
+            username: Q01_SSH_USERNAME,
+            password: Q01_SSH_PASSWORD,
+        });
+
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
             type: Network.Type.Router,
-            users: [
-                Network.createUser({
-                    username: Q01_SSH_USERNAME,
-                    password: Q01_SSH_PASSWORD,
-                }),
-            ],
+            users: [],
             ports: [
                 {
                     external: Q01_SSH_PORT,
@@ -222,8 +224,30 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                     service: "https",
                 },
             ],
-            children: [],
+            children: [
+                {
+                    ip: Q01_SSH_INTERNAL_IP,
+                    type: Network.Type.Device,
+                    ssh: true,
+                    ports: [
+                        {
+                            external: Q01_SSH_PORT,
+                            internal: Q01_SSH_PORT,
+                            active: true,
+                            service: "ssh",
+                        },
+                    ],
+                    users: [sshUser],
+                },
+            ],
         });
+
+        try {
+            Network.openPort(this.Data.targetIp, Q01_SSH_PORT);
+            Network.openPort(Q01_SSH_INTERNAL_IP, Q01_SSH_PORT);
+        } catch {
+            // Active ports are already declared in the target topology.
+        }
 
         this.sendMail(0);
         this.SetData("auditScopeReviewed", true);
