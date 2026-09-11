@@ -1,5 +1,4 @@
 import {
-    Network,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
@@ -8,7 +7,6 @@ import {
 import {
     Q01_OBJECTIVE_IDS,
     Q01_SSH_COMMAND,
-    Q01_SSH_PASSWORD,
     Q01_SSH_PORT,
     Q01_SSH_USERNAME,
     Q01_TARGET_IP,
@@ -149,7 +147,6 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                 "",
                 "Temporary audit access:",
                 `SSH user: ${Q01_SSH_USERNAME}`,
-                `Audit access password: ${Q01_SSH_PASSWORD}`,
                 "",
                 "Not Authorized:",
                 "Data extraction",
@@ -179,37 +176,6 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     }
 
     override OnStart() {
-        Network.createSubnetNetwork({
-            ip: this.Data.targetIp,
-            type: Network.Type.Device,
-            users: [
-                Network.createUser({
-                    username: Q01_SSH_USERNAME,
-                    password: Q01_SSH_PASSWORD,
-                }),
-            ],
-            ports: [
-                {
-                    external: Q01_SSH_PORT,
-                    internal: Q01_SSH_PORT,
-                    active: true,
-                    service: "ssh",
-                },
-                {
-                    external: 80,
-                    internal: 80,
-                    active: true,
-                    service: "http",
-                },
-                {
-                    external: 443,
-                    internal: 443,
-                    active: true,
-                    service: "https",
-                },
-            ],
-        });
-
         this.sendMail(0);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
     }
@@ -249,13 +215,11 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
-        Network.destroyNetwork(this.Data.targetIp);
     }
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
-        Network.destroyNetwork(this.Data.targetIp);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
@@ -311,7 +275,10 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     }
 
     private handleSshConnection(ip: string): void {
-        if (ip !== this.Data.targetIp || !this.Data.servicesIdentified) {
+        if (
+            ip !== this.Data.targetIp ||
+            !this.Data.servicesIdentified
+        ) {
             return;
         }
 
@@ -394,7 +361,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
         if (
             normalizedSubject !== Q01_REPORT_SUBJECT.toLowerCase() &&
-            normalizedSubject !== `${Q01_REPORT_SUBJECT} [dev replay]`.toLowerCase()
+            normalizedSubject !== `${Q01_REPORT_SUBJECT} [DEV REPLAY]`.toLowerCase()
         ) {
             return false;
         }
