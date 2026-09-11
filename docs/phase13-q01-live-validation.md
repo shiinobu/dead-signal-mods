@@ -60,15 +60,19 @@ Further internal assessment is recommended.
 
 ## Objective UX Contract
 
+The player-facing objective copy is intentionally short. Commands are shown through the native `terminalCommand` affordance, while only objectives that benefit from extra context use a `hint`.
+
 ```text
-01  Review audit scope
-02  Run nmap against 203.0.113.42
-03  Confirm exposed services: 22 / 80 / 443
-04  Run nmap 203.0.113.42 -sV for the basic security/service check
-05  Send the completed audit report to Adrian
+01  Review the scope
+02  Scan the IP             [Terminal command]
+03  Check the result         [? Optional clue]
+04  Run a basic security check [Terminal command + [?] clue]
+05  Send the report          [? Optional clue]
 ```
 
-Objective 04 is the implementation-level realization of the locked `basic vulnerability checks` objective. The recovered story/technical source includes certificate inspection, but HackHub's built-in `openssl` command does not provide TLS inspection and custom terminal command registration has not been validated in the live runtime. The current Q01 implementation therefore uses the supported `nmap -sV` service/version scan as the concrete, read-only assessment action. No exploitation is required.
+Objective 03's clue contains only the expected services. The report clue contains only the minimum information needed to submit the report and never exposes an internal mod path.
+
+Objective 04 remains the current five-objective Phase 8 implementation boundary and is intentionally not redesigned by this UX-only change. Any change to its gameplay semantics must be decided separately before implementation.
 
 ## Expected Canonical State (production only)
 
