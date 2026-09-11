@@ -39,7 +39,7 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_SSH_PORT, 22);
         assert.equal(
             Q01_SSH_COMMAND,
-            "ssh -h audit@203.0.113.42 -p 22",
+            "ssh -h audit@203.0.113.42",
         );
     });
 
