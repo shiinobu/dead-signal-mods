@@ -39,7 +39,15 @@ The locked Phase 8 allocation is authoritative:
 
 The player-facing objective state remains in HackHub's quest/objective lifecycle. The canonical DEAD SIGNAL state receives only the source-defined completion flag; no new persistent Q01 story flags are invented.
 
-The source does not define a dedicated vulnerability-exploitation command for Q01. The gameplay audit explicitly says Q01 does not require vulnerability exploitation. Therefore the implementation uses the submitted audit result as the completion boundary for the basic-assessment objective rather than inventing a new tool or command.
+The source does not define a dedicated vulnerability-exploitation command for Q01. The gameplay audit explicitly says Q01 does not require vulnerability exploitation. Objective 04 is therefore implemented as an authorized SSH service-verification action using HackHub's native SSH command and network simulation, rather than as an exploit or artificial custom command.
+
+The player-facing SSH syntax follows the current HackHub Handbook:
+
+```bash
+ssh -h audit@203.0.113.42 -p 22
+```
+
+The temporary audit account is attached directly to the virtual target device. Objective 04 completes only after the real `Terminal.SSH.Connected` event for `203.0.113.42`.
 
 HackHub's current native communication surface provides Email but no native `Relay` API in the available SDK reference. The source's short post-report Adrian response is therefore represented through the existing in-game mail channel as an implementation adapter detail; the narrative content itself is unchanged.
 
