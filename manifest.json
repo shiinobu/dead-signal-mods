@@ -5,6 +5,6 @@
   "author": "Shiinobu",
   "description": "DEAD SIGNAL story and gameplay expansion for HackHub.",
   "apiVersion": 1,
-  "permissions": ["events", "shell"],
+  "permissions": ["events", "filesystem", "shell"],
   "tags": ["story", "quest", "investigation", "mystery"]
 }
