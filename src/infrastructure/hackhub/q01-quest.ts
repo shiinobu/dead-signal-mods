@@ -1,12 +1,12 @@
 import {
-    Files,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
-    Q01_CERTIFICATE_FILE_PATH,
+    Q01_CERTIFICATE_COMMAND,
+    Q01_CERTIFICATE_TARGET,
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
@@ -60,8 +60,6 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
     },
 ];
 
-const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
-const Q01_CERTIFICATE_FILE_NAME = "meridian-443-certificate";
 const Q01_CERTIFICATE_RECORD = [
     "MERIDIAN LOGISTICS — HTTPS CERTIFICATE INSPECTION",
     "",
@@ -71,6 +69,8 @@ const Q01_CERTIFICATE_RECORD = [
     "",
     "Issuer: ARKA Secure Infrastructure",
 ].join("\n");
+
+const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
 
 const Q01_REPORT_REQUIRED_CONTENT = [
     "Meridian Logistics",
@@ -129,8 +129,9 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description:
-                `Inspect the HTTPS certificate record for port 443. Open ${Q01_CERTIFICATE_FILE_PATH}.`,
-            hint: `File: ${Q01_CERTIFICATE_FILE_PATH}`,
+                `Inspect the HTTPS certificate for port 443. Run: ${Q01_CERTIFICATE_COMMAND} ${Q01_CERTIFICATE_TARGET}`,
+            terminalCommand: `${Q01_CERTIFICATE_COMMAND} ${Q01_CERTIFICATE_TARGET}`,
+            info: "This is a read-only certificate inspection. No exploitation is required.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -208,30 +209,14 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             Q01_NMAP_RESULT,
         );
 
-        if (this.Data.servicesIdentified) {
-            void this.ensureCertificateRecord();
-        }
+        Shell.addCommandData(
+            Q01_CERTIFICATE_COMMAND,
+            Q01_CERTIFICATE_TARGET,
+            Q01_CERTIFICATE_RECORD,
+        );
 
         this.Events.on("Terminal.Command", (data) => {
             void this.handleTerminalCommand(data);
-        });
-
-        this.Events.on("Files.Open", (data) => {
-            if (
-                this.Data.basicVulnerabilityChecksCompleted ||
-                !this.Data.servicesIdentified ||
-                !this.isCertificateOpenEvent(data)
-            ) {
-                return;
-            }
-
-            this.SetData(
-                "basicVulnerabilityChecksCompleted",
-                true,
-            );
-            this.completeObjective(
-                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-            );
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -302,6 +287,10 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
+        Shell.removeCommandData(
+            Q01_CERTIFICATE_COMMAND,
+            Q01_CERTIFICATE_TARGET,
+        );
         gameRuntime.persistence.save();
     }
 
@@ -309,68 +298,59 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         data: TerminalCommandData,
     ): Promise<void> {
         if (
-            data.command !== "nmap" ||
-            data.args[0] !== this.Data.targetIp
+            data.command === "nmap" &&
+            data.args[0] === this.Data.targetIp
+        ) {
+            const result = Shell.getCommandData(
+                "nmap",
+                this.Data.targetIp,
+            );
+
+            if (!this.isExpectedNmapResult(result)) {
+                return;
+            }
+
+            if (!this.Data.networkScanned) {
+                this.SetData("networkScanned", true);
+                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
+            }
+
+            if (!this.Data.servicesIdentified) {
+                this.SetData("servicesIdentified", true);
+                this.completeObjective(
+                    Q01_OBJECTIVE_IDS.identifyServices,
+                );
+            }
+
+            return;
+        }
+
+        if (
+            data.command !== Q01_CERTIFICATE_COMMAND ||
+            data.args[0] !== Q01_CERTIFICATE_TARGET ||
+            !this.Data.servicesIdentified
         ) {
             return;
         }
 
         const result = Shell.getCommandData(
-            "nmap",
-            this.Data.targetIp,
+            Q01_CERTIFICATE_COMMAND,
+            Q01_CERTIFICATE_TARGET,
         );
 
-        if (!this.isExpectedNmapResult(result)) {
+        if (
+            result !== Q01_CERTIFICATE_RECORD ||
+            this.Data.basicVulnerabilityChecksCompleted
+        ) {
             return;
         }
 
-        if (!this.Data.networkScanned) {
-            this.SetData("networkScanned", true);
-            this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-        }
-
-        if (!this.Data.servicesIdentified) {
-            this.SetData("servicesIdentified", true);
-            await this.ensureCertificateRecord();
-            this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
-        } else {
-            await this.ensureCertificateRecord();
-        }
-    }
-
-    private async ensureCertificateRecord(): Promise<void> {
-        try {
-            if (await Files.exists(Q01_CERTIFICATE_FILE_PATH)) {
-                return;
-            }
-
-            await Files.create({
-                name: Q01_CERTIFICATE_FILE_NAME,
-                extension: "txt",
-                data: Q01_CERTIFICATE_RECORD,
-                parentPath: "~",
-            });
-        } catch (error) {
-            console.error(
-                "DEAD SIGNAL Q01: failed to create certificate inspection record.",
-                error,
-            );
-        }
-    }
-
-    private isCertificateOpenEvent(data: unknown): boolean {
-        const payload = data as {
-            name?: unknown;
-            path?: unknown;
-            fileName?: unknown;
-            filePath?: unknown;
-        };
-
-        return (
-            payload.name === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
-            payload.path === Q01_CERTIFICATE_FILE_PATH ||
-            payload.fileName === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
-            payload.filePath === Q01_CERTIFICATE_FILE_PATH
+        this.SetData(
+            "basicVulnerabilityChecksCompleted",
+            true,
+        );
+        this.completeObjective(
+            Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
         );
     }
 
