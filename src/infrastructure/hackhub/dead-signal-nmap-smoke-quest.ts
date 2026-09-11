@@ -12,22 +12,11 @@ interface NmapSmokeQuestData {
 const NMAP_TARGET_IP = "10.42.0.81";
 const NMAP_TARGET_PORT = 22;
 
-export function prepareNmapSmokeTest(): void {
-    Shell.addCommandData("nmap", NMAP_TARGET_IP, [
-        {
-            port: NMAP_TARGET_PORT,
-            status: "OPEN",
-            service: "ssh",
-            version: "OpenSSH 9.0",
-        },
-    ]);
-}
-
 @RegisterQuest
 export class DeadSignalNmapSmokeQuest extends HackHubQuest<NmapSmokeQuestData> {
     override Name = "DeadSignalNmapIntegrationSmokeTest";
     override Title = "DEAD SIGNAL — Nmap Integration Smoke Test";
-    override Description = "Phase 12 validation for native nmap command execution, command events, and typed command data.";
+    override Description = "Phase 12 validation for Nmap command routing and typed command response data.";
     override Group = "storyline" as const;
     override AutoStart = true;
     override AutoComplete = true;
@@ -50,6 +39,17 @@ export class DeadSignalNmapSmokeQuest extends HackHubQuest<NmapSmokeQuestData> {
         return {
             targetIp: NMAP_TARGET_IP,
         };
+    }
+
+    override OnStart() {
+        Shell.addCommandData("nmap", NMAP_TARGET_IP, [
+            {
+                port: NMAP_TARGET_PORT,
+                status: "OPEN",
+                service: "ssh",
+                version: "OpenSSH 9.0",
+            },
+        ]);
     }
 
     override OnComplete() {
