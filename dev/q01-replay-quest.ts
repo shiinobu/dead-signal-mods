@@ -34,16 +34,15 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-interface Q01SshAuditInput {
+interface Q01SshCommandInput {
     readonly host: string;
+    readonly key: string;
 }
 
-interface Q01SshAuditResult {
+interface Q01SshCommandData {
     readonly ip: string;
     readonly status: "OPEN" | "CLOSE";
 }
-
-const Q01_SSH_AUDIT_COMMAND = `ssh-audit -h ${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`;
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
     { port: 22, status: "OPEN", service: "ssh" },
@@ -63,11 +62,12 @@ const Q01_REPORT_REQUIRED_CONTENT = [
     "Further internal assessment is recommended.",
 ];
 
-const Q01_SSH_AUDIT_INPUT: Q01SshAuditInput = {
+const Q01_SSH_COMMAND_INPUT: Q01SshCommandInput = {
     host: `${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`,
+    key: "",
 };
 
-const Q01_SSH_AUDIT_RESULT: Q01SshAuditResult = {
+const Q01_SSH_COMMAND_RESULT: Q01SshCommandData = {
     ip: Q01_TARGET_IP,
     status: "OPEN",
 };
@@ -111,8 +111,8 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            terminalCommand: Q01_SSH_AUDIT_COMMAND,
-            hint: "Use the development SSH audit check to verify the authorized account path.",
+            terminalCommand: Q01_SSH_COMMAND,
+            hint: "Use the authorized audit account to verify SSH access.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -181,9 +181,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
         Shell.addCommandData(
-            "ssh-audit",
-            Q01_SSH_AUDIT_INPUT,
-            Q01_SSH_AUDIT_RESULT,
+            "ssh",
+            Q01_SSH_COMMAND_INPUT,
+            Q01_SSH_COMMAND_RESULT,
         );
 
         this.Events.on("Terminal.Command", (data) => {
@@ -212,17 +212,17 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnComplete() {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData("ssh-audit", Q01_SSH_AUDIT_INPUT);
+        Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
     }
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData("ssh-audit", Q01_SSH_AUDIT_INPUT);
+        Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
-        if (data.command === "ssh-audit") {
-            this.handleSshAuditCommand(data.args);
+        if (data.command === "ssh") {
+            this.handleSshCommand(data.args);
             return;
         }
 
@@ -255,22 +255,22 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
     }
 
-    private handleSshAuditCommand(args: readonly string[]): void {
+    private handleSshCommand(args: readonly string[]): void {
         if (
             args.length !== 2 ||
             args[0] !== "-h" ||
-            args[1] !== Q01_SSH_AUDIT_INPUT.host ||
+            args[1] !== Q01_SSH_COMMAND_INPUT.host ||
             !this.Data.servicesIdentified
         ) {
             return;
         }
 
         const result = Shell.getCommandData(
-            "ssh-audit",
-            Q01_SSH_AUDIT_INPUT,
+            "ssh",
+            Q01_SSH_COMMAND_INPUT,
         );
 
-        if (!this.isExpectedSshAuditResult(result)) {
+        if (!this.isExpectedSshCommandResult(result)) {
             return;
         }
 
@@ -305,9 +305,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
     }
 
-    private isExpectedSshAuditResult(
+    private isExpectedSshCommandResult(
         result: unknown,
-    ): result is Q01SshAuditResult {
+    ): result is Q01SshCommandData {
         return (
             typeof result === "object" &&
             result !== null &&
