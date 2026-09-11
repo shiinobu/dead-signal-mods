@@ -39,17 +39,17 @@ The locked Phase 8 allocation is authoritative:
 
 The player-facing objective state remains in HackHub's quest/objective lifecycle. The canonical DEAD SIGNAL state receives only the source-defined completion flag; no new persistent Q01 story flags are invented.
 
-The source does not define a dedicated vulnerability-exploitation command for Q01. The gameplay audit explicitly says Q01 does not require vulnerability exploitation. Objective 04 is therefore represented as an authorized SSH service-verification action using HackHub's native `ssh` command. Because the modded network did not establish the SSH session reliably during live validation, the implementation uses a scoped `Shell.addCommandData()` success response for the native SSH command while retaining the real SSH event as an additional completion path when available.
+The source does not define a dedicated vulnerability-exploitation command for Q01. The gameplay audit explicitly says Q01 does not require vulnerability exploitation. Objective 04 is therefore represented as an authorized SSH service-verification action using HackHub's native `ssh` command. Because live testing showed that the modded network transport did not establish SSH reliably, the implementation uses a scoped `Shell.addCommandData()` response for the native SSH command rather than relying on a real network connection.
 
 The player-facing SSH syntax is:
 
 ```bash
-ssh -h audit@203.0.113.42
+ssh -h audit@203.0.113.42 -p 22
 ```
 
-The `-h` argument contains `username@ip`; no password is passed as a terminal argument.
+The `-h` argument contains `username@ip`; the port is supplied separately with `-p`. No password is passed as a terminal argument.
 
-The temporary audit user remains attached to the virtual target device, and the injected command response is scoped to the Q01 SSH interaction.
+The injected SSH response is scoped to the Q01 target and is only accepted for the authorized `audit` interaction.
 
 HackHub's current native communication surface provides Email but no native `Relay` API in the available SDK reference. The source's short post-report Adrian response is therefore represented through the existing in-game mail channel as an implementation adapter detail; the narrative content itself is unchanged.
 
