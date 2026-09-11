@@ -45,7 +45,7 @@ Run nmap 203.0.113.42
         ↓
 Confirm 22 / ssh, 80 / http, 443 / https
         ↓
-Run the authorized SSH audit check
+Connect to the authorized SSH audit account
         ↓
 Perform basic vulnerability checks
         ↓
@@ -74,15 +74,13 @@ Supporting guidance:
 
 - Terminal affordance for `nmap 203.0.113.42`.
 - Short hint for the expected exposed services.
-- Terminal affordance for `ssh -h audit@203.0.113.42 -p 22`.
+- Terminal affordance for `ssh -h audit@203.0.113.42`.
 - Short hint that Adrian supplied an authorized audit account.
 - Short hint for the report destination/action.
 
 No internal mod paths are exposed in hints.
 
 ## Technical Interaction
-
-Q01 does not require HackHub's simulated `Network` layer. During live validation the simulator accepted the Nmap command but did not establish SSH even when a port 22/user topology was defined. The player-facing interaction therefore uses native terminal commands with quest-scoped response data supplied through the Shell API.
 
 ### Reconnaissance
 
@@ -111,25 +109,27 @@ Repeating Nmap does not satisfy Objective 04.
 
 ### Authorized SSH Verification
 
+Q01 uses the minimal native SSH network pattern documented by HackHub: a Router target with the authorized audit user directly on that Router and an active SSH port 22. No child device or router-specific hacking route is required.
+
+```text
+203.0.113.42
+├── 22 / ssh
+│   └── user: audit
+├── 80 / http
+└── 443 / https
+```
+
 The player-facing SSH syntax follows the current HackHub Handbook:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
 
-Q01 registers native SSH response data through `Shell.addCommandData()`:
+The player does not pass a password as a terminal argument. The authorized password is stored on the virtual network user for the native SSH interaction.
 
-```text
-input.host = audit@203.0.113.42
-input.key  = empty
+Objective 04 is completed only after the native SSH connection event is received for `203.0.113.42` and username `audit`.
 
-response.ip     = 203.0.113.42
-response.status = OPEN
-```
-
-The Objective 04 completion handler accepts the expected SSH command only when the scoped SSH response is `OPEN` for the Q01 target. A real `Terminal.SSH.Connected` event remains accepted as an additional runtime path if the game emits one.
-
-This does not add a new terminal verb, does not require a password argument, and does not perform a real network connection.
+No `Shell.addCommandData("ssh", ...)` response is used for completion, because that path produced false positives while the native terminal still displayed `Connection could not be established.` during live testing.
 
 ## Completion
 
@@ -170,11 +170,11 @@ $200
 
 ## Cleanup
 
-The Nmap and SSH command response data are removed when Q01 completes or is abandoned. No Q01 `Network` object is created or destroyed.
+The temporary Nmap command data is removed when Q01 completes or is abandoned. The target network is destroyed at the same boundary.
 
 ## Boundary
 
-Q01 does not require exploitation, credential attacks, data extraction, or internal access. The SSH interaction is an authorized service-verification step represented through HackHub's native terminal command-data mechanism.
+Q01 does not require exploitation, credential attacks, data extraction, or internal access. The SSH interaction is an authorized service-verification step inside the virtual target network.
 
 ## Validation Gate
 
@@ -195,7 +195,7 @@ Verify one-scan flow
         ↓
 Verify Nmap cannot complete Objective 04
         ↓
-Verify `ssh -h audit@203.0.113.42 -p 22` produces the scoped OPEN response
+Verify `ssh -h audit@203.0.113.42` produces a real successful SSH connection
         ↓
 Verify Objective 04 completes
         ↓
