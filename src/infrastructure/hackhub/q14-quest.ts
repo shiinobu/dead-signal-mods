@@ -27,12 +27,10 @@ interface Q14QuestData {
     readonly authorizationFileId: string;
     readonly approverFileId: string;
     readonly justificationFileId: string;
-    readonly marcusDialogStarted: boolean;
 }
 
 const Q14_BASE_XP = 130;
 const Q14_OPTIONAL_XP = 10;
-const Q14_COMPLETION_ID = "q14-completion";
 
 const Q14_ROOT = "/exports/operations/dead-signal/q14";
 const Q14_AUTHORIZATIONS = `${Q14_ROOT}/authorizations`;
@@ -149,19 +147,7 @@ const markFlag = (
     gameRuntime.persistence.save();
 };
 
-const setQuestReward = (
-    quest: DeadSignalQ14,
-    includeOptional: boolean,
-): void => {
-    quest.Rewards = {
-        money: 0,
-        xp: includeOptional
-            ? Q14_BASE_XP + Q14_OPTIONAL_XP
-            : Q14_BASE_XP,
-    };
-};
-
-const eventMatchesFile = (
+const matchesFileEvent = (
     data: unknown,
     fileId: string,
     path: string,
@@ -170,21 +156,26 @@ const eventMatchesFile = (
         id?: string;
         fileId?: string;
         path?: string;
-        name?: string;
-        extension?: string;
     };
 
     const emittedFileId = payload?.id ?? payload?.fileId;
 
-    if (emittedFileId === fileId) {
-        return true;
+    return emittedFileId === fileId || payload?.path === path;
+};
+
+const createMarcusContact = (
+    quest: DeadSignalQ14Quest,
+): void => {
+    if (
+        gameRuntime.flagStore.get<boolean>(
+            "dead_signal.marcus_introduced",
+        ) === true
+    ) {
+        return;
     }
 
-    if (payload?.path === path) {
-        return true;
-    }
-
-    return false;
+    markFlag("dead_signal.marcus_introduced");
+    quest.createDialog("default");
 };
 
 @RegisterQuest
@@ -206,57 +197,21 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
         {
             name: "q14.objective.01",
             description: "Find the access registry.",
-            trigger: {
-                event: "Files.Open",
-                condition: (data: unknown) =>
-                    eventMatchesFile(
-                        data,
-                        this.Data.registryFileId,
-                        this.Data.registryPath,
-                    ),
-            },
         },
         {
             name: "q14.objective.02",
             description: "Trace the access window.",
             unlocksAfter: ["q14.objective.01"],
-            trigger: {
-                event: "Files.Open",
-                condition: (data: unknown) =>
-                    eventMatchesFile(
-                        data,
-                        this.Data.sessionFileId,
-                        this.Data.sessionPath,
-                    ),
-            },
         },
         {
             name: "q14.objective.03",
             description: "Find the authorization.",
             unlocksAfter: ["q14.objective.02"],
-            trigger: {
-                event: "Files.Open",
-                condition: (data: unknown) =>
-                    eventMatchesFile(
-                        data,
-                        this.Data.authorizationFileId,
-                        this.Data.authorizationPath,
-                    ),
-            },
         },
         {
             name: "q14.objective.04",
             description: "Resolve the approver.",
             unlocksAfter: ["q14.objective.03"],
-            trigger: {
-                event: "Files.Open",
-                condition: (data: unknown) =>
-                    eventMatchesFile(
-                        data,
-                        this.Data.approverFileId,
-                        this.Data.approverPath,
-                    ),
-            },
         },
         {
             name: "q14.objective.05",
@@ -271,11 +226,7 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
     ];
 
     override async CreateData(): Promise<Q14QuestData> {
-        await ensureFolder(
-            "/exports",
-            "exports",
-            "/",
-        );
+        await ensureFolder("/exports", "exports", "/");
         await ensureFolder(
             "/exports/operations",
             "operations",
@@ -349,147 +300,104 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
             authorizationFileId,
             approverFileId,
             justificationFileId,
-            marcusDialogStarted: false,
         };
     }
 
     override OnStart() {
-        gameRuntime.persistence.load();
         gameRuntime.quest.start(Q14_THE_OWNER);
     }
 
     override OnObjectivesStart() {
-        setQuestReward(
-            this,
-            gameRuntime.flagStore.get<boolean>(
-                "dead_signal.q14.exception_access_found",
-            ) === true,
-        );
-
-        this.Events.on(
-            "Files.Open",
-            (data) => {
-                if (
-                    !eventMatchesFile(
-                        data,
-                        this.Data.registryFileId,
-                        this.Data.registryPath,
-                    )
-                ) {
-                    return;
-                }
-
+        this.Events.on("Files.Open", (data) => {
+            if (
+                matchesFileEvent(
+                    data,
+                    this.Data.registryFileId,
+                    this.Data.registryPath,
+                )
+            ) {
                 markFlag(
                     "dead_signal.q14.override_access_registry_found",
                 );
                 markFlag(
                     "dead_signal.q14.delegated_access_confirmed",
                 );
-            },
-        );
+                this.completeObjective("q14.objective.01");
+                return;
+            }
 
-        this.Events.on(
-            "Files.Open",
-            (data) => {
-                if (
-                    !eventMatchesFile(
-                        data,
-                        this.Data.sessionFileId,
-                        this.Data.sessionPath,
-                    )
-                ) {
-                    return;
-                }
-
+            if (
+                matchesFileEvent(
+                    data,
+                    this.Data.sessionFileId,
+                    this.Data.sessionPath,
+                ) &&
+                gameRuntime.flagStore.get<boolean>(
+                    "dead_signal.q14.override_access_registry_found",
+                ) === true
+            ) {
                 markFlag(
                     "dead_signal.q14.access_window_found",
                 );
                 markFlag(
                     "dead_signal.q14.override_session_found",
                 );
-            },
-        );
+                this.completeObjective("q14.objective.02");
+                return;
+            }
 
-        this.Events.on(
-            "Files.Open",
-            (data) => {
-                if (
-                    !eventMatchesFile(
-                        data,
-                        this.Data.authorizationFileId,
-                        this.Data.authorizationPath,
-                    )
-                ) {
-                    return;
-                }
-
+            if (
+                matchesFileEvent(
+                    data,
+                    this.Data.authorizationFileId,
+                    this.Data.authorizationPath,
+                ) &&
+                gameRuntime.flagStore.get<boolean>(
+                    "dead_signal.q14.override_session_found",
+                ) === true
+            ) {
                 markFlag(
                     "dead_signal.q14.marcus_access_approval_confirmed",
                 );
-            },
-        );
+                this.completeObjective("q14.objective.03");
+                return;
+            }
 
-        this.Events.on(
-            "Files.Open",
-            (data) => {
-                if (
-                    !eventMatchesFile(
-                        data,
-                        this.Data.approverFileId,
-                        this.Data.approverPath,
-                    )
-                ) {
-                    return;
-                }
+            if (
+                matchesFileEvent(
+                    data,
+                    this.Data.approverFileId,
+                    this.Data.approverPath,
+                ) &&
+                gameRuntime.flagStore.get<boolean>(
+                    "dead_signal.q14.marcus_access_approval_confirmed",
+                ) === true
+            ) {
+                markFlag("dead_signal.q14.marcus_reed_confirmed");
+                this.completeObjective("q14.objective.04");
+                createMarcusContact(this);
+                return;
+            }
 
-                markFlag(
-                    "dead_signal.q14.marcus_reed_confirmed",
-                );
-
-                if (!this.Data.marcusDialogStarted) {
-                    this.SetData(
-                        "marcusDialogStarted",
-                        true,
-                    );
-                    this.createDialog("default");
-                }
-            },
-        );
-
-        this.Events.on(
-            "Files.Open",
-            (data) => {
-                if (
-                    !eventMatchesFile(
-                        data,
-                        this.Data.justificationFileId,
-                        this.Data.justificationPath,
-                    )
-                ) {
-                    return;
-                }
-
-                setQuestReward(
-                    this,
-                    true,
-                );
+            if (
+                matchesFileEvent(
+                    data,
+                    this.Data.justificationFileId,
+                    this.Data.justificationPath,
+                )
+            ) {
                 markFlag(
                     "dead_signal.q14.exception_access_found",
                 );
-            },
-        );
+            }
+        });
 
         if (
             gameRuntime.flagStore.get<boolean>(
                 "dead_signal.q14.marcus_reed_confirmed",
-            ) === true &&
-            !this.Data.marcusDialogStarted
+            ) === true
         ) {
-            this.SetData(
-                "marcusDialogStarted",
-                true,
-            );
-            this.createDialog("default");
+            createMarcusContact(this);
         }
     }
 
@@ -531,9 +439,6 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
                 speaker: "Marcus Reed",
                 text: "Correct.",
                 onEnd: () => {
-                    markFlag(
-                        "dead_signal.marcus_introduced",
-                    );
                     markFlag(
                         "dead_signal.marcus_authority_confirmed",
                     );
@@ -625,9 +530,6 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
         markFlag(
             "dead_signal.q14.primary_audit_system_required",
         );
-        markFlag(
-            "dead_signal.q14.completed",
-        );
 
         const completion = gameRuntime.quest.complete(
             Q14_THE_OWNER,
@@ -639,12 +541,10 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
             );
         }
 
-        const baseRewardId = asId<"Reward">(
-            "dead_signal.q14.xp.base",
-        );
+        markFlag("dead_signal.q14.completed");
 
         gameRuntime.reward.claim({
-            id: baseRewardId,
+            id: asId<"Reward">("dead_signal.q14.xp.base"),
             kind: "experience",
             amount: Q14_BASE_XP,
         });
@@ -654,19 +554,15 @@ export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData> {
                 "dead_signal.q14.exception_access_found",
             ) === true
         ) {
-            const optionalRewardId = asId<"Reward">(
-                "dead_signal.q14.xp.exception-access",
-            );
-
             gameRuntime.reward.claim({
-                id: optionalRewardId,
+                id: asId<"Reward">(
+                    "dead_signal.q14.xp.exception-access",
+                ),
                 kind: "experience",
                 amount: Q14_OPTIONAL_XP,
             });
         }
 
         gameRuntime.persistence.save();
-
-        void Q14_COMPLETION_ID;
     }
 }
