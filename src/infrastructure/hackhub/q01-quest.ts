@@ -5,11 +5,11 @@ import {
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
-    Q01_CERTIFICATE_COMMAND,
-    Q01_CERTIFICATE_TARGET,
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
+    Q01_SERVICE_CHECK_OPTION,
+    Q01_SERVICE_CHECK_TARGET,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
 } from "../../content/index.js";
@@ -59,16 +59,6 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
         service: "https",
     },
 ];
-
-const Q01_CERTIFICATE_RECORD = [
-    "MERIDIAN LOGISTICS — HTTPS CERTIFICATE INSPECTION",
-    "",
-    `Target: ${Q01_TARGET_IP}`,
-    "Port: 443/tcp",
-    "Service: HTTPS",
-    "",
-    "Issuer: ARKA Secure Infrastructure",
-].join("\n");
 
 const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
 
@@ -129,9 +119,11 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description:
-                `Inspect the HTTPS certificate for port 443. Run: ${Q01_CERTIFICATE_COMMAND} ${Q01_CERTIFICATE_TARGET}`,
-            terminalCommand: `${Q01_CERTIFICATE_COMMAND} ${Q01_CERTIFICATE_TARGET}`,
-            info: "This is a read-only certificate inspection. No exploitation is required.",
+                `Run nmap ${Q01_TARGET_IP} ${Q01_SERVICE_CHECK_OPTION} for a basic service/security check.`,
+            terminalCommand:
+                `nmap ${Q01_SERVICE_CHECK_TARGET} ${Q01_SERVICE_CHECK_OPTION}`,
+            info:
+                "Use the service/version scan to perform the basic assessment. No exploitation is required.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -209,14 +201,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             Q01_NMAP_RESULT,
         );
 
-        Shell.addCommandData(
-            Q01_CERTIFICATE_COMMAND,
-            Q01_CERTIFICATE_TARGET,
-            Q01_CERTIFICATE_RECORD,
-        );
-
         this.Events.on("Terminal.Command", (data) => {
-            void this.handleTerminalCommand(data);
+            this.handleTerminalCommand(data);
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -287,71 +273,56 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData(
-            Q01_CERTIFICATE_COMMAND,
-            Q01_CERTIFICATE_TARGET,
-        );
         gameRuntime.persistence.save();
     }
 
-    private async handleTerminalCommand(
-        data: TerminalCommandData,
-    ): Promise<void> {
+    private handleTerminalCommand(data: TerminalCommandData): void {
         if (
-            data.command === "nmap" &&
-            data.args[0] === this.Data.targetIp
+            data.command !== "nmap" ||
+            data.args[0] !== this.Data.targetIp
         ) {
-            const result = Shell.getCommandData(
-                "nmap",
-                this.Data.targetIp,
-            );
+            return;
+        }
 
-            if (!this.isExpectedNmapResult(result)) {
-                return;
-            }
+        const result = Shell.getCommandData(
+            "nmap",
+            this.Data.targetIp,
+        );
 
-            if (!this.Data.networkScanned) {
-                this.SetData("networkScanned", true);
-                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-            }
+        if (!this.isExpectedNmapResult(result)) {
+            return;
+        }
 
-            if (!this.Data.servicesIdentified) {
-                this.SetData("servicesIdentified", true);
+        const isServiceCheck = data.args.includes(Q01_SERVICE_CHECK_OPTION);
+
+        if (isServiceCheck) {
+            if (
+                this.Data.servicesIdentified &&
+                !this.Data.basicVulnerabilityChecksCompleted
+            ) {
+                this.SetData(
+                    "basicVulnerabilityChecksCompleted",
+                    true,
+                );
                 this.completeObjective(
-                    Q01_OBJECTIVE_IDS.identifyServices,
+                    Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
                 );
             }
 
             return;
         }
 
-        if (
-            data.command !== Q01_CERTIFICATE_COMMAND ||
-            data.args[0] !== Q01_CERTIFICATE_TARGET ||
-            !this.Data.servicesIdentified
-        ) {
-            return;
+        if (!this.Data.networkScanned) {
+            this.SetData("networkScanned", true);
+            this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
         }
 
-        const result = Shell.getCommandData(
-            Q01_CERTIFICATE_COMMAND,
-            Q01_CERTIFICATE_TARGET,
-        );
-
-        if (
-            result !== Q01_CERTIFICATE_RECORD ||
-            this.Data.basicVulnerabilityChecksCompleted
-        ) {
-            return;
+        if (!this.Data.servicesIdentified) {
+            this.SetData("servicesIdentified", true);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.identifyServices,
+            );
         }
-
-        this.SetData(
-            "basicVulnerabilityChecksCompleted",
-            true,
-        );
-        this.completeObjective(
-            Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-        );
     }
 
     private isExpectedNmapResult(
