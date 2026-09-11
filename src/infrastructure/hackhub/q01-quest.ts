@@ -358,9 +358,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         return (
             payload.name === `${Q01_CERTIFICATE_FILE_NAME}.txt` ||
-            payload.path === Q01_CERTIFICATE_FILE_PATH ||
-            payload.fileId !== undefined &&
-                payload.fileId === payload.id
+            payload.path === Q01_CERTIFICATE_FILE_PATH
         );
     }
 
