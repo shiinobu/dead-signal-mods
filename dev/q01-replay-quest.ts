@@ -1,5 +1,4 @@
 import {
-    Network,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
@@ -9,7 +8,6 @@ import {
     Q01_OBJECTIVE_IDS,
     Q01_SSH_COMMAND,
     Q01_SSH_PASSWORD,
-    Q01_SSH_PORT,
     Q01_SSH_USERNAME,
     Q01_TARGET_IP,
 } from "../src/content/q01.js";
@@ -36,6 +34,17 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
+interface Q01SshAuditInput {
+    readonly host: string;
+}
+
+interface Q01SshAuditResult {
+    readonly ip: string;
+    readonly status: "OPEN" | "CLOSE";
+}
+
+const Q01_SSH_AUDIT_COMMAND = `ssh-audit -h ${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`;
+
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
     { port: 22, status: "OPEN", service: "ssh" },
     { port: 80, status: "OPEN", service: "http" },
@@ -53,6 +62,15 @@ const Q01_REPORT_REQUIRED_CONTENT = [
     "No critical vulnerabilities identified.",
     "Further internal assessment is recommended.",
 ];
+
+const Q01_SSH_AUDIT_INPUT: Q01SshAuditInput = {
+    host: `${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`,
+};
+
+const Q01_SSH_AUDIT_RESULT: Q01SshAuditResult = {
+    ip: Q01_TARGET_IP,
+    status: "OPEN",
+};
 
 @RegisterQuest
 export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
@@ -93,8 +111,8 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            terminalCommand: Q01_SSH_COMMAND,
-            hint: "Use the authorized audit account to verify SSH access.",
+            terminalCommand: Q01_SSH_AUDIT_COMMAND,
+            hint: "Use the development SSH audit check to verify the authorized account path.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -156,44 +174,17 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     }
 
     override OnStart() {
-        Network.createSubnetNetwork({
-            ip: this.Data.targetIp,
-            type: Network.Type.Router,
-            ports: [
-                {
-                    external: Q01_SSH_PORT,
-                    internal: Q01_SSH_PORT,
-                    active: true,
-                    service: "ssh",
-                },
-                {
-                    external: 80,
-                    internal: 80,
-                    active: true,
-                    service: "http",
-                },
-                {
-                    external: 443,
-                    internal: 443,
-                    active: true,
-                    service: "https",
-                },
-            ],
-            users: [
-                Network.createUser({
-                    username: Q01_SSH_USERNAME,
-                    password: Q01_SSH_PASSWORD,
-                }),
-            ],
-            children: [],
-        });
-
         this.sendMail(0);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
     }
 
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
+        Shell.addCommandData(
+            "ssh-audit",
+            Q01_SSH_AUDIT_INPUT,
+            Q01_SSH_AUDIT_RESULT,
+        );
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data as TerminalCommandData);
@@ -221,15 +212,20 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnComplete() {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Network.destroyNetwork(this.Data.targetIp);
+        Shell.removeCommandData("ssh-audit", Q01_SSH_AUDIT_INPUT);
     }
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Network.destroyNetwork(this.Data.targetIp);
+        Shell.removeCommandData("ssh-audit", Q01_SSH_AUDIT_INPUT);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
+        if (data.command === "ssh-audit") {
+            this.handleSshAuditCommand(data.args);
+            return;
+        }
+
         if (
             data.command !== "nmap" ||
             data.args[0] !== this.Data.targetIp
@@ -259,6 +255,40 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
     }
 
+    private handleSshAuditCommand(args: readonly string[]): void {
+        if (
+            args.length !== 2 ||
+            args[0] !== "-h" ||
+            args[1] !== Q01_SSH_AUDIT_INPUT.host ||
+            !this.Data.servicesIdentified
+        ) {
+            return;
+        }
+
+        const result = Shell.getCommandData(
+            "ssh-audit",
+            Q01_SSH_AUDIT_INPUT,
+        );
+
+        if (!this.isExpectedSshAuditResult(result)) {
+            return;
+        }
+
+        if (
+            result.ip !== this.Data.targetIp ||
+            result.status !== "OPEN"
+        ) {
+            return;
+        }
+
+        if (!this.Data.sshConnected) {
+            this.SetData("sshConnected", true);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
+            );
+        }
+    }
+
     private handleSshConnection(ip: string): void {
         if (
             ip !== this.Data.targetIp ||
@@ -273,6 +303,19 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                 Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             );
         }
+    }
+
+    private isExpectedSshAuditResult(
+        result: unknown,
+    ): result is Q01SshAuditResult {
+        return (
+            typeof result === "object" &&
+            result !== null &&
+            "ip" in result &&
+            "status" in result &&
+            typeof result.ip === "string" &&
+            (result.status === "OPEN" || result.status === "CLOSE")
+        );
     }
 
     private isExpectedNmapResult(
