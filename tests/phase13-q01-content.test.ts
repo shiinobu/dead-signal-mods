@@ -5,6 +5,10 @@ import {
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
+    Q01_SSH_COMMAND,
+    Q01_SSH_PASSWORD,
+    Q01_SSH_PORT,
+    Q01_SSH_USERNAME,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
 } from "../src/content/index.js";
@@ -29,6 +33,13 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_THE_CONTRACT.id, "dead_signal.q01");
         assert.equal(Q01_THE_CONTRACT.title, "THE CONTRACT");
         assert.equal(Q01_TARGET_IP, "203.0.113.42");
+    });
+
+    it("defines the authorized SSH audit account", () => {
+        assert.equal(Q01_SSH_USERNAME, "audit");
+        assert.equal(Q01_SSH_PASSWORD, "meridian-audit");
+        assert.equal(Q01_SSH_PORT, 22);
+        assert.equal(Q01_SSH_COMMAND, "ssh audit@203.0.113.42");
     });
 
     it("preserves the five locked player objective ids", () => {
