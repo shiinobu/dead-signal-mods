@@ -74,7 +74,7 @@ Supporting guidance:
 
 - Terminal affordance for `nmap 203.0.113.42`.
 - Short hint for the expected exposed services.
-- Terminal affordance for `ssh audit@203.0.113.42`.
+- Terminal affordance for `ssh -h audit@203.0.113.42 -p 22`.
 - Short hint that Adrian supplied an authorized audit account.
 - Short hint for the report destination/action.
 
@@ -84,7 +84,7 @@ No internal mod paths are exposed in hints.
 
 ### Network
 
-The quest creates a dedicated virtual target network in `OnStart()`:
+The quest creates a dedicated virtual target network in `OnStart()` using `Network.Type.Router`, matching the official SDK SSH quest example:
 
 ```text
 203.0.113.42
@@ -129,17 +129,15 @@ Repeating Nmap does not satisfy Objective 04.
 
 ### Authorized SSH Verification
 
-Objective 04 is completed only after the real in-game SSH connection event is received for the target IP and the authorized username:
+The player-facing SSH syntax follows the current HackHub Handbook:
 
-```text
-Terminal.SSHConnect
-        ↓
-203.0.113.42
-        ↓
-audit
-        ↓
-Perform basic vulnerability checks = complete
+```bash
+ssh -h audit@203.0.113.42 -p 22
 ```
+
+Port is supplied with `-p`; the `-h` argument contains `username@ip` without a port.
+
+Objective 04 is completed only after the real in-game `Terminal.SSH.Connected` event is received for `203.0.113.42`.
 
 The implementation does not simulate the SSH result with a fake terminal command.
 
@@ -206,6 +204,8 @@ Live Q01 from clean/replay state
 Verify one-scan flow
         ↓
 Verify Nmap cannot complete Objective 04
+        ↓
+Verify documented SSH syntax reaches the target
         ↓
 Verify authorized SSH completes Objective 04
         ↓
