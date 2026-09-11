@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsx esbuild.config.ts",
+    "build:replay:q01": "tsx scripts/build-q01-replay.ts",
     "dev": "tsx scripts/dev-watch.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "tsx --test"
