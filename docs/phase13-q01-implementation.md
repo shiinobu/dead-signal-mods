@@ -74,7 +74,7 @@ Supporting guidance:
 
 - Terminal affordance for `nmap 203.0.113.42`.
 - Short hint for the expected exposed services.
-- Terminal affordance for `ssh -h audit@203.0.113.42 -p 22`.
+- Terminal affordance for `ssh -h audit@203.0.113.42`.
 - Short hint that Adrian supplied an authorized audit account.
 - Short hint for the report destination/action.
 
@@ -84,21 +84,26 @@ No internal mod paths are exposed in hints.
 
 ### Network
 
-The quest creates a dedicated virtual target network in `OnStart()` using `Network.Type.Router`, matching the official SDK SSH quest example:
+The quest creates a dedicated public router with a private child device for the SSH landing point. This mirrors the working modding pattern used for SSH-enabled targets: the public router exposes the audit ports, while the child device owns the SSH-capable user and service.
 
 ```text
-203.0.113.42
+203.0.113.42  (public router)
 ├── 22 / ssh
 ├── 80 / http
 └── 443 / https
+        │
+        └── 10.0.0.2  (SSH child device)
+            └── 22 / ssh
+                └── user: audit
 ```
 
 The SSH account is explicitly authorized by the mission brief:
 
 ```text
 username: audit
-password: meridian-audit
 ```
+
+The implementation keeps the target credential inside the network user object; the player-facing terminal syntax does not accept a password argument.
 
 The production manifest therefore requires the `network` permission.
 
@@ -129,13 +134,11 @@ Repeating Nmap does not satisfy Objective 04.
 
 ### Authorized SSH Verification
 
-The player-facing SSH syntax follows the current HackHub Handbook:
+The player-facing SSH syntax follows the current HackHub Handbook, using the default SSH port because `-p` is optional:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
-
-Port is supplied with `-p`; the `-h` argument contains `username@ip` without a port.
 
 Objective 04 is completed only after the real in-game `Terminal.SSH.Connected` event is received for `203.0.113.42`.
 
