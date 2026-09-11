@@ -46,14 +46,15 @@ nmap 203.0.113.42
 
 8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. Connect using the current HackHub SSH syntax and the authorized audit user:
+10. Run the authorized SSH audit check using the current HackHub syntax:
 
 ```bash
-ssh -h audit@203.0.113.42 -p 22
+ssh -h audit@203.0.113.42
 ```
 
-11. Confirm the SSH connection succeeds against the direct virtual target and Objective 04 completes only after the `Terminal.SSH.Connected` event for `203.0.113.42`.
-12. Submit the audit report using the source-defined facts, including:
+11. Confirm the terminal accepts the scoped SSH response for `203.0.113.42` with status `OPEN` and Objective 04 completes.
+12. If HackHub emits `Terminal.SSH.Connected`, confirm that event also completes Objective 04 for the same target.
+13. Submit the audit report using the source-defined facts, including:
 
 ```text
 Target: Meridian Logistics
@@ -63,9 +64,9 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-13. Confirm the audit-report objective completes and the development quest finishes.
-14. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
-15. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
+14. Confirm the audit-report objective completes and the development quest finishes.
+15. Confirm the replay build does not grant production XP/money and does not set `dead_signal.q01.completed`.
+16. Confirm no Q14 or Phase 12 diagnostic content is exposed by the development package.
 
 ## Objective UX Contract
 
@@ -83,7 +84,7 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Network Validation Detail
 
-The target is intentionally implemented as a direct `Network.Type.Device`, matching the simple public target shape used for the audit. There is no router/child-device hop in Q01.
+The target is intentionally implemented as a direct `Network.Type.Device`, matching the simple public target shape used for the audit. The SSH interaction uses the native `ssh` command with a Q01-scoped successful response through `Shell.addCommandData()`.
 
 ```text
 203.0.113.42
