@@ -1,4 +1,5 @@
 import {
+    Network,
     Quest as HackHubQuest,
     RegisterQuest,
     Shell,
@@ -9,6 +10,7 @@ import {
     Q01_OBJECTIVE_IDS,
     Q01_REWARDS,
     Q01_SSH_COMMAND,
+    Q01_SSH_PASSWORD,
     Q01_SSH_PORT,
     Q01_SSH_USERNAME,
     Q01_TARGET_IP,
@@ -44,14 +46,9 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-interface Q01SshCommandInput {
-    readonly host: string;
-    readonly key: string;
-}
-
-interface Q01SshCommandData {
+interface Q01SshConnectedEvent {
     readonly ip: string;
-    readonly status: "OPEN" | "CLOSE";
+    readonly username: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -71,16 +68,6 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
         service: "https",
     },
 ];
-
-const Q01_SSH_COMMAND_INPUT: Q01SshCommandInput = {
-    host: `${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`,
-    key: "",
-};
-
-const Q01_SSH_COMMAND_RESULT: Q01SshCommandData = {
-    ip: Q01_TARGET_IP,
-    status: "OPEN",
-};
 
 const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
 
@@ -210,6 +197,39 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
     override OnStart() {
         gameRuntime.quest.start(Q01_THE_CONTRACT);
+
+        Network.createSubnetNetwork({
+            ip: this.Data.targetIp,
+            type: Network.Type.Router,
+            users: [
+                Network.createUser({
+                    username: Q01_SSH_USERNAME,
+                    password: Q01_SSH_PASSWORD,
+                }),
+            ],
+            ports: [
+                {
+                    external: Q01_SSH_PORT,
+                    internal: Q01_SSH_PORT,
+                    active: true,
+                    service: "ssh",
+                },
+                {
+                    external: 80,
+                    internal: 80,
+                    active: true,
+                    service: "http",
+                },
+                {
+                    external: 443,
+                    internal: 443,
+                    active: true,
+                    service: "https",
+                },
+            ],
+            children: [],
+        });
+
         this.sendMail(0);
         this.SetData("auditScopeReviewed", true);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
@@ -222,18 +242,12 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             Q01_NMAP_RESULT,
         );
 
-        Shell.addCommandData(
-            "ssh",
-            Q01_SSH_COMMAND_INPUT,
-            Q01_SSH_COMMAND_RESULT,
-        );
-
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data);
         });
 
-        this.Events.on("Terminal.SSH.Connected", (ip) => {
-            this.handleSshConnection(ip);
+        this.Events.on("Terminal.SSHConnect", (data) => {
+            this.handleSshConnection(data as Q01SshConnectedEvent);
         });
 
         this.Events.on("Mail.Sent", (data) => {
@@ -304,21 +318,16 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
+        Network.destroyNetwork(this.Data.targetIp);
         gameRuntime.persistence.save();
     }
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
+        Network.destroyNetwork(this.Data.targetIp);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
-        if (data.command === "ssh") {
-            this.handleSshCommand(data.args);
-            return;
-        }
-
         if (
             data.command !== "nmap" ||
             data.args[0] !== this.Data.targetIp
@@ -348,72 +357,21 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
     }
 
-    private handleSshCommand(args: readonly string[]): void {
-        if (!this.isExpectedSshCommand(args)) {
-            return;
-        }
-
-        const result = Shell.getCommandData(
-            "ssh",
-            Q01_SSH_COMMAND_INPUT,
-        );
-
-        if (!this.isExpectedSshResult(result)) {
-            return;
-        }
-
-        this.completeSshObjective();
-    }
-
-    private handleSshConnection(ip: string): void {
+    private handleSshConnection(data: Q01SshConnectedEvent): void {
         if (
-            ip !== this.Data.targetIp ||
+            data.ip !== this.Data.targetIp ||
+            data.username !== Q01_SSH_USERNAME ||
             !this.Data.servicesIdentified
         ) {
             return;
         }
 
-        this.completeSshObjective();
-    }
-
-    private completeSshObjective(): void {
-        if (this.Data.sshConnected) {
-            return;
+        if (!this.Data.sshConnected) {
+            this.SetData("sshConnected", true);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
+            );
         }
-
-        this.SetData("sshConnected", true);
-        this.completeObjective(
-            Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
-        );
-    }
-
-    private isExpectedSshCommand(args: readonly string[]): boolean {
-        if (args.length < 2 || args[0] !== "-h") {
-            return false;
-        }
-
-        if (args[1] !== `${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`) {
-            return false;
-        }
-
-        if (args.length === 2) {
-            return true;
-        }
-
-        return (
-            args.length === 4 &&
-            args[2] === "-p" &&
-            args[3] === String(Q01_SSH_PORT)
-        );
-    }
-
-    private isExpectedSshResult(
-        result: Q01SshCommandData | undefined,
-    ): result is Q01SshCommandData {
-        return (
-            result?.ip === this.Data.targetIp &&
-            result.status === "OPEN"
-        );
     }
 
     private isExpectedNmapResult(
