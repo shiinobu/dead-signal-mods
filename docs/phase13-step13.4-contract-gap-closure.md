@@ -6,9 +6,9 @@ Date: 2026-09-11
 
 ## Status
 
-**COMPLETE — Q14 DOMAIN CONTENT IS NOW SOURCE-BACKED AND COMPLETION-SAFE**
+**COMPLETE — Q14 OBJECTIVE CONTRACT IS SOURCE-BACKED AND OPTIONAL-OBJECTIVE SAFE**
 
-Step 13.4 closes the remaining Q14 source-to-runtime gaps discovered during Step 13.3. The correction is based on the locked Q14 artifact and the locked Phase 9/10 objective model.
+Step 13.4 closes the Q14 objective-level source-to-runtime gaps discovered during Step 13.3. The correction is based on the locked Q14 artifact and the locked Phase 9/10 objective model. Full HackHub production registration remains a later integration step.
 
 ## Source findings
 
@@ -75,9 +75,9 @@ The runtime objective contract was extended with:
 readonly optional?: boolean;
 ```
 
-with `false` behavior remaining the default when the field is omitted.
+with required behavior remaining the default when the field is omitted.
 
-`QuestService.areObjectivesComplete()` now evaluates only required objectives for quest completion. This preserves existing behavior for all current objectives while allowing source-defined optional investigation content.
+`QuestService.areObjectivesComplete()` now evaluates only required objectives for quest completion. This implements the already-locked optional-investigation semantics rather than creating a new story rule.
 
 ## Q14 production-domain definition
 
@@ -104,8 +104,8 @@ The Step 13.3 Q14 source-backed test was updated to consume the production-domai
 It now verifies:
 
 1. Q14 is incomplete with no relevant state.
-2. All seven required state boundaries are sufficient for Q14 completion.
-3. Objective 07 does not block completion when its optional flag is absent.
+2. All required Q14 state boundaries are sufficient for objective completion.
+3. Objective 07 does not block Q14 completion when its optional flag is absent.
 4. Objective 07 remains valid when completed.
 5. Explicit negative Marcus/operator states are never created.
 
@@ -135,11 +135,25 @@ StateStore
 
 `StateStore` remains the canonical root state owner and `ConditionNode` remains the single condition representation. Phase 10 also explicitly freezes the quest/objective semantics and forbids semantic reinterpretation of the Phase 8 rules. fileciteturn161file1L223-L241
 
-## Remaining Q15 gap
+## Remaining integration boundaries
 
-Q15 Objective 04 — `RECONSTRUCT THE SESSION` remains unresolved at the dedicated state-key level because the locked Q15 persistent state names `operator_session_found` but does not define a separate exact completion key for the action timeline itself. The timeline itself is source-backed, but collapsing it into an already-used state key would create semantic ambiguity.
+### Q14 quest-completion story flag
 
-Therefore this item remains explicitly tracked as a source-to-runtime gap and is not guessed in Step 13.4. The timeline source is:
+The locked Q14 source requires:
+
+```text
+dead_signal.q14.completed = true
+```
+
+The current generic `QuestService` persists quest completion in `QuestState.completedQuestIds`, but it does not automatically write arbitrary story flags. A separate source-backed completion transition must therefore be wired at the application/content integration boundary rather than adding a hidden side effect to `QuestService`.
+
+This remains **INTEGRATION-DEFERRED**, not source-ambiguous.
+
+### Q15 Objective 04
+
+Q15 Objective 04 — `RECONSTRUCT THE SESSION` remains unresolved at the dedicated state-key level because the locked Q15 persistent state names `operator_session_found` but does not define a separate exact completion key for the action timeline itself. Reusing that state would collapse two distinct source objectives into one completion boundary.
+
+The source-backed timeline is:
 
 ```text
 LOGIN
@@ -156,6 +170,8 @@ LOGOUT
 
 fileciteturn200file2L145-L158
 
+This remains an explicit source-to-runtime gap.
+
 ## Step 13.4 acceptance criteria
 
 - Q14 Objective 03 is source-backed and executable.
@@ -165,10 +181,11 @@ LOGOUT
 - Existing required-objective behavior remains unchanged by default.
 - No negative Q14 state is asserted.
 - No locked Phase 9/10 ownership boundary is changed.
+- Q14 completion-flag wiring is explicitly deferred to the application/content integration boundary.
 - Q15 Objective 04 remains explicitly blocked rather than inferred.
 
 ## Disposition
 
 **STEP 13.4 COMPLETE**
 
-The next step may proceed toward production HackHub quest registration/integration for the now source-complete Q14 domain content, while Q15 Objective 04 remains tracked separately.
+The next step may proceed to the Q14 production registration/integration boundary, including the explicit `dead_signal.q14.completed` transition, while Q15 Objective 04 remains separately tracked.
