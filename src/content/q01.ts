@@ -1,0 +1,37 @@
+import { asId } from "../core/index.js";
+import { always } from "../domain/shared/index.js";
+import type { Quest } from "../domain/quest/index.js";
+
+export const Q01_THE_CONTRACT: Quest = {
+    id: asId<"Quest">("dead_signal.q01"),
+    chapterId: "chapter-01-dead-signal",
+    title: "THE CONTRACT",
+    description: "Routine security audit for Meridian Logistics in Jakarta.",
+    objectives: [
+        {
+            id: "q01.runtime.completion",
+            description: "Q01 runtime completion boundary.",
+            condition: always(),
+        },
+    ],
+};
+
+export const Q01_OBJECTIVE_IDS = {
+    reviewScope: "q01.objective.01",
+    scanNetwork: "q01.objective.02",
+    identifyServices: "q01.objective.03",
+    basicVulnerabilityChecks: "q01.objective.04",
+    submitAudit: "q01.objective.05",
+} as const;
+
+export const Q01_TARGET_IP = "203.0.113.42";
+
+export const Q01_FINAL_STATE_FLAG = "dead_signal.q01.completed";
+
+export const Q01_REWARDS = {
+    externalAudit: 35,
+    networkServiceEnumeration: 20,
+    basicVulnerabilityAssessment: 10,
+    submitCorrectReport: 15,
+    money: 200,
+} as const;
