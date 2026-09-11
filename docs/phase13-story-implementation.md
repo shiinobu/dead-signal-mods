@@ -1,13 +1,13 @@
 # DEAD SIGNAL — Phase 13 Story Implementation
 
 Date: 2026-09-11
-Status: **SEQUENTIAL CAMPAIGN EXECUTION LOCKED — CURRENT TARGET Q01**
+Status: **SEQUENTIAL CAMPAIGN EXECUTION LOCKED — Q01 IMPLEMENTED, LIVE VALIDATION PENDING**
 
 ## Purpose
 
 Phase 13 turns the locked DEAD SIGNAL story/design outputs from Phases 1–8 into concrete game content while preserving the locked runtime contracts established by Phases 9–12.
 
-The execution strategy is now explicitly sequential: **Q01 → Q16**, with live HackHub validation as the gate between quests.
+The execution strategy is explicitly sequential: **Q01 → Q16**, with live HackHub validation as the gate between quests.
 
 ## Cross-phase verification baseline
 
@@ -108,25 +108,7 @@ The following remain mandatory:
 
 ## Previous Phase 13 Work — Historical / Superseded as Active Path
 
-Steps 13.1–13.6 previously explored Q14 as an early executable slice. That exploration remains preserved in Git history and documentation for auditability, but it is no longer the active execution path.
-
-Q14 was implemented before Q01–Q13 existed in production, which made it impossible to validate through the real campaign dependency chain. The sequential lock therefore supersedes that execution strategy.
-
-The previous Q14 production implementation has been removed from the current production source tree. It can be recovered from Git history when the campaign reaches Q14 in sequence.
-
-Historical Phase 13 artifacts remain available for provenance:
-
-- `docs/phase13-step13.1-story-source-audit.md`
-- `docs/phase13-step13.2-quest-implementation-map.md`
-- `docs/phase13-step13.2-amendment.md`
-- `docs/phase13-step13.3-source-backed-executable-slice.md`
-- `docs/phase13-step13.4-contract-gap-closure.md`
-- `docs/phase13-step13.5-production-hackhub-integration.md`
-- `docs/phase13-step13.6-q14-focused-ingame-validation.md`
-- `docs/phase13-step13.6-sequencing-amendment.md`
-- `docs/phase13-step13.6-validation-blocker-q13.md`
-
-These documents are historical records, not current implementation instructions.
+Q14 was previously implemented as an early downstream slice during Phase 13 exploration. That work is preserved in Git history and historical documentation, but it is not the active execution path. Q14 must not be reintroduced into production before the campaign reaches it in sequence.
 
 ## Step 13.1 — Story Source & Repository Audit
 
@@ -136,8 +118,6 @@ Artifact:
 
 Status: **COMPLETE**
 
-The step established the recoverable locked story/source inventory and distinguished canonical source facts from implementation inference.
-
 ## Step 13.2 — Quest Implementation Mapping
 
 Artifact:
@@ -146,28 +126,76 @@ Artifact:
 
 Status: **COMPLETE FOR RECOVERED CONTENT**
 
-The step mapped recovered story content to the canonical runtime ownership boundaries. Its Q14-first execution recommendation is now superseded by the sequential campaign lock.
+The earlier Q14-first execution recommendation is superseded by the sequential campaign lock.
 
-## Current Implementation Target — Q01
+## Q01 — THE CONTRACT
+
+Implementation artifact:
+
+`docs/phase13-q01-implementation.md`
+
+Source gate artifact:
+
+`docs/phase13-q01-source-gate.md`
+
+Implementation status:
+
+**IMPLEMENTED — LIVE VALIDATION PENDING**
+
+Recovered source and Phase 8 establish:
 
 ```text
-Q01 — THE CONTRACT
+ID:            dead_signal.q01
+Title:         THE CONTRACT
+Chapter:       01 — DEAD SIGNAL
+Location:      Jakarta
+Primary:       Adrian Cole
+Prerequisite:  none
+Target:        203.0.113.42
+State:         dead_signal.q01.completed = true
+Money:         $200
+Maximum XP:    80
 ```
 
-Verified Phase 8 XP contract:
+Player-facing objectives:
 
 ```text
-Complete external audit         35 XP
-Network/service enumeration     20 XP
-Basic vulnerability assessment  10 XP
-Submit correct report           15 XP
-Maximum                         80 XP
-Optional XP                      0 XP
+01  Review audit scope
+02  Scan 203.0.113.42
+03  Identify exposed services
+04  Perform basic vulnerability checks
+05  Submit audit report
 ```
 
-Source evidence establishes these XP components and the Q01 title, but the complete Q01 objective/event/state/dialogue/technical-interaction specification is not currently represented in the readable repository or recovered source artifacts. It must be recovered before creating executable production semantics.
+Expected Nmap result:
 
-Therefore **Q01 is the current target, but implementation must not invent missing behavior**.
+```text
+22/tcp  OPEN  ssh
+80/tcp  OPEN  http
+443/tcp OPEN  https
+```
+
+Implementation files:
+
+```text
+src/content/q01.ts
+src/content/index.ts
+src/infrastructure/hackhub/q01-quest.ts
+src/index.ts
+manifest.json
+```
+
+The implementation uses `Terminal.Command` plus `Shell.addCommandData("nmap", ...)`, consistent with the validated Phase 12 terminal integration boundary. It does not depend on direct `Terminal.NmapScan` handling.
+
+The canonical persistent story state is limited to the recovered `dead_signal.q01.completed` flag. Player-facing objective state remains in HackHub's quest state.
+
+The locked Phase 8 XP allocation is dispatched through the canonical reward ownership chain as 35 + 20 + 10 + 15 = 80 XP, and the money reward is dispatched through `EconomyService` as `$200`.
+
+The implementation has not been declared live-validated or production-locked yet.
+
+## Q02–Q16
+
+Not active. No downstream quest may be implemented or registered into the production campaign until Q01 passes its live validation gate.
 
 ## Phase 13 Completion Condition
 
