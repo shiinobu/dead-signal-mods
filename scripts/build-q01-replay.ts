@@ -26,7 +26,7 @@ const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
 const sourceDssAppPath = resolve(
     projectRoot,
-    "src/infrastructure/hackhub/apps/dead-signal.html",
+    "public/dead-signal.html",
 );
 const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
