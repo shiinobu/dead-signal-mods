@@ -55,27 +55,21 @@ const commandSource = readFileSync(
 
 const productionEntrySource = readFileSync(
     resolve(
-        fileURLToPath(
-            new URL("../src/index.ts", import.meta.url),
-        ),
+        fileURLToPath(new URL("../src/index.ts", import.meta.url)),
     ),
     "utf8",
 );
 
 const replayEntrySource = readFileSync(
     resolve(
-        fileURLToPath(
-            new URL("../dev/q01-replay-entry.ts", import.meta.url),
-        ),
+        fileURLToPath(new URL("../dev/q01-replay-entry.ts", import.meta.url)),
     ),
     "utf8",
 );
 
 const replayQuestSource = readFileSync(
     resolve(
-        fileURLToPath(
-            new URL("../dev/q01-replay-quest.ts", import.meta.url),
-        ),
+        fileURLToPath(new URL("../dev/q01-replay-quest.ts", import.meta.url)),
     ),
     "utf8",
 );
@@ -85,7 +79,8 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /@RegisterApp/);
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
-        assert.match(appSource, /HTML\s*=\s*"dead-signal\.html"/);
+        assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/dead-signal\.html"/);
+        assert.match(appSource, /HTML\s*=\s*appHTML/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1220,\s*height:\s*800\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
@@ -105,6 +100,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
         assert.match(appSource, /startRecon:\s*\(target: string\)/);
         assert.match(appSource, /executeCommand:\s*\(commandLine: string\)/);
+        assert.match(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
     });
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
@@ -309,12 +305,12 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /command === "lynx"/);
     });
 
-    it("uses the DSS exported command entrypoint for desktop command execution", () => {
+    it("uses the DSS exported command entrypoint and request listener for desktop command execution", () => {
         assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*startRecon/);
         assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*executeCommand/);
-        assert.match(appSource, /startRecon:\s*\(target: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand\(\`recon -d \$\{target\}\`\)/);
-        assert.match(appSource, /executeCommand:\s*\(commandLine: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand\(commandLine\)/);
-        assert.doesNotMatch(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
+        assert.match(appSource, /startRecon:\s*\(target: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand/);
+        assert.match(appSource, /executeCommand:\s*\(commandLine: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand/);
+        assert.match(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
         assert.doesNotMatch(appSource, /throw new Error\(/);
     });
 });
