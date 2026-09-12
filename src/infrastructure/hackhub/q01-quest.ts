@@ -28,6 +28,10 @@ import {
 } from "../../content/index.js";
 
 import { asId } from "../../core/index.js";
+import {
+    normalizeReconTarget,
+} from "../../application/ops/recon-service.js";
+import { opsRuntime } from "../../application/ops-runtime.js";
 import { gameRuntime } from "./runtime.js";
 
 interface Q01QuestData {
@@ -89,25 +93,7 @@ const registerQ01ShellFixtures = (): void => {
     Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
 };
 
-const normalizeSubfinderTarget = (rawTarget: string): string | null => {
-    const value = rawTarget.trim().replace(/^['"]|['"]$/g, "");
-
-    if (!value) {
-        return null;
-    }
-
-    try {
-        const url = value.includes("://")
-            ? new URL(value)
-            : new URL(`https://${value}`);
-
-        return url.hostname.toLowerCase().replace(/\.$/, "");
-    } catch {
-        return null;
-    }
-};
-
-const getSubfinderTarget = (args: string[]): string | null => {
+const getReconTarget = (args: string[]): string | null => {
     const domainFlagIndex = args.findIndex(
         (arg) => arg === "-d" || arg === "--domain",
     );
@@ -117,16 +103,20 @@ const getSubfinderTarget = (args: string[]): string | null => {
         : args[0] ?? null;
 };
 
-const isExpectedSubfinderTarget = (args: string[]): boolean => {
-    const rawTarget = getSubfinderTarget(args);
+const isExpectedReconTarget = (args: string[]): boolean => {
+    const rawTarget = getReconTarget(args);
     const normalizedTarget = rawTarget
-        ? normalizeSubfinderTarget(rawTarget)
+        ? normalizeReconTarget(rawTarget)
         : null;
 
-    return (
-        normalizedTarget === Q01_WEB_HOST ||
-        normalizedTarget === Q01_WEB_HOME_HOST
-    );
+    if (
+        normalizedTarget !== Q01_WEB_HOST &&
+        normalizedTarget !== Q01_WEB_HOME_HOST
+    ) {
+        return false;
+    }
+
+    return opsRuntime.recon.resolveProfile(normalizedTarget)?.id === "q01";
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -227,7 +217,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: "Discover the public web host with lynx, enumerate its subdomains, then inspect the authorized security surface.",
+            hint: "Discover the public web host with lynx, run the reconnaissance module, then inspect the authorized security surface.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -426,8 +416,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return;
         }
 
-        if (data.command === "subfinder") {
-            if (!isExpectedSubfinderTarget(data.args)) {
+        if (data.command === "recon") {
+            if (!isExpectedReconTarget(data.args)) {
                 return;
             }
 
