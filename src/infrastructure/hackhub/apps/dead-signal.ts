@@ -14,14 +14,14 @@ import {
     opsRuntime,
 } from "../../../application/ops/runtime.js";
 import type {
+    OpsCommandDefinition,
+} from "../../../application/ops/command-registry.js";
+import type {
     OpsSessionSnapshot,
 } from "../../../application/ops/session-store.js";
 import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
-import type {
-    OpsCommandDefinition,
-} from "../../../application/ops/command-registry.js";
 
 const DSS_APP_TITLE = "DEAD-SIGNAL";
 
@@ -33,11 +33,6 @@ export class DeadSignalApp extends App {
     HTML = "./dead-signal.html";
     DefaultSize = { width: 1100, height: 720 };
     Unlocked = true;
-
-    Store = {
-        title: "DEAD-SIGNAL",
-        description: "DSS // Dead Signal System — integrated investigation workspace.",
-    };
 
     Exports = {
         getToolCatalog: (): readonly OpsToolDefinition[] =>
