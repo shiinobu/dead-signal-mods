@@ -30,7 +30,6 @@ export class DeadSignalApp extends App {
 
     Store = {
         title: "DEAD-SIGNAL",
-        ratings: 5,
         description: "DSS // Dead Signal System — integrated investigation workspace.",
     };
 
@@ -81,7 +80,6 @@ export class DeadSignalApp extends App {
             });
 
             if (!result) {
-                opsRuntime.session.fail();
                 Events.emit(DSS_RECON_EVENTS.failed, {
                     target: rawTarget,
                     reason: "Reconnaissance did not resolve a registered profile.",
