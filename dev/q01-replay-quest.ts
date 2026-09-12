@@ -51,7 +51,7 @@ interface BrowserMetaData {
 interface Q01LynxResult {
     readonly ips?: readonly string[];
     readonly address?: readonly string[];
-    readonly additional?: string;
+    readonly additional?: readonly string[];
 }
 
 const Q01_NMAP_RESULT = [
@@ -67,7 +67,7 @@ const Q01_LYNX_RESULT: Q01LynxResult = {
         Q01_CLIENT_NAME,
         "Jakarta Operations",
         "Canonical public web host discovered from the target IP.",
-    ].join("\n"),
+    ],
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
