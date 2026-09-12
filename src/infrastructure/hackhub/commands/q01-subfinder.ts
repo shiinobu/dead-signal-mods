@@ -139,11 +139,8 @@ export class Q01SubfinderCommand extends Command {
         const spinnerStartedAt = Date.now();
 
         while (Date.now() - spinnerStartedAt < SPINNER_DURATION_MS) {
-            this.printFrame(
-                tools,
-                normalizedTarget,
-                SPINNER_FRAMES[spinnerFrame],
-            );
+            const frame = SPINNER_FRAMES[spinnerFrame]!;
+            this.printFrame(tools, normalizedTarget, frame);
             spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES.length;
             await tools.sleep(SPINNER_DELAY_MS);
         }
