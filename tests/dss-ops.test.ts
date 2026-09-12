@@ -108,8 +108,8 @@ describe("DSS operations application foundation", () => {
     });
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
-        assert.match(appHtml, /DEAD-SIGNAL/);
-        assert.match(appHtml, /DSS \/\/ Dead Signal System/);
+        assert.match(appHtml, /DSS/);
+        assert.match(appHtml, /DEAD SIGNAL SYSTEM/);
         assert.match(appHtml, /Terminal\+/);
         assert.match(appHtml, />Recon</);
         assert.match(appHtml, /Wireshark\+/);
