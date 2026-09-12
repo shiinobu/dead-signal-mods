@@ -223,7 +223,7 @@ export class Q01SubfinderCommand extends Command {
         tools.println("");
 
         for (let index = 0; index < SOURCES.length; index += 1) {
-            const source = SOURCES[index];
+            const source = SOURCES[index]!;
             const status = getSourceStatus(index, activeSource);
             const foundCount =
                 status === "complete"
@@ -321,15 +321,14 @@ export class Q01SubfinderCommand extends Command {
         tools.println("");
 
         const subdomains = Q01_SUBFINDER_RESULT.split("\n");
-
         for (const subdomain of subdomains) {
             await tools.sleep(RESULT_DELAY_MS);
             tools.println(subdomain);
         }
 
-        const elapsedMs = Date.now() - animationStartedAt;
+        tools.println("");
         tools.println(
-            `[INF] Found ${subdomains.length} unique subdomains for ${normalizedTarget} in ${elapsedMs} milliseconds`,
+            `[INF] Found ${subdomains.length} unique subdomains for ${normalizedTarget}`,
         );
     }
 }
