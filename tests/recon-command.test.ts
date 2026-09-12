@@ -22,7 +22,7 @@ describe("DSS recon command", () => {
     });
 
     it("delegates reconnaissance behavior to the shared Ops runtime", () => {
-        assert.match(reconCommandSource, /opsRuntime\.recon\.run/);
+        assert.match(reconCommandSource, /opsRuntime\.runRecon/);
         assert.match(reconCommandSource, /formatReconProgressBar/);
         assert.match(reconCommandSource, /normalizeReconTarget/);
     });
