@@ -43,7 +43,9 @@ describe("DSS recon service", () => {
 
         const events: string[] = [];
         const result = await service.run(Q01_RECON_INPUT.replace("-d ", ""), {
-            onStarted: ({ profileId }) => events.push(`started:${profileId}`),
+            onStarted: ({ profileId, sources }) => {
+                events.push(`started:${profileId}:${sources.length}`);
+            },
             onSourceStarted: ({ source }) => events.push(`scan:${source.id}`),
             onSourceCompleted: ({ source, progressPercent }) =>
                 events.push(`done:${source.id}:${progressPercent}`),
@@ -60,7 +62,7 @@ describe("DSS recon service", () => {
             result?.hosts.join("\n"),
             Q01_RECON_RESULT,
         );
-        assert.equal(events[0], "started:q01");
+        assert.equal(events[0], "started:q01:5");
         assert.equal(events.at(-5), "completed:4");
         assert.deepEqual(events.slice(-4), [
             "host:portal.skynet-logistics.idx",
