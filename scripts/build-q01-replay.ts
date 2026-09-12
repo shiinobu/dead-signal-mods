@@ -50,7 +50,8 @@ await buildMod({
 
 const replayBundle = await readFile(replayModPath, "utf8");
 const requiredBundleMarkers = [
-    "Q01SubfinderCommand",
+    "ReconCommand",
+    "Q01_RECON_PROFILE",
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
     "www.skynet-logistics.idx",
@@ -59,7 +60,7 @@ const requiredBundleMarkers = [
 for (const marker of requiredBundleMarkers) {
     if (!replayBundle.includes(marker)) {
         throw new Error(
-            `Q01 replay bundle is stale or incomplete: missing fixture marker ${marker}`,
+            `Q01 replay bundle is stale or incomplete: missing DSS recon fixture marker ${marker}`,
         );
     }
 }
