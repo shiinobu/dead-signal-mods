@@ -1,6 +1,7 @@
 import { asId } from "../core/index.js";
 import { flagEquals } from "../domain/shared/index.js";
 import type { Quest } from "../domain/quest/index.js";
+import { ADRIAN_COLE } from "./characters.js";
 
 export const Q01_CLIENT_NAME = "Skynet Logistics";
 export const Q01_TARGET_IP = "203.0.113.42";
@@ -9,7 +10,7 @@ export const Q01_WEB_AUDIT_PATH = "/security";
 export const Q01_WEB_HTTP_URL = `http://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
 export const Q01_WEB_HTTPS_URL = `https://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
 
-export const Q01_ADRIAN_EMAIL = "adrian.cole@deadsignal.lock";
+export const Q01_ADRIAN_EMAIL = ADRIAN_COLE.email;
 export const Q01_REPORT_RECIPIENT = Q01_ADRIAN_EMAIL;
 export const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
 export const Q01_REPORT_BODY = [
