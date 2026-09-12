@@ -1,13 +1,13 @@
 # DEAD SIGNAL — Q01 Final Lock
 
 Date: 2026-09-12
-Status: **FINAL LOCK — REVISED DESIGN & IMPLEMENTATION METHOD; LIVE VALIDATION PENDING**
+Status: **FINAL LOCK — REVISED WEB SURFACE & REPORT DISCOVERY; LIVE VALIDATION PENDING**
 
 ## Lock Scope
 
-This document is the final implementation lock for Q01 after the explicit project-owner methodology revision.
+This document is the current implementation lock for Q01 after the project-owner revision to the public web surface, audit-page presentation, and report-submission discovery flow.
 
-The lock preserves the recovered story contract while changing only the explicitly approved client name, service scope, Objective 02 presentation, Objective 04 gameplay method, and canonical email/report contract.
+The lock preserves the recovered story sequence, five objectives, canonical runtime state, rewards, and non-exploitative assessment boundary.
 
 ## Canonical Identity
 
@@ -66,9 +66,34 @@ Inspect web service and review the security findings.
 
 The Q01 gameplay path focuses on HTTPS over port 443.
 
+## Locked Web Surface
+
+Canonical public home:
+
+```text
+https://skynet-logistics.idx/
+```
+
+Canonical audit page:
+
+```text
+https://skynet-logistics.idx/security
+```
+
+The Website registration intentionally contains only two pages:
+
+```text
+/          public company homepage
+/security  external security review
+```
+
+No other web paths are registered by Q01, so unlisted paths do not have Q01 pages. The project-owner wording of "sub-domain" is preserved as a gameplay-facing web-surface concept; `/security` remains an HTTP path under the requested host rather than a separate DNS hostname.
+
+The homepage is intentionally more polished and corporate so the player can discover the client identity naturally. The security page uses a black/green terminal-style visual treatment and exposes the assessment evidence needed to complete Q01.
+
 ## Locked Objective 04 Method
 
-Native SSH is **removed from the Q01 critical path**.
+Native SSH is outside the Q01 critical path.
 
 The canonical method is:
 
@@ -82,19 +107,11 @@ HTTPS Browser.Meta interaction
 Basic vulnerability assessment complete
 ```
 
-Required web surface:
-
-```text
-Host:   skynet-logistics.test
-Path:   /security
-URL:    https://skynet-logistics.test/security
-```
-
 Objective 04 completes only when Objective 03 is complete and `Browser.Meta` reports:
 
 ```text
 protocol = https:
-hostname = skynet-logistics.test
+hostname = skynet-logistics.idx
 pathname = /security
 ```
 
@@ -126,12 +143,37 @@ adrian.cole@deadsignal.lock
 
 Future recurring character identities must be defined in the content layer and must not be randomly generated.
 
-## Locked Q01 Report Submission Contract
+## Locked Q01 Report Discovery Contract
+
+Adrian's email no longer supplies the answer values directly. It supplies the format the player must complete from the audit evidence:
 
 ```text
-To:      adrian.cole@deadsignal.lock
+Format report audit:
 Subject: Security Audit — Jakarta
 
+Target: <COMPANY>
+Open Ports: <PORTS>
+
+No critical vulnerabilities identified.
+Further internal assessment is recommended.
+```
+
+The report recipient remains the canonical Adrian address and is still surfaced by the Objective 05 hint:
+
+```text
+adrian.cole@deadsignal.lock
+```
+
+The player is expected to discover:
+
+```text
+COMPANY = the audited client identity
+PORTS   = the open external port(s) observed during the audit
+```
+
+For Q01's canonical world state the resolved submission is:
+
+```text
 Target: Skynet Logistics
 Open Ports: 443
 
@@ -139,7 +181,7 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-Objective 05 completes only when the sent email subject and plain-text body match the canonical contract. The intended player flow is to select the supplied report subject/template and send it without manually inventing the quest-critical wording.
+Objective 05 completes only when the sent subject and plain-text body match the resolved canonical values. The placeholders are not accepted as a valid submission.
 
 ## Rewards
 
@@ -179,7 +221,7 @@ The maintained Q01 replay tool remains:
 scripts/build-q01-replay.ts
 ```
 
-Replay builds remain isolated from production completion state and rewards.
+Replay builds remain isolated from production completion state and rewards, but they now use the same revised `.idx` web host and report-discovery template.
 
 ## Production Validation Status
 
@@ -198,11 +240,13 @@ complete objectives 01–03
  ↓
 verify 22/ssh CLOSED, 80/http CLOSED, 443/https OPEN
  ↓
-open /security over HTTPS
+open https://skynet-logistics.idx/security
  ↓
 complete Objective 04
  ↓
-send canonical Security Audit — Jakarta subject/body
+discover COMPANY and PORTS from the audit surfaces
+ ↓
+send Security Audit — Jakarta using the resolved report values
  ↓
 complete Objective 05
  ↓
@@ -217,4 +261,4 @@ Until that real-game gate is observed, Q02 must not be activated in production.
 
 **Q01 REVISED IMPLEMENTATION LOCKED.**
 
-The story sequence is preserved. The client is `Skynet Logistics`. The Q01 service scope is HTTPS-only for gameplay, native SSH is outside the critical path, Objective 02 hides the target IP from its player-facing command text, Objective 03 has no hint, Objective 04 uses the concise web-service hint, and Objective 05 is gated by the canonical email subject/body. Further changes require explicit change control after this lock.
+The story sequence is preserved. The client is `Skynet Logistics`. The canonical public host is `skynet-logistics.idx`. The homepage is `/`, the only registered audit page is `/security`, and other paths are intentionally unregistered. Objective 04 remains HTTPS-only on `/security`. Adrian's report email now supplies a format with `<COMPANY>` and `<PORTS>` placeholders so the player must derive the values from the audit evidence before submission. Further changes require explicit change control after this lock.
