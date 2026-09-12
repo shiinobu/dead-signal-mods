@@ -1,5 +1,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
     Q01_ADRIAN_EMAIL,
@@ -37,6 +40,11 @@ import {
 } from "../src/state/index.js";
 
 import { QuestService } from "../src/application/index.js";
+
+const questSource = readFileSync(
+    resolve(fileURLToPath(new URL("../src/infrastructure/hackhub/q01-quest.ts", import.meta.url))),
+    "utf8",
+);
 
 describe("Phase 13 Q01 — THE CONTRACT", () => {
     it("matches the revised quest identity, client, target, and apex domain", () => {
@@ -76,6 +84,17 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(
             Q01_SUBFINDER_RESULT,
             "portal.skynet-logistics.idx\nsecurity.skynet-logistics.idx\nstatus.skynet-logistics.idx\nwww.skynet-logistics.idx",
+        );
+    });
+
+    it("keeps the Lynx address as one runtime list entry", () => {
+        assert.match(
+            questSource,
+            /address:\s*\[Q01_WEB_HOME_URL\],/,
+        );
+        assert.doesNotMatch(
+            questSource,
+            /Q01_WEB_HOME_URL\s+as unknown as string\[\]/,
         );
     });
 
