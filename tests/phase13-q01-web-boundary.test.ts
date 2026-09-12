@@ -57,9 +57,10 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
     });
 
     it("registers all four subdomains as root-page website surfaces", () => {
-        for (const hostname of Q01_WEB_SUBDOMAINS) {
-            assert.match(websiteRegistration, new RegExp(`Host = ${hostname.replaceAll(".", "\\.")}`));
-        }
+        assert.match(websiteRegistration, /Host = Q01_WEB_HOME_HOST/);
+        assert.match(websiteRegistration, /Host = Q01_WEB_FORBIDDEN_HOSTS\[0\]/);
+        assert.match(websiteRegistration, /Host = Q01_WEB_FORBIDDEN_HOSTS\[1\]/);
+        assert.match(websiteRegistration, /Host = Q01_WEB_AUDIT_HOST/);
         assert.equal(
             (websiteRegistration.match(/Pages: WebsitePageDefinition\[\] = \[/g) ?? []).length,
             4,
@@ -83,6 +84,7 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
         assert.doesNotMatch(forbiddenPage, /SECURITY REVIEW/);
         assert.match(websiteRegistration, /Host = Q01_WEB_FORBIDDEN_HOSTS\[0\]/);
         assert.match(websiteRegistration, /Host = Q01_WEB_FORBIDDEN_HOSTS\[1\]/);
+        assert.match(websiteRegistration, /forbiddenPage/);
     });
 
     it("does not expose a direct security link from www", () => {
