@@ -5,10 +5,16 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+    DSS_RECON_EVENTS,
+    OpsRuntime,
     OpsSessionStore,
     OpsToolRegistry,
-    DSS_RECON_EVENTS,
+    ReconService,
 } from "../src/application/ops/index.js";
+import {
+    Q01_RECON_INPUT,
+    Q01_RECON_PROFILE,
+} from "../src/content/q01.js";
 
 const appSource = readFileSync(
     resolve(
@@ -43,6 +49,15 @@ const productionEntrySource = readFileSync(
     "utf8",
 );
 
+const replayEntrySource = readFileSync(
+    resolve(
+        fileURLToPath(
+            new URL("../dev/q01-replay-entry.ts", import.meta.url),
+        ),
+    ),
+    "utf8",
+);
+
 describe("DSS operations application foundation", () => {
     it("registers DEAD-SIGNAL as the canonical desktop application", () => {
         assert.match(appSource, /@RegisterApp/);
@@ -56,7 +71,7 @@ describe("DSS operations application foundation", () => {
     it("exposes the DSS runtime boundary to the desktop application", () => {
         assert.match(appSource, /opsRuntime\.tools\.getAll\(\)/);
         assert.match(appSource, /opsRuntime\.session\.getSnapshot\(\)/);
-        assert.match(appSource, /opsRuntime\.recon\.run\(/);
+        assert.match(appSource, /opsRuntime\.runRecon\(/);
         assert.match(appSource, /DSS_RECON_EVENTS\.started/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceStarted/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceCompleted/);
@@ -73,10 +88,14 @@ describe("DSS operations application foundation", () => {
         assert.match(appHtml, /OPERATIONS WORKSPACE/);
     });
 
-    it("is imported by the production mod entry point", () => {
+    it("is imported by both production and Q01 replay entries", () => {
         assert.match(
             productionEntrySource,
             /import "\.\/infrastructure\/hackhub\/apps\/dead-signal\.js";/,
+        );
+        assert.match(
+            replayEntrySource,
+            /import "\.\.\/src\/infrastructure\/hackhub\/apps\/dead-signal\.js";/,
         );
     });
 
@@ -115,5 +134,40 @@ describe("DSS operations application foundation", () => {
             discoveredHosts: [],
             lastElapsedMs: null,
         });
+    });
+
+    it("centralizes recon session updates in OpsRuntime", async () => {
+        const runtime = new OpsRuntime({
+            recon: new ReconService({
+                animation: {
+                    sourceDurationMs: 0,
+                    resultDelayMs: 0,
+                },
+            }),
+        });
+        runtime.recon.registerProfile(Q01_RECON_PROFILE);
+
+        const result = await runtime.runRecon(
+            Q01_RECON_INPUT.replace("-d ", ""),
+            {
+                onStarted: () => undefined,
+                onSourceStarted: () => undefined,
+                onSourceCompleted: () => undefined,
+                onHostDiscovered: () => undefined,
+                onCompleted: () => undefined,
+                sleep: async () => undefined,
+            },
+        );
+
+        assert.ok(result);
+        assert.equal(runtime.session.getSnapshot().status, "completed");
+        assert.equal(runtime.session.getSnapshot().completedSources, 5);
+        assert.equal(runtime.session.getSnapshot().uniqueHostsFound, 4);
+        assert.deepEqual(runtime.session.getSnapshot().discoveredHosts, [
+            "portal.skynet-logistics.idx",
+            "security.skynet-logistics.idx",
+            "status.skynet-logistics.idx",
+            "www.skynet-logistics.idx",
+        ]);
     });
 });
