@@ -125,7 +125,7 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
     it("registers the Q01 custom subfinder command in production and replay", () => {
         assert.match(
             subfinderCommandSource,
-            /@RegisterCommand/,
+            /@RegisterCommand\(\{\s*default:\s*true\s*\}\)/,
         );
         assert.match(
             subfinderCommandSource,
