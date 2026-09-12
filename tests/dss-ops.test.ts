@@ -102,7 +102,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceCompleted/);
         assert.match(appSource, /DSS_RECON_EVENTS\.hostDiscovered/);
         assert.match(appSource, /DSS_RECON_EVENTS\.completed/);
-        assert.match(appSource, /DSS_COMMAND_EVENTS\.request/);
+        assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*executeCommand/);
     });
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
@@ -307,11 +307,12 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /command === "lynx"/);
     });
 
-    it("routes desktop commands through the shared HackHub event bridge", () => {
-        assert.match(appSource, /DSS_COMMAND_EVENTS/);
-        assert.match(appSource, /DSS_COMMAND_EVENTS\.request/);
-        assert.match(appSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
-        assert.match(appSource, /executeDssCommand\(commandLine\)/);
+    it("uses the DSS exported command entrypoint for desktop command execution", () => {
+        assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*startRecon/);
+        assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*executeCommand/);
+        assert.match(appSource, /startRecon:\s*\(target: string\).*executeDssCommand/);
+        assert.match(appSource, /executeCommand:\s*\(commandLine: string\).*executeDssCommand/);
+        assert.doesNotMatch(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
         assert.doesNotMatch(appSource, /throw new Error\(/);
     });
 });
