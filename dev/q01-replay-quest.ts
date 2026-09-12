@@ -9,15 +9,20 @@ import {
 import {
     Q01_ADRIAN_EMAIL,
     Q01_CLIENT_NAME,
+    Q01_LYNX_INPUT_IP,
+    Q01_LYNX_INPUT_URL,
     Q01_OBJECTIVE_IDS,
     Q01_REPORT_BODY,
     Q01_REPORT_BODY_TEMPLATE,
     Q01_REPORT_RECIPIENT,
     Q01_REPORT_SUBJECT,
+    Q01_SUBFINDER_INPUT,
+    Q01_SUBFINDER_RESULT,
     Q01_TARGET_IP,
-    Q01_WEB_AUDIT_PATH,
+    Q01_WEB_AUDIT_HOST,
     Q01_WEB_HOST,
-    Q01_WEB_HTTPS_URL,
+    Q01_WEB_HOME_URL,
+    Q01_WEB_SUBDOMAINS,
 } from "../src/content/q01.js";
 
 import { DEV_Q01_REPLAY_ID } from "./replay-id.generated.js";
@@ -26,6 +31,8 @@ interface Q01ReplayData {
     readonly targetIp: string;
     readonly networkScanned: boolean;
     readonly servicesIdentified: boolean;
+    readonly lynxDiscovered: boolean;
+    readonly subdomainsEnumerated: boolean;
     readonly basicVulnerabilityChecksCompleted: boolean;
     readonly reportSubmitted: boolean;
 }
@@ -39,6 +46,13 @@ interface BrowserMetaData {
     readonly protocol: string;
     readonly hostname: string;
     readonly pathname: string;
+    readonly port?: number;
+}
+
+interface Q01LynxResult {
+    readonly ips?: readonly string[];
+    readonly address?: string;
+    readonly additional?: string;
 }
 
 const Q01_NMAP_RESULT = [
@@ -46,6 +60,16 @@ const Q01_NMAP_RESULT = [
     { port: 80, status: "CLOSE", service: "http" },
     { port: 443, status: "OPEN", service: "https" },
 ] as const;
+
+const Q01_LYNX_RESULT: Q01LynxResult = {
+    ips: [Q01_TARGET_IP],
+    address: Q01_WEB_HOME_URL,
+    additional: [
+        Q01_CLIENT_NAME,
+        "Jakarta Operations",
+        "Canonical public web host discovered from the target IP.",
+    ].join("\n"),
+};
 
 const Q01_INCOMING_MAIL_CONTENT = [
     "DEV REPLAY — Q01 TEST CONTRACT",
@@ -61,9 +85,6 @@ const Q01_INCOMING_MAIL_CONTENT = [
     "Network discovery",
     "Service enumeration",
     "Basic vulnerability checks",
-    "",
-    "Web audit surface:",
-    Q01_WEB_HTTPS_URL,
     "",
     "Not Authorized:",
     "Data extraction",
@@ -94,7 +115,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override Name = `dead_signal.dev.q01.${DEV_Q01_REPLAY_ID}`;
     override Title = "THE CONTRACT — DEV REPLAY";
     override Description =
-        "Development replay fixture for the revised Q01 HTTPS audit flow.";
+        "Development replay fixture for the revised Q01 reconnaissance flow.";
     override Group = "storyline" as const;
     override AutoStart = false;
     override AutoComplete = true;
@@ -127,7 +148,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: "Inspect web service and review the security findings.",
+            hint: "Discover the public web host with lynx, enumerate its subdomains with subfinder, then inspect the authorized security surface.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -143,6 +164,8 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             targetIp: Q01_TARGET_IP,
             networkScanned: false,
             servicesIdentified: false,
+            lynxDiscovered: false,
+            subdomainsEnumerated: false,
             basicVulnerabilityChecksCompleted: false,
             reportSubmitted: false,
         };
@@ -152,9 +175,6 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
             type: Network.Type.Router,
-            domain: {
-                name: Q01_WEB_HOST,
-            },
             ports: [
                 { external: 22, internal: 22, active: false, service: "ssh" },
                 { external: 80, internal: 80, active: false, service: "http" },
@@ -165,6 +185,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         });
 
         Network.registerDomain(Q01_WEB_HOST, this.Data.targetIp);
+        Q01_WEB_SUBDOMAINS.forEach((hostname) => {
+            Network.registerDomain(hostname, this.Data.targetIp);
+        });
 
         Mail.send({
             from: Q01_ADRIAN_EMAIL,
@@ -178,6 +201,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
         Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
+        Shell.addCommandData("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT);
+        Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
+        Shell.addCommandData("subfinder", Q01_SUBFINDER_INPUT, Q01_SUBFINDER_RESULT);
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data as TerminalCommandData);
@@ -208,61 +234,107 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Shell.removeCommandData("nmap", "");
+        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
+        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
+        Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
         Network.removeDomain(Q01_WEB_HOST);
+        Q01_WEB_SUBDOMAINS.forEach((hostname) => {
+            Network.removeDomain(hostname);
+        });
         Network.destroyNetwork(this.Data.targetIp);
     }
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Shell.removeCommandData("nmap", "");
+        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
+        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
+        Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
         Network.removeDomain(Q01_WEB_HOST);
+        Q01_WEB_SUBDOMAINS.forEach((hostname) => {
+            Network.removeDomain(hostname);
+        });
         Network.destroyNetwork(this.Data.targetIp);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
-        if (data.command !== "nmap") {
+        const input = data.args.join(" ").trim();
+
+        if (data.command === "nmap") {
+            if (
+                data.args.length > 0 &&
+                data.args[0] !== this.Data.targetIp
+            ) {
+                return;
+            }
+
+            const result = Shell.getCommandData(
+                "nmap",
+                data.args.length === 0 ? "" : this.Data.targetIp,
+            );
+
+            if (!this.isExpectedNmapResult(result)) {
+                return;
+            }
+
+            if (!this.Data.networkScanned) {
+                this.SetData("networkScanned", true);
+                this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
+            }
+
+            if (!this.Data.servicesIdentified) {
+                this.SetData("servicesIdentified", true);
+                this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
+            }
+
             return;
         }
 
-        if (
-            data.args.length > 0 &&
-            data.args[0] !== this.Data.targetIp
-        ) {
+        if (data.command === "lynx") {
+            if (input !== Q01_LYNX_INPUT_IP && input !== Q01_LYNX_INPUT_URL) {
+                return;
+            }
+
+            const result = Shell.getCommandData("lynx", input);
+
+            if (!this.isExpectedLynxResult(result)) {
+                return;
+            }
+
+            this.SetData("lynxDiscovered", true);
             return;
         }
 
-        const result = Shell.getCommandData(
-            "nmap",
-            data.args.length === 0 ? "" : this.Data.targetIp,
-        );
+        if (data.command === "subfinder") {
+            if (input !== Q01_SUBFINDER_INPUT) {
+                return;
+            }
 
-        if (!this.isExpectedNmapResult(result)) {
-            return;
-        }
+            const result = Shell.getCommandData("subfinder", input);
 
-        if (!this.Data.networkScanned) {
-            this.SetData("networkScanned", true);
-            this.completeObjective(Q01_OBJECTIVE_IDS.scanNetwork);
-        }
+            if (result !== Q01_SUBFINDER_RESULT) {
+                return;
+            }
 
-        if (!this.Data.servicesIdentified) {
-            this.SetData("servicesIdentified", true);
-            this.completeObjective(Q01_OBJECTIVE_IDS.identifyServices);
+            this.SetData("subdomainsEnumerated", true);
         }
     }
 
     private handleBrowserMeta(data: BrowserMetaData): void {
         if (
             this.Data.basicVulnerabilityChecksCompleted ||
-            !this.Data.servicesIdentified
+            !this.Data.servicesIdentified ||
+            !this.Data.lynxDiscovered ||
+            !this.Data.subdomainsEnumerated
         ) {
             return;
         }
 
         if (
             data.protocol !== "https:" ||
-            data.hostname !== Q01_WEB_HOST ||
-            data.pathname !== Q01_WEB_AUDIT_PATH
+            data.hostname !== Q01_WEB_AUDIT_HOST ||
+            data.pathname !== "/" ||
+            (data.port !== undefined && data.port !== 443)
         ) {
             return;
         }
@@ -294,6 +366,22 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                     actual.service === expected.service,
             ),
         );
+    }
+
+    private isExpectedLynxResult(result: unknown): result is Q01LynxResult {
+        if (typeof result !== "object" || result === null) {
+            return false;
+        }
+
+        if (!("address" in result) || result.address !== Q01_WEB_HOME_URL) {
+            return false;
+        }
+
+        if (!("ips" in result) || !Array.isArray(result.ips)) {
+            return false;
+        }
+
+        return result.ips.includes(Q01_TARGET_IP);
     }
 
     private isAuditReport(subject: string, content: string): boolean {
