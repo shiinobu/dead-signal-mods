@@ -5,6 +5,9 @@ import {
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
+    OpsCommandRouter,
+} from "../../../application/ops/command-router.js";
+import {
     DSS_RECON_EVENTS,
 } from "../../../application/ops/events.js";
 import {
@@ -44,64 +47,60 @@ export class DeadSignalApp extends App {
         getSession: (): OpsSessionSnapshot =>
             opsRuntime.session.getSnapshot(),
         startRecon: (target: string): Promise<boolean> =>
-            this.startRecon(target),
+            this.executeCommand(`recon -d ${target}`),
+        executeCommand: (commandLine: string): Promise<boolean> =>
+            this.executeCommand(commandLine),
     };
 
-    private reconRunning = false;
+    private readonly commandRouter = new OpsCommandRouter(opsRuntime);
+    private commandRunning = false;
 
-    private async startRecon(rawTarget: string): Promise<boolean> {
-        if (this.reconRunning) {
+    private async executeCommand(commandLine: string): Promise<boolean> {
+        if (this.commandRunning) {
             return false;
         }
 
-        if (!opsRuntime.recon.resolveProfile(rawTarget)) {
-            Events.emit(DSS_RECON_EVENTS.failed, {
-                target: rawTarget,
-                reason: "No registered reconnaissance profile matched the target.",
-            });
-            return false;
-        }
-
-        this.reconRunning = true;
+        this.commandRunning = true;
 
         try {
-            const result = await opsRuntime.runRecon(rawTarget, {
-                onStarted: (event) => {
-                    Events.emit(DSS_RECON_EVENTS.started, event);
+            const result = await this.commandRouter.execute(commandLine, {
+                observer: {
+                    onStarted: (event) => {
+                        Events.emit(DSS_RECON_EVENTS.started, event);
+                    },
+                    onSourceStarted: (event) => {
+                        Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
+                    },
+                    onSourceCompleted: (event) => {
+                        Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
+                    },
+                    onHostDiscovered: (host) => {
+                        Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
+                    },
+                    onCompleted: (reconResult) => {
+                        Events.emit(DSS_RECON_EVENTS.completed, reconResult);
+                    },
+                    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
                 },
-                onSourceStarted: (event) => {
-                    Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
-                },
-                onSourceCompleted: (event) => {
-                    Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
-                },
-                onHostDiscovered: (host) => {
-                    Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
-                },
-                onCompleted: (reconResult) => {
-                    Events.emit(DSS_RECON_EVENTS.completed, reconResult);
-                },
-                sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
             });
 
-            if (!result) {
+            if (!result.ok) {
                 Events.emit(DSS_RECON_EVENTS.failed, {
-                    target: rawTarget,
-                    reason: "Reconnaissance did not resolve a registered profile.",
+                    target: commandLine,
+                    reason: result.message ?? "Command execution failed.",
                 });
-                return false;
             }
 
-            return true;
+            return result.ok;
         } catch (error) {
             opsRuntime.session.fail();
             Events.emit(DSS_RECON_EVENTS.failed, {
-                target: rawTarget,
-                reason: error instanceof Error ? error.message : "Unknown reconnaissance error.",
+                target: commandLine,
+                reason: error instanceof Error ? error.message : "Unknown command execution error.",
             });
             return false;
         } finally {
-            this.reconRunning = false;
+            this.commandRunning = false;
         }
     }
 }
