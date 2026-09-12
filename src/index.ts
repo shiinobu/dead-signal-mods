@@ -1,3 +1,4 @@
+import "./infrastructure/hackhub/websites/q01-skynet-portal.js";
 import "./infrastructure/hackhub/q01-quest.js";
 
 import {
@@ -5,9 +6,7 @@ import {
     RegisterModPackage,
 } from "@hotbunny/hackhub-content-sdk";
 
-import {
-    gameRuntime,
-} from "./infrastructure/hackhub/runtime.js";
+import { gameRuntime } from "./infrastructure/hackhub/runtime.js";
 
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {

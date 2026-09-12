@@ -2,11 +2,12 @@ import { asId } from "../core/index.js";
 import { flagEquals } from "../domain/shared/index.js";
 import type { Quest } from "../domain/quest/index.js";
 
+export const Q01_CLIENT_NAME = "Skynet Logistics";
 export const Q01_TARGET_IP = "203.0.113.42";
-export const Q01_SSH_USERNAME = "audit";
-export const Q01_SSH_PASSWORD = ["meridian", "audit"].join("-");
-export const Q01_SSH_PORT = 22;
-export const Q01_SSH_COMMAND = `ssh -h ${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`;
+export const Q01_WEB_HOST = "skynet-logistics.test";
+export const Q01_WEB_AUDIT_PATH = "/security";
+export const Q01_WEB_HTTP_URL = `http://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
+export const Q01_WEB_HTTPS_URL = `https://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
 
 export const Q01_FINAL_STATE_FLAG = "dead_signal.q01.completed";
 
@@ -30,7 +31,7 @@ export const Q01_THE_CONTRACT: Quest = {
     id: asId<"Quest">("dead_signal.q01"),
     chapterId: "chapter-01-dead-signal",
     title: "THE CONTRACT",
-    description: "Routine security audit for Meridian Logistics in Jakarta.",
+    description: `Routine security audit for ${Q01_CLIENT_NAME} in Jakarta.`,
     objectives: [
         {
             id: "q01.runtime.completion",
