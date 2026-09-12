@@ -16,6 +16,9 @@ import type {
 import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
+import type {
+    OpsCommandDefinition,
+} from "../../../application/ops/command-registry.js";
 
 const DSS_APP_TITLE = "DEAD-SIGNAL";
 
@@ -36,6 +39,8 @@ export class DeadSignalApp extends App {
     Exports = {
         getToolCatalog: (): readonly OpsToolDefinition[] =>
             opsRuntime.tools.getAll(),
+        getCommandCatalog: (): readonly OpsCommandDefinition[] =>
+            opsRuntime.commands.getAll(),
         getSession: (): OpsSessionSnapshot =>
             opsRuntime.session.getSnapshot(),
         startRecon: (target: string): Promise<boolean> =>
