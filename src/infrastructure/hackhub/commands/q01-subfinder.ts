@@ -110,7 +110,7 @@ export class Q01SubfinderCommand extends Command {
         tools.println("");
         tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
         tools.println("");
-        tools.println(`  ${frame} Enumerating...`);
+        tools.println(`  ${frame} `);
     }
 
     override async Run(tools: Q01SubfinderTools) {
