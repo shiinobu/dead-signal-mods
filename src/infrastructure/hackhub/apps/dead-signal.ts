@@ -37,15 +37,10 @@ export class DeadSignalApp extends App {
     };
 
     override Exports = {
-        getToolCatalog: (): readonly OpsToolDefinition[] =>
-            opsRuntime.tools.getAll(),
-        getCommandCatalog: (): readonly OpsCommandDefinition[] =>
-            opsRuntime.commands.getAll(),
-        getSession: (): OpsSessionSnapshot =>
-            opsRuntime.session.getSnapshot(),
-        startRecon: (target: string): Promise<boolean> =>
-            executeDssCommand(`recon -d ${target}`),
-        executeCommand: (commandLine: string): Promise<boolean> =>
-            executeDssCommand(commandLine),
+        getToolCatalog: (): readonly OpsToolDefinition[] => opsRuntime.tools.getAll(),
+        getCommandCatalog: (): readonly OpsCommandDefinition[] => opsRuntime.commands.getAll(),
+        getSession: (): OpsSessionSnapshot => opsRuntime.session.getSnapshot(),
+        startRecon: (target: string): Promise<boolean> => executeDssCommand(`recon -d ${target}`),
+        executeCommand: (commandLine: string): Promise<boolean> => executeDssCommand(commandLine),
     };
 }
