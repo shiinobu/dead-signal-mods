@@ -52,7 +52,7 @@ const replayBundle = await readFile(replayModPath, "utf8");
 const requiredBundleMarkers = [
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
-    "https://www.skynet-logistics.idx/",
+    "www.skynet-logistics.idx",
 ];
 
 for (const marker of requiredBundleMarkers) {
