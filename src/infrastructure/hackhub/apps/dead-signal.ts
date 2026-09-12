@@ -24,24 +24,12 @@ import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
 
-const brokenShowImplementation = "const show=id=>{const view=views[id]||'recon';for(const key of Object.keys(views))$(views[key]).classList.toggle('active',key===view);text('crumb',view==='wireshark'?'Wireshark+':view==='terminal'?'Terminal+':'Recon');if(view==='terminal')setTimeout(()=>$('cmd-input')?.focus(),0)};";
-const fixedShowImplementation = "const show=id=>{const activeView=Object.prototype.hasOwnProperty.call(views,id)?id:'recon';for(const key of Object.keys(views))$(views[key]).classList.toggle('active',key===activeView);text('crumb',activeView==='wireshark'?'Wireshark+':activeView==='terminal'?'Terminal+':'Recon');if(activeView==='terminal')setTimeout(()=>$('cmd-input')?.focus(),0)};";
-
-if (!appHTML.includes(brokenShowImplementation)) {
-    throw new Error("DSS HTML navigation contract changed; update the runtime compatibility patch.");
-}
-
-const dssHTML = appHTML.replace(
-    brokenShowImplementation,
-    fixedShowImplementation,
-);
-
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = dssHTML;
+    HTML = appHTML;
     DefaultSize = { width: 1220, height: 800 };
     override MinSize = { width: 1200, height: 780 };
     override Unlocked = true;
