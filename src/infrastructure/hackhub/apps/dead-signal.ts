@@ -23,13 +23,13 @@ import type {
 const DSS_DIRECT_INTERACTION_PATCH = `
 <script>
 (() => {
-  const sdk = globalThis.HackhubSDK;
   const emit = async (commandLine) => {
     const exported = globalThis.executeCommand;
     if (typeof exported === 'function') {
       await Promise.resolve(exported(commandLine));
       return true;
     }
+    const sdk = globalThis.HackhubSDK;
     if (!sdk?.Events?.emit) return false;
     sdk.Events.emit('DSS.Command.Request', { commandLine });
     return true;
@@ -65,7 +65,10 @@ const DSS_DIRECT_INTERACTION_PATCH = `
         if (sourceList) sourceList.innerHTML = '<div class="empty">Loading profile...</div>';
         try {
           const ok = await emit('recon -d ' + target);
-          if (!ok && state) state.textContent = 'DSS command bridge is unavailable.';
+          if (!ok) {
+            if (state) state.textContent = 'DSS command bridge is unavailable.';
+            reconButton.disabled = false;
+          }
         } catch (error) {
           if (state) state.textContent = error instanceof Error ? error.message : 'Reconnaissance failed.';
           reconButton.disabled = false;
