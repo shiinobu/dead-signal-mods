@@ -54,17 +54,21 @@ const emitNativeTerminalCommand = (
     });
 };
 
-const formatNmapResult = (result: unknown): string => {
-    if (!Array.isArray(result)) {
-        return "nmap: no response data.";
-    }
-
+const formatNmapResult = (result: unknown, target: string): string => {
     const lines = [
         "Starting Nmap — DSS terminal simulation",
+        `Nmap scan report for ${target}`,
         "Host is up.",
         "",
-        "PORT     STATE   SERVICE",
+        "PORT     STATE    SERVICE",
     ];
+
+    if (!Array.isArray(result)) {
+        lines.push("22/tcp   filtered ssh");
+        lines.push("80/tcp   closed   http");
+        lines.push("443/tcp  closed   https");
+        return lines.join("\n");
+    }
 
     for (const entry of result) {
         if (
@@ -77,10 +81,10 @@ const formatNmapResult = (result: unknown): string => {
             continue;
         }
 
-        const port = String(entry.port).padEnd(8, " ");
-        const status = String(entry.status).padEnd(8, " ").toLowerCase();
+        const port = `${String(entry.port)}/tcp`;
+        const status = String(entry.status).toLowerCase();
         const service = String(entry.service);
-        lines.push(`${port}${status}${service}`);
+        lines.push(`${port.padEnd(9, " ")}${status.padEnd(9, " ")}${service}`);
     }
 
     return lines.join("\n");
@@ -138,6 +142,13 @@ const executeNativeTerminalCommand = async (
     const result = Shell.getCommandData(command, input);
 
     if (typeof result === "undefined") {
+        if (command === "nmap" && input) {
+            return {
+                ok: true,
+                message: formatNmapResult(undefined, input),
+            };
+        }
+
         return {
             ok: false,
             message: `${command}: no fixture available for '${input || "default"}'.`,
@@ -153,7 +164,7 @@ const executeNativeTerminalCommand = async (
     return {
         ok: true,
         message: command === "nmap"
-            ? formatNmapResult(result)
+            ? formatNmapResult(result, input || "local")
             : formatLynxResult(result),
     };
 };
@@ -185,21 +196,12 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
         const nativeResult = await executeNativeTerminalCommand(trimmed);
 
         if (nativeResult) {
-            if (!nativeResult.ok) {
-                Events.emit(DSS_COMMAND_EVENTS.result, {
-                    commandLine: trimmed,
-                    ok: false,
-                    message: nativeResult.message,
-                });
-                return false;
-            }
-
             Events.emit(DSS_COMMAND_EVENTS.result, {
                 commandLine: trimmed,
-                ok: true,
+                ok: nativeResult.ok,
                 message: nativeResult.message,
             });
-            return true;
+            return nativeResult.ok;
         }
 
         if (trimmed.toLowerCase() === "help") {
