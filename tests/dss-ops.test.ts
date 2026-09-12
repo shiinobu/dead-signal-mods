@@ -87,7 +87,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
         assert.match(appSource, /HTML\s*=\s*appHTML/);
-        assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1100,\s*height:\s*720\s*\}/);
+        assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1220,\s*height:\s*800\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
     });
@@ -114,6 +114,15 @@ describe("DSS operations application foundation", () => {
         assert.match(appHtml, /OPERATIONS WORKSPACE/);
         assert.match(appHtml, /DSS Shell/);
         assert.match(appHtml, /Run Recon/);
+    });
+
+    it("locks the DSS workspace canvas and avoids responsive collapse", () => {
+        assert.match(appHtml, /min-width:1180px/);
+        assert.match(appHtml, /min-height:740px/);
+        assert.match(appHtml, /grid-template-columns:250px minmax\(930px,1fr\)/);
+        assert.match(appHtml, /font:700 14px\/1 ui-monospace/);
+        assert.match(appHtml, /font:600 13px\/1 ui-monospace/);
+        assert.doesNotMatch(appHtml, /@media\(/);
     });
 
     it("is imported by both production and Q01 replay entries", () => {
