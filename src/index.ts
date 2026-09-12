@@ -1,3 +1,4 @@
+import "./infrastructure/hackhub/apps/dead-signal.js";
 import "./infrastructure/hackhub/commands/recon.js";
 import "./infrastructure/hackhub/websites/q01-skynet-portal.js";
 import "./infrastructure/hackhub/q01-quest.js";
