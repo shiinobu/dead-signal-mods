@@ -80,7 +80,10 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
             Q01_LYNX_INPUT_URL,
             "https://203.0.113.42/",
         );
-        assert.equal(Q01_SUBFINDER_INPUT, "-d skynet-logistics.idx");
+        assert.equal(
+            Q01_SUBFINDER_INPUT,
+            "-d https://www.skynet-logistics.idx/",
+        );
         assert.equal(
             Q01_SUBFINDER_RESULT,
             "portal.skynet-logistics.idx\nsecurity.skynet-logistics.idx\nstatus.skynet-logistics.idx\nwww.skynet-logistics.idx",
