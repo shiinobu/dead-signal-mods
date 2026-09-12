@@ -3,6 +3,7 @@ import {
     Events,
     RegisterApp,
 } from "@hotbunny/hackhub-content-sdk";
+import appHTML from "../../../dead-signal.html";
 
 import {
     OpsCommandRouter,
@@ -28,7 +29,7 @@ export class DeadSignalApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = "dead-signal.html";
+    HTML = appHTML;
     DefaultSize = { width: 1100, height: 720 };
     override Unlocked = true;
 
