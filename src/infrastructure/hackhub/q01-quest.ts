@@ -59,11 +59,14 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-// HackHub's LynxData exposes array-valued address/ips fields. Keep the actual
-// runtime value as an array so Lynx renders the URL as one address entry.
+// HackHub's LynxData exposes optional list-valued metadata fields. In the
+// observed game renderer, the address section incorrectly iterates scalar URL
+// values. Keep address empty and surface the canonical URL through additional
+// as one list item, which is still part of the official LynxData contract.
 interface Q01LynxResult {
     readonly ips: string[];
-    readonly address: string[];
+    readonly address?: string[];
+    readonly additional?: Array<string | Record<string, unknown>>;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -74,7 +77,7 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
 
 const Q01_LYNX_RESULT: Q01LynxResult = {
     ips: [Q01_TARGET_IP],
-    address: [Q01_WEB_HOME_URL],
+    additional: [`Canonical web host: ${Q01_WEB_HOME_URL}`],
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -460,19 +463,26 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return false;
         }
 
-        if (!("address" in result) || !Array.isArray(result.address)) {
-            return false;
-        }
-
-        if (!result.address.includes(Q01_WEB_HOME_URL)) {
-            return false;
-        }
-
         if (!("ips" in result) || !Array.isArray(result.ips)) {
             return false;
         }
 
-        return result.ips.includes(Q01_TARGET_IP);
+        if (!result.ips.includes(Q01_TARGET_IP)) {
+            return false;
+        }
+
+        if (
+            !("additional" in result) ||
+            !Array.isArray(result.additional)
+        ) {
+            return false;
+        }
+
+        return result.additional.some(
+            (value) =>
+                typeof value === "string" &&
+                value.includes(Q01_WEB_HOME_URL),
+        );
     }
 
     private isAuditReport(subject: string, content: string): boolean {
