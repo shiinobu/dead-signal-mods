@@ -11,6 +11,7 @@ import {
     Q01_CLIENT_NAME,
     Q01_OBJECTIVE_IDS,
     Q01_REPORT_BODY,
+    Q01_REPORT_BODY_TEMPLATE,
     Q01_REPORT_RECIPIENT,
     Q01_REPORT_SUBJECT,
     Q01_TARGET_IP,
@@ -41,8 +42,8 @@ interface BrowserMetaData {
 }
 
 const Q01_NMAP_RESULT = [
-    { port: 22, status: "CLOSED", service: "ssh" },
-    { port: 80, status: "CLOSED", service: "http" },
+    { port: 22, status: "CLOSE", service: "ssh" },
+    { port: 80, status: "CLOSE", service: "http" },
     { port: 443, status: "OPEN", service: "https" },
 ] as const;
 
@@ -63,17 +64,17 @@ const Q01_INCOMING_MAIL_CONTENT = [
     "Basic vulnerability checks",
     "",
     "Web audit surface:",
-    `HTTPS: ${Q01_WEB_HTTPS_URL}`,
+    Q01_WEB_HTTPS_URL,
     "",
     "Not Authorized:",
     "Data extraction",
     "Internal access",
     "Credential attacks",
     "",
-    `Reply to ${Q01_REPORT_RECIPIENT} using the subject below and the provided report text:`,
+    "Format report audit:",
     `Subject: ${Q01_REPORT_SUBJECT}`,
     "",
-    Q01_REPORT_BODY,
+    Q01_REPORT_BODY_TEMPLATE,
     "",
     "This mail belongs to the development replay fixture.",
     "— Adrian",
@@ -133,7 +134,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Submit audit report",
-            hint: `Reply to ${Q01_REPORT_RECIPIENT} with subject \"${Q01_REPORT_SUBJECT}\". The exact report text is included in Adrian's audit email.`,
+            hint: `Reply to ${Q01_REPORT_RECIPIENT} with subject \"${Q01_REPORT_SUBJECT}\". Fill in the company and open-port values you discovered during the audit.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
