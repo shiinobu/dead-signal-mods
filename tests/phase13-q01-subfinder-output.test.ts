@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const subfinderCommandSource = readFileSync(
+const reconCommandSource = readFileSync(
     resolve(
         fileURLToPath(
             new URL(
@@ -16,98 +16,110 @@ const subfinderCommandSource = readFileSync(
     "utf8",
 );
 
-describe("Phase 13 Q01 — subfinder presentation", () => {
-    it("uses the current ProjectDiscovery banner and attribution", () => {
-        assert.match(subfinderCommandSource, /SUBFINDER_BANNER = \[/);
-        assert.match(subfinderCommandSource, /__    _____           __/);
-        assert.match(subfinderCommandSource, /projectdiscovery\.io/);
+describe("Phase 13 Q01 — DEAD SIGNAL recon presentation", () => {
+    it("uses the current ProjectDiscovery banner as the visual inspiration", () => {
+        assert.match(reconCommandSource, /SUBFINDER_BANNER = \[/);
+        assert.match(reconCommandSource, /__    _____           __/);
+        assert.match(reconCommandSource, /projectdiscovery\.io/);
     });
 
-    it("matches the reference warning and enumeration sequence", () => {
+    it("uses the DEAD SIGNAL reconnaissance wording while preserving the reference warning sequence", () => {
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /\[WRN\] Use with caution\. You are responsible for your actions\./,
         );
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /\[WRN\] Developers assume no liability and are not responsible for any misuse or damage\./,
         );
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /\[WRN\] By using subfinder, you also agree to the terms of the APIs used\./,
         );
         assert.match(
-            subfinderCommandSource,
-            /\[INF\] Enumerating subdomains for \$\{normalizedTarget\}/,
+            reconCommandSource,
+            /\[INF\] Reconnaissance started for \$\{normalizedTarget\}/,
+        );
+        assert.match(
+            reconCommandSource,
+            /\[INF\] Reconnaissance completed/,
         );
     });
 
     it("preserves append-only terminal history and does not clear or emit ANSI control sequences", () => {
-        assert.doesNotMatch(subfinderCommandSource, /tools\.clear\(\)/);
-        assert.doesNotMatch(subfinderCommandSource, /\\u001B\[/);
-        assert.doesNotMatch(subfinderCommandSource, /ANSI_CURSOR_UP/);
-        assert.doesNotMatch(subfinderCommandSource, /ANSI_CLEAR_LINE/);
-        assert.doesNotMatch(subfinderCommandSource, /ANSI_CARRIAGE_RETURN/);
-        assert.match(subfinderCommandSource, /await tools\.sleep\(SOURCE_DURATION_MS\)/);
+        assert.doesNotMatch(reconCommandSource, /tools\.clear\(\)/);
+        assert.doesNotMatch(reconCommandSource, /\\u001B\[/);
+        assert.doesNotMatch(reconCommandSource, /ANSI_CURSOR_UP/);
+        assert.doesNotMatch(reconCommandSource, /ANSI_CLEAR_LINE/);
+        assert.doesNotMatch(reconCommandSource, /ANSI_CARRIAGE_RETURN/);
+        assert.match(reconCommandSource, /await tools\.sleep\(SOURCE_DURATION_MS\)/);
     });
 
     it("uses five deterministic simulated discovery sources with duplicate candidates", () => {
-        assert.match(subfinderCommandSource, /const SOURCES = \[/);
-        assert.match(subfinderCommandSource, /name: "crtsh"/);
-        assert.match(subfinderCommandSource, /name: "rapiddns"/);
-        assert.match(subfinderCommandSource, /name: "hackertarget"/);
-        assert.match(subfinderCommandSource, /name: "alienvault"/);
-        assert.match(subfinderCommandSource, /name: "urlscan"/);
-        assert.match(subfinderCommandSource, /certificate transparency/);
-        assert.match(subfinderCommandSource, /passive DNS/);
-        assert.match(subfinderCommandSource, /Candidates: \$\{candidateCount\}/);
-        assert.match(subfinderCommandSource, /Unique:\s+\$\{uniqueCount\}/);
+        assert.match(reconCommandSource, /const SOURCES = \[/);
+        assert.match(reconCommandSource, /name: "crtsh"/);
+        assert.match(reconCommandSource, /name: "rapiddns"/);
+        assert.match(reconCommandSource, /name: "hackertarget"/);
+        assert.match(reconCommandSource, /name: "alienvault"/);
+        assert.match(reconCommandSource, /name: "urlscan"/);
+        assert.match(reconCommandSource, /certificate transparency/);
+        assert.match(reconCommandSource, /passive DNS/);
+        assert.match(reconCommandSource, /Candidates: \$\{candidateCount\}/);
+        assert.match(reconCommandSource, /Unique:\s+\$\{uniqueCount\}/);
     });
 
     it("renders source-by-source progress with a progress bar and active-source indicator", () => {
-        assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
-        assert.match(subfinderCommandSource, /const formatProgressBar =/);
-        assert.match(subfinderCommandSource, /█/);
-        assert.match(subfinderCommandSource, /░/);
+        assert.match(reconCommandSource, /SPINNER_FRAMES = \[/);
+        assert.match(reconCommandSource, /const formatProgressBar =/);
+        assert.match(reconCommandSource, /█/);
+        assert.match(reconCommandSource, /░/);
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /\[>] \$\{source\.name\.padEnd\(18, "\."\)\} \$\{frame\} scanning \$\{source\.description\}/,
         );
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /\[✓\] \$\{source\.name\.padEnd\(18, "\."\)\} \$\{source\.candidates\.length\} found/,
         );
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /Progress: \$\{formatProgressBar\(progress\)\} \$\{progress\}%/,
         );
-        assert.match(subfinderCommandSource, /Sources:  \$\{completedSources\.length\}\/\$\{SOURCES\.length\}/);
+        assert.match(
+            reconCommandSource,
+            /Sources:  \$\{completedSources\.length\}\/\$\{SOURCES\.length\}/,
+        );
     });
 
-    it("streams the canonical deterministic Q01 result after enumeration completes", () => {
+    it("streams the canonical deterministic Q01 result after reconnaissance completes", () => {
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)/,
         );
-        assert.match(subfinderCommandSource, /\[INF\] Enumeration completed/);
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /await tools\.sleep\(RESULT_DELAY_MS\);[\s\S]*tools\.println\(subdomain\)/,
         );
         assert.match(
-            subfinderCommandSource,
-            /\[INF\] Found \$\{subdomains\.length\} unique subdomains for \$\{normalizedTarget\}/,
+            reconCommandSource,
+            /\[INF\] Found \$\{subdomains\.length\} unique hosts for \$\{normalizedTarget\}/,
         );
+    });
+
+    it("registers the original DEAD SIGNAL command name", () => {
+        assert.match(reconCommandSource, /CommandName = "recon"/);
+        assert.match(reconCommandSource, /Usage: recon -d <domain>/);
+        assert.match(reconCommandSource, /export class Q01ReconCommand/);
     });
 
     it("retains the Q01-only target gate and non-Q01 warning path", () => {
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /normalizedTarget !== Q01_WEB_HOST &&[\s\S]*normalizedTarget !== Q01_WEB_HOME_HOST/,
         );
         assert.match(
-            subfinderCommandSource,
-            /\[WRN\] No subdomains found for \$\{normalizedTarget\}/,
+            reconCommandSource,
+            /\[WRN\] No reconnaissance data found for \$\{normalizedTarget\}/,
         );
     });
 });
