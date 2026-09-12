@@ -24,6 +24,10 @@ const replayModPath = resolve(replayOutputDir, "mod.js");
 const replayAppPath = resolve(replayOutputDir, "dead-signal.html");
 const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
+const sourceDssAppPath = resolve(
+    projectRoot,
+    "src/infrastructure/hackhub/apps/dead-signal.html",
+);
 const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
 const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
@@ -93,6 +97,7 @@ await cp(sourceAssetsDir, replayAssetsDir, {
     recursive: true,
     force: true,
 });
+await cp(sourceDssAppPath, replayAppPath, { force: true });
 
 const requiredFiles = [
     replayModPath,
