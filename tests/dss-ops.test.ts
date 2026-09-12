@@ -81,13 +81,15 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /Title\s*=\s*"DEAD-SIGNAL"/);
         assert.match(appSource, /HTML\s*=\s*"\.\/dead-signal\.html"/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1100,\s*height:\s*720\s*\}/);
-        assert.match(appSource, /Unlocked\s*=\s*true/);
+        assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
+        assert.match(appSource, /override\s+Exports\s*=/);
     });
 
     it("exposes the DSS runtime boundary to the desktop application", () => {
         assert.match(appSource, /opsRuntime\.tools\.getAll\(\)/);
         assert.match(appSource, /opsRuntime\.session\.getSnapshot\(\)/);
-        assert.match(appSource, /opsRuntime\.runRecon\(/);
+        assert.match(appSource, /OpsCommandRouter\(opsRuntime\)/);
+        assert.match(appSource, /executeCommand\(commandLine/);
         assert.match(appSource, /getCommandCatalog/);
         assert.match(appSource, /DSS_RECON_EVENTS\.started/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceStarted/);
@@ -230,7 +232,7 @@ describe("DSS operations application foundation", () => {
         runtime.recon.registerProfile(Q01_RECON_PROFILE);
         const router = new OpsCommandRouter(runtime);
 
-        const result = await router.execute(Q01_RECON_INPUT, {
+        const result = await router.execute(`recon ${Q01_RECON_INPUT}`, {
             observer: {
                 onStarted: () => undefined,
                 onSourceStarted: () => undefined,
