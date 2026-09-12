@@ -51,7 +51,6 @@ interface BrowserMetaData {
     readonly protocol: string;
     readonly hostname: string;
     readonly pathname: string;
-    readonly port?: number;
 }
 
 interface Q01NmapPort {
@@ -182,7 +181,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: "Discover the public web host and enumerate its subdomains, then inspect the authorized security surface.",
+            hint: "Discover the public web host with lynx, enumerate its subdomains, then inspect the authorized security surface.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -421,8 +420,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         if (
             data.protocol !== "https:" ||
             data.hostname !== Q01_WEB_AUDIT_HOST ||
-            data.pathname !== "/" ||
-            (data.port !== undefined && data.port !== 443)
+            data.pathname !== "/"
         ) {
             return;
         }
