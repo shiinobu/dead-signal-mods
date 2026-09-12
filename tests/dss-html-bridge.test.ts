@@ -55,10 +55,12 @@ describe("DSS desktop HTML bridge", () => {
     });
 
     it("keeps the terminal workspace inside the native DSS window without an outer scrollbar", () => {
-        assert.match(appHtml, /\.content\{flex:1;min-height:0;overflow:hidden/);
-        assert.match(appHtml, /\.view-terminal\.active\{display:flex;flex-direction:column\}/);
+        assert.match(appHtml, /\.content\{[^}]*flex:1;min-height:0;overflow:hidden/);
+        assert.match(appHtml, /\.view-terminal\.active\{display:flex;flex-direction:column/);
         assert.match(appHtml, /\.termgrid\{[^}]*flex:1;min-height:0/);
         assert.match(appHtml, /\.terminal\{[^}]*min-height:0;height:100%/);
-        assert.match(appHtml, /\.output\{[^}]*min-height:0;overflow:auto/);
+        assert.match(appHtml, /\.output\{[^}]*min-height:0;overflow:hidden/);
+        assert.doesNotMatch(appHtml, /overflow:(?:auto|scroll)/);
+        assert.doesNotMatch(appHtml, /scrollTop/);
     });
 });
