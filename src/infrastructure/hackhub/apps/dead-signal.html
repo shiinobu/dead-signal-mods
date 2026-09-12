@@ -62,7 +62,7 @@
     events.on("DSS.Recon.Completed",e=>{state.running=false;$("pulse").hidden=true;progress(100);text("state",`Enumeration completed in ${e.elapsedMs} ms.`);text("sources",`${e.sources.length}/${e.sources.length}`);text("candidates",e.candidatesFound);text("unique",e.uniqueHostsFound)});
     events.on("DSS.Recon.Failed",e=>{state.running=false;$("pulse").hidden=true;text("state",e?.reason||"Reconnaissance failed.")});
   };
-  $("form").addEventListener("submit",async e=>{e.preventDefault();if(state.running||typeof startRecon!=="function")return;const target=$("target").value.trim();if(!target)return;reset();$("run").disabled=true;text("state","Starting reconnaissance...");try{const ok=await startRecon(target);if(!ok&&!state.running)text("state","No reconnaissance profile matched the target.");if(typeof getSession==="function")setSession(getSession())}catch(err){text("state",err instanceof Error?err.message:"Reconnaissance failed.")}finally{$("run").disabled=false}});
+  $("form").addEventListener("submit",async e=>{e.preventDefault();if(state.running||typeof startRecon!=="function")return;const target=$("target").value.trim();if(!target)return;reset();$("run").disabled=true;text("state","Starting reconnaissance...");try{const ok=await startRecon(target);if(!ok&&!state.running)text("state","No reconnaissance profile matched the target.");if(typeof getSession==="function")setSession(getSession())}catch(err){text("state",err instanceof Error?err.message:"Reconnaissance failed")}finally{$("run").disabled=false}});
   buildNav();setupEvents();if(typeof getSession==="function")setSession(getSession());renderSources();renderResults();
 })();
 </script>
