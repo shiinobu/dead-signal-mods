@@ -289,11 +289,13 @@ describe("DSS operations application foundation", () => {
         assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.completed/);
     });
 
-    it("locks the app HTML compatibility patch to the known navigation defect", () => {
-        assert.match(appSource, /const brokenShowImplementation\s*=\s*"const show=id=>/);
-        assert.match(appSource, /const fixedShowImplementation\s*=\s*"const show=id=>/);
-        assert.match(appSource, /appHTML\.includes\(brokenShowImplementation\)/);
-        assert.match(appSource, /const dssHTML = appHTML\.replace\(/);
+    it("locks the app HTML compatibility patch to the safe navigation wrapper", () => {
+        assert.match(appSource, /const DSS_NAVIGATION_PATCH\s*=\s*`/);
+        assert.match(appSource, /const showDssView\s*=\s*\(id\)\s*=>/);
+        assert.match(appSource, /const activeView = Object\.prototype\.hasOwnProperty\.call\(views, id\)/);
+        assert.match(appSource, /view\.classList\.toggle\("active", key === activeView\)/);
+        assert.match(appSource, /const dssHTML = `\$\{appHTML\}\$\{DSS_NAVIGATION_PATCH\}`;/);
         assert.match(appSource, /HTML\s*=\s*dssHTML/);
+        assert.doesNotMatch(appSource, /throw new Error\(/);
     });
 });
