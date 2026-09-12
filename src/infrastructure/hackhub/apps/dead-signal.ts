@@ -20,12 +20,127 @@ import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
 
+const DSS_DIRECT_INTERACTION_PATCH = `
+<script>
+(() => {
+  const sdk = globalThis.HackhubSDK;
+  const emit = async (commandLine) => {
+    const exported = globalThis.executeCommand;
+    if (typeof exported === 'function') {
+      await Promise.resolve(exported(commandLine));
+      return true;
+    }
+    if (!sdk?.Events?.emit) return false;
+    sdk.Events.emit('DSS.Command.Request', { commandLine });
+    return true;
+  };
+  const bind = () => {
+    const reconForm = document.getElementById('recon-form');
+    const reconButton = document.getElementById('recon-run');
+    const reconTarget = document.getElementById('recon-target');
+    if (reconButton && !reconButton.dataset.dssDirectBound) {
+      reconButton.type = 'button';
+      reconButton.dataset.dssDirectBound = 'true';
+      reconButton.addEventListener('click', async () => {
+        const target = reconTarget?.value.trim();
+        if (!target || reconButton.disabled) return;
+        reconButton.disabled = true;
+        const state = document.getElementById('scan-state');
+        const percent = document.getElementById('percent');
+        const bar = document.getElementById('bar');
+        const profile = document.getElementById('profile');
+        const sources = document.getElementById('sources');
+        const candidates = document.getElementById('candidates');
+        const unique = document.getElementById('unique');
+        const results = document.getElementById('results');
+        const sourceList = document.getElementById('source-list');
+        if (state) state.textContent = 'Starting reconnaissance.';
+        if (percent) percent.textContent = '0%';
+        if (bar) bar.style.width = '0%';
+        if (profile) profile.textContent = 'RUNNING';
+        if (sources) sources.textContent = '0/0';
+        if (candidates) candidates.textContent = '0';
+        if (unique) unique.textContent = '0';
+        if (results) results.innerHTML = '<div class="empty">Scanning...</div>';
+        if (sourceList) sourceList.innerHTML = '<div class="empty">Loading profile...</div>';
+        try {
+          const ok = await emit('recon -d ' + target);
+          if (!ok && state) state.textContent = 'DSS command bridge is unavailable.';
+        } catch (error) {
+          if (state) state.textContent = error instanceof Error ? error.message : 'Reconnaissance failed.';
+          reconButton.disabled = false;
+        }
+      });
+    }
+
+    const commandForm = document.getElementById('cmd-form');
+    const commandButton = document.getElementById('cmd-run');
+    const commandInput = document.getElementById('cmd-input');
+    const commandOutput = document.getElementById('terminal-output');
+    if (commandButton && !commandButton.dataset.dssDirectBound) {
+      commandButton.type = 'button';
+      commandButton.dataset.dssDirectBound = 'true';
+      commandButton.addEventListener('click', async () => {
+        const commandLine = commandInput?.value.trim();
+        if (!commandLine) return;
+        if (commandOutput) {
+          const line = document.createElement('div');
+          line.className = 'line line-info';
+          line.textContent = 'dss~$ ' + commandLine;
+          commandOutput.append(line);
+          while (commandOutput.children.length > 36) commandOutput.removeChild(commandOutput.firstChild);
+        }
+        if (commandInput) commandInput.value = '';
+        if (commandLine.toLowerCase() === 'clear') {
+          if (commandOutput) commandOutput.innerHTML = '';
+          const line = document.createElement('div');
+          line.className = 'line line-info';
+          line.textContent = 'DSS // Dead Signal System';
+          commandOutput?.append(line);
+          commandInput?.focus();
+          return;
+        }
+        try {
+          const ok = await emit(commandLine);
+          if (!ok && commandOutput) {
+            const line = document.createElement('div');
+            line.className = 'line line-warn';
+            line.textContent = 'DSS command bridge is unavailable.';
+            commandOutput.append(line);
+          }
+        } catch (error) {
+          if (commandOutput) {
+            const line = document.createElement('div');
+            line.className = 'line line-warn';
+            line.textContent = error instanceof Error ? error.message : 'Command execution failed.';
+            commandOutput.append(line);
+          }
+        }
+        commandInput?.focus();
+      });
+    }
+
+    if (reconForm) reconForm.addEventListener('submit', (event) => event.preventDefault());
+    if (commandForm) commandForm.addEventListener('submit', (event) => event.preventDefault());
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind, { once: true });
+  } else {
+    bind();
+  }
+})();
+</script>`;
+
+const dssHTML = appHTML.includes('</body>')
+    ? appHTML.replace('</body>', `${DSS_DIRECT_INTERACTION_PATCH}</body>`)
+    : appHTML;
+
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = appHTML;
+    HTML = dssHTML;
     DefaultSize = { width: 1220, height: 800 };
     override MinSize = { width: 1200, height: 780 };
     override Unlocked = true;
