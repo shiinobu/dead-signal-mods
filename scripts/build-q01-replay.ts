@@ -50,6 +50,7 @@ await buildMod({
 
 const replayBundle = await readFile(replayModPath, "utf8");
 const requiredBundleMarkers = [
+    "Q01SubfinderCommand",
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
     "www.skynet-logistics.idx",
