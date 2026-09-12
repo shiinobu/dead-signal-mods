@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
     DSS_RECON_EVENTS,
     OpsCommandRegistry,
+    OpsCommandRouter,
     OpsEventBus,
     OpsRuntime,
     OpsSessionStore,
@@ -36,6 +37,18 @@ const appHtml = readFileSync(
         fileURLToPath(
             new URL(
                 "../src/infrastructure/hackhub/apps/dead-signal.html",
+                import.meta.url,
+            ),
+        ),
+    ),
+    "utf8",
+);
+
+const commandSource = readFileSync(
+    resolve(
+        fileURLToPath(
+            new URL(
+                "../src/infrastructure/hackhub/commands/recon.ts",
                 import.meta.url,
             ),
         ),
@@ -75,6 +88,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /opsRuntime\.tools\.getAll\(\)/);
         assert.match(appSource, /opsRuntime\.session\.getSnapshot\(\)/);
         assert.match(appSource, /opsRuntime\.runRecon\(/);
+        assert.match(appSource, /getCommandCatalog/);
         assert.match(appSource, /DSS_RECON_EVENTS\.started/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceStarted/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceCompleted/);
@@ -89,6 +103,8 @@ describe("DSS operations application foundation", () => {
         assert.match(appHtml, />Recon</);
         assert.match(appHtml, /Wireshark\+/);
         assert.match(appHtml, /OPERATIONS WORKSPACE/);
+        assert.match(appHtml, /DSS Shell/);
+        assert.match(appHtml, /Run Recon/);
     });
 
     it("is imported by both production and Q01 replay entries", () => {
@@ -200,5 +216,42 @@ describe("DSS operations application foundation", () => {
             "status.skynet-logistics.idx",
             "www.skynet-logistics.idx",
         ]);
+    });
+
+    it("routes recon through the shared command router", async () => {
+        const runtime = new OpsRuntime({
+            recon: new ReconService({
+                animation: {
+                    sourceDurationMs: 0,
+                    resultDelayMs: 0,
+                },
+            }),
+        });
+        runtime.recon.registerProfile(Q01_RECON_PROFILE);
+        const router = new OpsCommandRouter(runtime);
+
+        const result = await router.execute(Q01_RECON_INPUT, {
+            observer: {
+                onStarted: () => undefined,
+                onSourceStarted: () => undefined,
+                onSourceCompleted: () => undefined,
+                onHostDiscovered: () => undefined,
+                onCompleted: () => undefined,
+                sleep: async () => undefined,
+            },
+        });
+
+        assert.equal(result.ok, true);
+        assert.equal(result.command, "recon");
+        assert.equal(result.result?.uniqueHostsFound, 4);
+    });
+
+    it("bridges native recon command progress into the DSS event surface", () => {
+        assert.match(commandSource, /import \{\s*DSS_RECON_EVENTS,\s*\}/);
+        assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.started/);
+        assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.sourceStarted/);
+        assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.sourceCompleted/);
+        assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.hostDiscovered/);
+        assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.completed/);
     });
 });
