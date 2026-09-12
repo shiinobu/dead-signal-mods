@@ -56,12 +56,6 @@ The result order is deterministic and is the authoritative Q01 enumeration outpu
 
 The terminal presentation is adapted from the current ProjectDiscovery Subfinder `dev` branch and matched against the supplied HackHub reference capture. The upstream source provides the banner and `projectdiscovery.io` attribution; Q01 also reproduces the warning block visible in the reference capture and uses a braille spinner for the enumeration wait state. The upstream project is MIT licensed.
 
-The Q01 command uses the current upstream version identifier internally:
-
-```text
-v2.16.0
-```
-
 The player-facing flow is:
 
 ```text
