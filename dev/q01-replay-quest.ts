@@ -51,7 +51,6 @@ const Q01_INCOMING_MAIL_CONTENT = [
     "DEV REPLAY — Q01 TEST CONTRACT",
     "",
     "CLIENT",
-    `Company: ${Q01_CLIENT_NAME}`,
     "Location: Jakarta",
     `Target: ${Q01_TARGET_IP}`,
     "",
