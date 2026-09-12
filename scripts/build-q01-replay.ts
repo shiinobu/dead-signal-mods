@@ -21,6 +21,7 @@ const replayManifestPath = resolve(
     "manifest.json",
 );
 const replayModPath = resolve(replayOutputDir, "mod.js");
+const replayAppPath = resolve(replayOutputDir, "dead-signal.html");
 const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
 const replayAssetsDir = resolve(replayOutputDir, "assets");
@@ -50,6 +51,8 @@ await buildMod({
 
 const replayBundle = await readFile(replayModPath, "utf8");
 const requiredBundleMarkers = [
+    "DeadSignalApp",
+    "DEAD-SIGNAL",
     "ReconCommand",
     "Q01_RECON_PROFILE",
     "portal.skynet-logistics.idx",
@@ -60,7 +63,7 @@ const requiredBundleMarkers = [
 for (const marker of requiredBundleMarkers) {
     if (!replayBundle.includes(marker)) {
         throw new Error(
-            `Q01 replay bundle is stale or incomplete: missing DSS recon fixture marker ${marker}`,
+            `Q01 replay bundle is stale or incomplete: missing DSS fixture marker ${marker}`,
         );
     }
 }
@@ -93,6 +96,7 @@ await cp(sourceAssetsDir, replayAssetsDir, {
 const requiredFiles = [
     replayModPath,
     replayManifestPath,
+    replayAppPath,
     replayAvatarPath,
 ];
 
@@ -115,7 +119,9 @@ for (const marker of requiredBundleMarkers) {
 console.log("Package contents:");
 console.log("  - mod.js");
 console.log("  - manifest.json");
+console.log("  - dead-signal.html");
 console.log("  - assets/adrian-cole.png");
+console.log("  - assets/dss.svg");
 console.log(
     "Install the complete dist-replay contents into HackHub/mods/dead-signal-dev and restart HackHub.",
 );
