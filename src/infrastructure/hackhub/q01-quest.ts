@@ -24,9 +24,7 @@ import {
     Q01_THE_CONTRACT,
     Q01_WEB_AUDIT_HOST,
     Q01_WEB_HOST,
-    Q01_WEB_HOME_HOST,
     Q01_WEB_HOME_URL,
-    Q01_WEB_FORBIDDEN_HOSTS,
     Q01_WEB_SUBDOMAINS,
 } from "../../content/index.js";
 
