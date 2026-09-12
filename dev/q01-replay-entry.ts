@@ -8,7 +8,7 @@ import "../src/infrastructure/hackhub/commands/recon.js";
 import "../src/infrastructure/hackhub/websites/q01-skynet-portal.js";
 
 import { Q01_RECON_PROFILE } from "../src/content/q01.js";
-import { opsRuntime } from "../src/application/ops-runtime.js";
+import { opsRuntime } from "../src/application/ops/runtime.js";
 
 @RegisterModPackage
 export default class DeadSignalReplayMod extends Bootstrap {
