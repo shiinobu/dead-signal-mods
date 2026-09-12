@@ -9,7 +9,6 @@ import {
     Q01_WEB_HOME_HOST,
 } from "../../../content/q01.js";
 
-const SUBFINDER_VERSION = "v2.16.0";
 const RESULT_DELAY_MS = 90;
 const SPINNER_DELAY_MS = 100;
 const SPINNER_DURATION_MS = 2400;
@@ -126,7 +125,7 @@ export class Q01SubfinderCommand extends Command {
             normalizedTarget !== Q01_WEB_HOME_HOST
         ) {
             await sleep(SPINNER_DELAY_MS * 2);
-            tools.println("\u001B[1A\u001B[2K\r");
+            tools.println(`${ANSI_CURSOR_UP}${ANSI_CLEAR_LINE}${ANSI_CARRIAGE_RETURN}`);
             tools.println(`[WRN] No subdomains found for ${normalizedTarget}`);
             return;
         }
