@@ -46,6 +46,8 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
+const Q01_SSH_INTERNAL_IP = "10.0.0.2";
+
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
     {
         port: 22,
@@ -193,37 +195,59 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     override OnStart() {
         gameRuntime.quest.start(Q01_THE_CONTRACT);
 
+        const publicPorts = [
+            {
+                external: Q01_SSH_PORT,
+                internal: Q01_SSH_PORT,
+                active: true,
+                service: "ssh",
+            },
+            {
+                external: 80,
+                internal: 80,
+                active: true,
+                service: "http",
+            },
+            {
+                external: 443,
+                internal: 443,
+                active: true,
+                service: "https",
+            },
+        ];
+
+        const sshPorts = [
+            {
+                external: Q01_SSH_PORT,
+                internal: Q01_SSH_PORT,
+                active: true,
+                service: "ssh",
+            },
+        ];
+
+        const auditUser = Network.createUser({
+            username: Q01_SSH_USERNAME,
+            password: Q01_SSH_PASSWORD,
+        });
+
         Network.createSubnetNetwork({
             ip: this.Data.targetIp,
             type: Network.Type.Router,
-            ports: [
+            ports: publicPorts,
+            users: [],
+            children: [
                 {
-                    external: Q01_SSH_PORT,
-                    internal: Q01_SSH_PORT,
-                    active: true,
-                    service: "ssh",
-                },
-                {
-                    external: 80,
-                    internal: 80,
-                    active: true,
-                    service: "http",
-                },
-                {
-                    external: 443,
-                    internal: 443,
-                    active: true,
-                    service: "https",
+                    ip: Q01_SSH_INTERNAL_IP,
+                    type: Network.Type.Device,
+                    ssh: true,
+                    ports: sshPorts,
+                    users: [auditUser],
                 },
             ],
-            users: [
-                Network.createUser({
-                    username: Q01_SSH_USERNAME,
-                    password: Q01_SSH_PASSWORD,
-                }),
-            ],
-            children: [],
         });
+
+        Network.openPort(this.Data.targetIp, Q01_SSH_PORT);
+        Network.openPort(Q01_SSH_INTERNAL_IP, Q01_SSH_PORT);
 
         this.sendMail(0);
         this.SetData("auditScopeReviewed", true);
