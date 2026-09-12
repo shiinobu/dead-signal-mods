@@ -43,7 +43,11 @@ type Q01SubfinderTools = Parameters<Command["Run"]>[0];
 
 @RegisterCommand({ default: true })
 export class Q01SubfinderCommand extends Command {
-    CommandName = "subfinder";
+    /**
+     * Q01 intentionally uses the plural command name so it does not collide
+     * with HackHub's native `subfinder` executable.
+     */
+    CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
 
     override async Run(tools: Q01SubfinderTools) {
@@ -54,7 +58,7 @@ export class Q01SubfinderCommand extends Command {
             : null;
 
         if (!normalizedTarget) {
-            tools.println("Usage: subfinder -d <domain>");
+            tools.println("Usage: subfinders -d <domain>");
             return;
         }
 
