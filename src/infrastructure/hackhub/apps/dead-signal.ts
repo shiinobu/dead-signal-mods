@@ -34,6 +34,14 @@ const DSS_DIRECT_INTERACTION_PATCH = `
     sdk.Events.emit('DSS.Command.Request', { commandLine });
     return true;
   };
+  const startRecon = async (target) => {
+    const exported = globalThis.startRecon;
+    if (typeof exported === 'function') {
+      await Promise.resolve(exported(target));
+      return true;
+    }
+    return emit('recon -d ' + target);
+  };
   const bind = () => {
     const reconForm = document.getElementById('recon-form');
     const reconButton = document.getElementById('recon-run');
@@ -64,9 +72,9 @@ const DSS_DIRECT_INTERACTION_PATCH = `
         if (results) results.innerHTML = '<div class="empty">Scanning...</div>';
         if (sourceList) sourceList.innerHTML = '<div class="empty">Loading profile...</div>';
         try {
-          const ok = await emit('recon -d ' + target);
+          const ok = await startRecon(target);
           if (!ok) {
-            if (state) state.textContent = 'DSS command bridge is unavailable.';
+            if (state) state.textContent = 'DSS reconnaissance runtime rejected the target.';
             reconButton.disabled = false;
           }
         } catch (error) {
