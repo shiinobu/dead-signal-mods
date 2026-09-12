@@ -23,7 +23,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.match(subfinderCommandSource, /projectdiscovery\.io/);
     });
 
-    it("matches the HackHub reference warning and enumeration sequence", () => {
+    it("matches the reference warning and enumeration sequence", () => {
         assert.match(
             subfinderCommandSource,
             /\[WRN\] Use with caution\. You are responsible for your actions\./,
@@ -38,68 +38,50 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         );
         assert.match(
             subfinderCommandSource,
-            /\[INF\] Enumerating subdomains for \$\{target\}/,
+            /\[INF\] Enumerating subdomains for \$\{normalizedTarget\}/,
         );
     });
 
-    it("uses native CommandTools.clear() without emitting ANSI control sequences", () => {
-        assert.match(subfinderCommandSource, /tools\.clear\(\);/);
-        assert.match(
-            subfinderCommandSource,
-            /await tools\.sleep\(SPINNER_DELAY_MS\)/,
-        );
+    it("preserves append-only terminal history and does not clear or emit ANSI control sequences", () => {
+        assert.doesNotMatch(subfinderCommandSource, /tools\.clear\(\)/);
         assert.doesNotMatch(subfinderCommandSource, /\\u001B\[/);
         assert.doesNotMatch(subfinderCommandSource, /ANSI_CURSOR_UP/);
         assert.doesNotMatch(subfinderCommandSource, /ANSI_CLEAR_LINE/);
         assert.doesNotMatch(subfinderCommandSource, /ANSI_CARRIAGE_RETURN/);
+        assert.match(subfinderCommandSource, /await tools\.sleep\(SOURCE_DURATION_MS\)/);
     });
 
-    it("uses the reference braille sequence and source-by-source progress timing", () => {
-        assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
-        assert.match(subfinderCommandSource, /"⠋"/);
-        assert.match(subfinderCommandSource, /"⠙"/);
-        assert.match(subfinderCommandSource, /"⠹"/);
-        assert.match(subfinderCommandSource, /"⠸"/);
-        assert.match(subfinderCommandSource, /"⠼"/);
-        assert.match(subfinderCommandSource, /"⠴"/);
-        assert.match(subfinderCommandSource, /"⠦"/);
-        assert.match(subfinderCommandSource, /"⠧"/);
-        assert.match(subfinderCommandSource, /"⠇"/);
-        assert.match(subfinderCommandSource, /"⠏"/);
-        assert.match(subfinderCommandSource, /SOURCE_DURATION_MS = 1000/);
-        assert.match(subfinderCommandSource, /SPINNER_DELAY_MS = 100/);
-        assert.match(
-            subfinderCommandSource,
-            /Sources:.*SOURCES\.length/,
-        );
-    });
-
-    it("defines deterministic simulated discovery sources with duplicate candidates", () => {
+    it("uses five deterministic simulated discovery sources with duplicate candidates", () => {
         assert.match(subfinderCommandSource, /const SOURCES = \[/);
         assert.match(subfinderCommandSource, /name: "crtsh"/);
         assert.match(subfinderCommandSource, /name: "rapiddns"/);
         assert.match(subfinderCommandSource, /name: "hackertarget"/);
         assert.match(subfinderCommandSource, /name: "alienvault"/);
         assert.match(subfinderCommandSource, /name: "urlscan"/);
-        assert.match(
-            subfinderCommandSource,
-            /Candidates: \$\{candidateCount\}/,
-        );
+        assert.match(subfinderCommandSource, /certificate transparency/);
+        assert.match(subfinderCommandSource, /passive DNS/);
+        assert.match(subfinderCommandSource, /Candidates: \$\{candidateCount\}/);
         assert.match(subfinderCommandSource, /Unique:\s+\$\{uniqueCount\}/);
     });
 
-    it("renders a live progress bar and active-source spinner", () => {
+    it("renders source-by-source progress with a progress bar and active-source indicator", () => {
+        assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
         assert.match(subfinderCommandSource, /const formatProgressBar =/);
         assert.match(subfinderCommandSource, /█/);
         assert.match(subfinderCommandSource, /░/);
         assert.match(
             subfinderCommandSource,
-            /\[\$\{marker\}\] \$\{source\.name\.padEnd\(18, "\."\)\} \$\{suffix\}/,
+            /\[>] \$\{source\.name\.padEnd\(18, "\."\)\} \$\{frame\} scanning \$\{source\.description\}/,
+        );
+        assert.match(
+            subfinderCommandSource,
+            /\[✓\] \$\{source\.name\.padEnd\(18, "\."\)\} \$\{source\.candidates\.length\} found/,
         );
         assert.match(
             subfinderCommandSource,
             /Progress: \$\{formatProgressBar\(progress\)\} \$\{progress\}%/,
         );
+        assert.match(subfinderCommandSource, /Sources:  \$\{completedSources\.length\}\/\$\{SOURCES\.length\}/);
     });
 
     it("streams the canonical deterministic Q01 result after enumeration completes", () => {
@@ -107,10 +89,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
             subfinderCommandSource,
             /Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)/,
         );
-        assert.match(
-            subfinderCommandSource,
-            /\[INF\] Enumeration completed/,
-        );
+        assert.match(subfinderCommandSource, /\[INF\] Enumeration completed/);
         assert.match(
             subfinderCommandSource,
             /await tools\.sleep\(RESULT_DELAY_MS\);[\s\S]*tools\.println\(subdomain\)/,
