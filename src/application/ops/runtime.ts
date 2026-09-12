@@ -1,8 +1,8 @@
-import type {
-    ReconObserver,
-    ReconProgress,
-    ReconResult,
+import {
     ReconService,
+    type ReconObserver,
+    type ReconProgress,
+    type ReconResult,
 } from "./recon-service.js";
 import {
     OpsSessionStore,
@@ -23,7 +23,7 @@ export class OpsRuntime {
     readonly tools: OpsToolRegistry;
 
     constructor(services?: Partial<OpsRuntimeServices>) {
-        this.recon = services?.recon ?? new (requireReconService())();
+        this.recon = services?.recon ?? new ReconService();
         this.session = services?.session ?? new OpsSessionStore();
         this.tools = services?.tools ?? new OpsToolRegistry();
     }
@@ -61,12 +61,5 @@ export class OpsRuntime {
         });
     }
 }
-
-const requireReconService = () => {
-    const { ReconService: Service } = require("./recon-service.js") as {
-        ReconService: typeof import("./recon-service.js").ReconService;
-    };
-    return Service;
-};
 
 export const opsRuntime = new OpsRuntime();
