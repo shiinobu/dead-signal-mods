@@ -13,11 +13,11 @@ const SUBFINDER_VERSION = "v2.16.0";
 const RESULT_DELAY_MS = 90;
 
 const SUBFINDER_BANNER = [
-    "                   __    _____           __         ",
-    "       _______  __/ /_  / __(_)___  ____/ /__  _____",
-    "      / ___/ / / / __ \\/ /_/ / __ \\/ __  / _ \\/ ___/",
-    "     (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /    ",
-    "    /____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/",
+    "               __    _____           __         ",
+    "   _______  __/ /_  / __(_)___  ____/ /__  _____",
+    "  / ___/ / / / __ \\/ /_/ / __ \\/ __  / _ \\/ ___/",
+    " (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /    ",
+    "/____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/",
 ] as const;
 
 const normalizeTarget = (rawTarget: string): string | null => {
@@ -98,15 +98,16 @@ export class Q01SubfinderCommand extends Command {
         }
 
         const startedAt = Date.now();
+        const subdomains = Q01_SUBFINDER_RESULT.split("\n");
 
-        for (const subdomain of Q01_SUBFINDER_RESULT.split("\n")) {
+        for (const subdomain of subdomains) {
             await sleep(RESULT_DELAY_MS);
             tools.println(subdomain);
         }
 
         const elapsedMs = Date.now() - startedAt;
         tools.println(
-            `[INF] Found ${Q01_SUBFINDER_RESULT.split("\n").length} subdomains for ${normalizedTarget} in ${elapsedMs} milliseconds`,
+            `[INF] Found ${subdomains.length} subdomains for ${normalizedTarget} in ${elapsedMs} milliseconds`,
         );
     }
 }
