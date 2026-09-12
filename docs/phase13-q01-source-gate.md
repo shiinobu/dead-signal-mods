@@ -5,34 +5,36 @@ Status: **REVISED IMPLEMENTATION LOCK — LIVE VALIDATION PENDING**
 
 ## Source Authority
 
-Q01 remains `dead_signal.q01` and keeps the locked five-objective structure and Phase 8 reward allocation. The current project-owner revision changes the public web host to `skynet-logistics.idx`, adds a richer public homepage, keeps `/security` as the only registered audit page, and changes Adrian's report email from an answer-bearing body to a player-completed report format.
+Q01 remains `dead_signal.q01` and keeps the locked five-objective structure and Phase 8 reward allocation. The current project-owner revision changes the web discovery model to Lynx + subdomain enumeration and changes Adrian's report email to a player-completed format.
 
-The revision does not add a new character, persistent flag, dependency, reward, or objective.
+The revision does not add a new character, persistent completion flag, dependency, reward, or objective.
 
 ## Canonical Q01 Contract
 
-- ID: `dead_signal.q01`
-- Title: `THE CONTRACT`
-- Chapter: `01 — DEAD SIGNAL`
-- Location: Jakarta
-- Primary: Adrian Cole
-- Prerequisite: none
-- Target: `203.0.113.42`
-- Client: `Skynet Logistics`
-- Public host: `skynet-logistics.idx`
-- Completion: audit report submitted
-- Persistent completion state: `dead_signal.q01.completed = true`
-- Reward: `$200`, up to `80 XP`
+```text
+ID:          dead_signal.q01
+Title:       THE CONTRACT
+Location:    Jakarta
+Primary:     Adrian Cole
+Target:      203.0.113.42
+Client:      Skynet Logistics
+Apex domain: skynet-logistics.idx
+Completion:  audit report submitted
+State:       dead_signal.q01.completed = true
+Reward:      $200 + up to 80 XP
+```
 
-## Locked Player Objectives
+## Locked Objectives
 
-1. `Review audit scope`
-2. `Scan the ip target`
-3. `Identify exposed services`
-4. `Perform basic vulnerability checks`
-5. `Submit audit report`
+```text
+01 Review audit scope
+02 Scan the ip target
+03 Identify exposed services
+04 Perform basic vulnerability checks
+05 Submit audit report
+```
 
-Objective IDs remain unchanged:
+Objective IDs remain:
 
 ```text
 q01.objective.01
@@ -42,81 +44,105 @@ q01.objective.04
 q01.objective.05
 ```
 
-Objective 02 presents only the terminal command `nmap`; the target IP is supplied by the audit material rather than displayed in the objective command text.
-
-Objective 03 intentionally has no hint.
-
-## Revised Service Enumeration
+## Service Enumeration
 
 ```text
-22/tcp  CLOSED  ssh
-80/tcp  CLOSED  http
-443/tcp OPEN    https
+22/tcp  CLOSE  ssh
+80/tcp  CLOSE  http
+443/tcp OPEN   https
 ```
 
-Port 443/HTTPS is the only exposed gameplay service used by the revised Q01 flow. SSH and HTTP remain scan evidence as closed ports but are not interaction requirements.
+Port 443/HTTPS is the only exposed web service. Canonical HTTPS URLs omit the explicit `:443`.
 
-## Revised Web Surface
+## Web Discovery
 
-Canonical public homepage:
+Exactly four subdomains exist in the Q01 world model:
 
 ```text
-https://skynet-logistics.idx/
+www.skynet-logistics.idx
+portal.skynet-logistics.idx
+status.skynet-logistics.idx
+security.skynet-logistics.idx
 ```
 
-Canonical security-review page:
+Behavior:
 
 ```text
-https://skynet-logistics.idx/security
+www      → public homepage
+portal   → 403 FORBIDDEN
+status   → 403 FORBIDDEN
+security → Q01 audit target
 ```
 
-The Q01 Website registers only:
+The apex domain is the enumeration root and has no Website page of its own.
+
+## Lynx
+
+The Q01 adapter provides the HackHub typed `lynx` response through Shell command data:
 
 ```text
-/          public company homepage
-/security  external HTTPS security review
+lynx 203.0.113.42
 ```
 
-No other Q01 pages are registered. This intentionally limits the active web surface while allowing the root homepage and the single audit page to exist. In URL terminology, `/security` is a path under the host rather than a DNS subdomain; the requested gameplay URL form is retained exactly.
-
-## Revised Objective 04 Method
-
-Objective 04 is satisfied by inspecting the authorized Skynet Logistics HTTPS audit surface:
+Compatibility input:
 
 ```text
-Host:   skynet-logistics.idx
-Path:   /security
-URL:    https://skynet-logistics.idx/security
+lynx https://203.0.113.42/
 ```
 
-Player-facing hint:
+Both resolve to the canonical public address:
 
 ```text
-Inspect web service and review the security findings.
+https://www.skynet-logistics.idx/
 ```
 
-The HackHub adapter registers the web surface with `@RegisterWebsite` and listens to the `Browser.Meta` event. The objective completes only when the player opens the exact security-review path over HTTPS after Objective 03 is complete.
+## Subfinder
 
-No SSH command, SSH user, password, `Shell.addCommandData("ssh", ...)`, child SSH device, or `Terminal.SSH.Connected` event is required by Q01.
+The Q01 adapter provides a deterministic custom command fixture:
 
-## Security-Assessment Semantics
+```text
+subfinder -d skynet-logistics.idx
+```
 
-The web page is an evidence surface for a basic, non-exploitative external assessment. It records the revised facts:
+The result contains exactly the four locked subdomains.
 
-- target is `203.0.113.42`;
-- 22/tcp is closed;
-- 80/tcp is closed;
-- 443/tcp is open and provides HTTPS;
-- no critical vulnerabilities were identified during the basic assessment;
-- further internal assessment is recommended.
+HackHub's official Shell documentation defines `Shell.addCommandData()` as the mechanism for injecting command responses and lists `lynx` as a typed built-in; non-built-in command names can use arbitrary input/data. citeturn313821search0
 
-The homepage separately establishes `Skynet Logistics` as the client identity, while the security page exposes the port evidence.
+## Objective 04 Method
 
-Q01 still does not require exploitation, credential attacks, data extraction, or internal access.
+```text
+nmap
+ ↓
+443/tcp OPEN
+ ↓
+lynx 203.0.113.42
+ ↓
+www.skynet-logistics.idx
+ ↓
+subfinder -d skynet-logistics.idx
+ ↓
+security.skynet-logistics.idx
+ ↓
+HTTPS Browser.Meta
+```
+
+Objective 04 completes only when `Browser.Meta` reports:
+
+```text
+protocol = https:
+hostname = security.skynet-logistics.idx
+pathname = /
+```
+
+Port enforcement is provided by the target network definition; Q01 does not depend on an undocumented Browser.Meta port field.
+
+## Security Boundary
+
+Q01 remains non-exploitative. Credential attacks, internal access, data extraction, SQL injection, RCE, and SSH access are not required.
 
 ## Report Contract
 
-Adrian's email now provides the player-facing report format:
+Adrian's incoming email contains:
 
 ```text
 Format report audit:
@@ -129,13 +155,9 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-Canonical recipient:
+The player must derive the company and open-port values from the reconnaissance/audit surfaces.
 
-```text
-adrian.cole@deadsignal.lock
-```
-
-The player must discover the company name and open port value from the audit surfaces. For the current Q01 world state, the resolved accepted body is:
+Canonical resolved body:
 
 ```text
 Target: Skynet Logistics
@@ -145,29 +167,26 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-Literal `<COMPANY>` and `<PORTS>` placeholders are not accepted by the quest validator.
-
-## XP Authority
-
-```text
-Complete external audit             35 XP
-Network/service enumeration         20 XP
-Basic vulnerability assessment     10 XP
-Submit correct report              15 XP
-----------------------------------------
-Total                               80 XP
-```
-
 ## State Boundary
 
-Only the recovered canonical completion flag is persisted:
+Only the canonical completion flag is persistent:
 
 ```text
 dead_signal.q01.completed = true
 ```
 
-Web interaction state is transient quest data owned by the HackHub quest instance. No new persistent story flags are introduced.
+Lynx/subfinder discovery state remains transient Q01 quest data.
 
-## Production Lock Boundary
+## Production Gate
 
-This document locks the revised `.idx` web host, root homepage, single `/security` audit page, terminal-style security presentation, and player-completed report template. **Production Q01 is not declared live-PASS until the revised five-step scenario succeeds in a clean HackHub run and the result is recorded.**
+Production Q01 is not declared live-PASS until a clean HackHub run demonstrates:
+
+```text
+nmap → 443/tcp OPEN
+lynx → www.skynet-logistics.idx
+subfinder → exactly four subdomains
+portal/status → 403 FORBIDDEN
+security → audit page
+report → Objective 05
+completion → $200 + 80 XP
+```
