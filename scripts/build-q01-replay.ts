@@ -62,7 +62,6 @@ const requiredBundleMarkers = [
     "dss",
     "ReconCommand",
     "Q01_RECON_PROFILE",
-    "OPERATIONS WORKSPACE",
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
     "www.skynet-logistics.idx",
@@ -71,7 +70,23 @@ const requiredBundleMarkers = [
 for (const marker of requiredBundleMarkers) {
     if (!replayBundle.includes(marker)) {
         throw new Error(
-            `Q01 replay bundle is stale or incomplete: missing DSS fixture marker ${marker}`,
+            `Q01 replay bundle is stale or incomplete: missing runtime marker ${marker}`,
+        );
+    }
+}
+
+const sourceDssApp = await readFile(sourceDssAppPath, "utf8");
+const requiredDssHtmlMarkers = [
+    "OPERATIONS WORKSPACE",
+    "Terminal+",
+    "Wireshark+",
+    "Run Recon",
+];
+
+for (const marker of requiredDssHtmlMarkers) {
+    if (!sourceDssApp.includes(marker)) {
+        throw new Error(
+            `Q01 replay DSS HTML is stale or incomplete: missing UI marker ${marker}`,
         );
     }
 }
@@ -101,7 +116,7 @@ await cp(sourceAssetsDir, replayAssetsDir, {
     force: true,
 });
 // Keep a readable source copy in the replay package for inspection. The
-// runtime App HTML is now bundled into mod.js via the HTML module import.
+// runtime App HTML is resolved by HackHub from the packaged HTML path.
 await cp(sourceDssAppPath, replayAppPath, { force: true });
 
 const requiredFiles = [
@@ -129,10 +144,14 @@ console.log("Verified bundle markers:");
 for (const marker of requiredBundleMarkers) {
     console.log(`  - ${marker}`);
 }
+console.log("Verified DSS HTML markers:");
+for (const marker of requiredDssHtmlMarkers) {
+    console.log(`  - ${marker}`);
+}
 console.log("Package contents:");
 console.log("  - mod.js");
 console.log("  - manifest.json");
-console.log("  - dead-signal.html (inspection copy)");
+console.log("  - dead-signal.html");
 console.log("  - assets/adrian-cole.png");
 console.log("  - assets/dss.svg");
 console.log(
