@@ -1,4 +1,5 @@
 import {
+    Mail,
     Network,
     Quest as HackHubQuest,
     RegisterQuest,
@@ -6,9 +7,13 @@ import {
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
+    Q01_ADRIAN_EMAIL,
     Q01_CLIENT_NAME,
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
+    Q01_REPORT_BODY,
+    Q01_REPORT_RECIPIENT,
+    Q01_REPORT_SUBJECT,
     Q01_REWARDS,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
@@ -53,20 +58,67 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
     { port: 443, status: "OPEN", service: "https" },
 ];
 
-const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
+const Q01_INCOMING_MAIL_CONTENT = [
+    "I have a client looking for a short security audit.",
+    "",
+    "Nothing complicated.",
+    "One external network.",
+    "A few services.",
+    "Basic vulnerability assessment.",
+    "",
+    "CLIENT",
+    `Company: ${Q01_CLIENT_NAME}`,
+    "Location: Jakarta",
+    `Target: ${Q01_TARGET_IP}`,
+    "",
+    "Scope:",
+    "External infrastructure only.",
+    "",
+    "Authorized:",
+    "Network discovery",
+    "Service enumeration",
+    "Basic vulnerability checks",
+    "",
+    "Web audit surface:",
+    `HTTP: ${Q01_WEB_HTTP_URL}`,
+    `HTTPS: ${Q01_WEB_HTTPS_URL}`,
+    "",
+    "Not Authorized:",
+    "Data extraction",
+    "Internal access",
+    "Credential attacks",
+    "",
+    "For the final submission, reply to this address using the subject below and the provided report text:",
+    `To: ${Q01_REPORT_RECIPIENT}`,
+    `Subject: ${Q01_REPORT_SUBJECT}`,
+    "",
+    Q01_REPORT_BODY,
+    "",
+    "— Adrian",
+].join("\n");
 
-const Q01_REPORT_REQUIRED_CONTENT = [
-    Q01_CLIENT_NAME,
-    Q01_TARGET_IP,
-    "22",
-    "80",
-    "443",
-    "No critical vulnerabilities identified.",
-    "Further internal assessment is recommended.",
-];
+const Q01_COMPLETION_MAIL_CONTENT = [
+    "Looks clean.",
+    "",
+    "Client should be happy.",
+    "",
+    "Payment's on the way.",
+    "",
+    "I'll let you know if they need anything else.",
+    "",
+    "— Adrian",
+].join("\n");
 
 const markCanonicalCompletion = (): void => {
     gameRuntime.flagStore.set(Q01_FINAL_STATE_FLAG, true);
+};
+
+const sendAdrianMail = (subject: string, content: string): void => {
+    Mail.send({
+        from: Q01_ADRIAN_EMAIL,
+        subject,
+        content,
+    });
 };
 
 @RegisterQuest
@@ -84,7 +136,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     };
     override HackhubPost = {
         content:
-            "Short security audit in Jakarta. One external network, a few services, basic vulnerability assessment.",
+            "Short security audit in Jakarta. One external network, a few services, basic vulnerability assessment. Adrian will provide the report submission format by email.",
         author: {
             name: "Adrian Cole",
             avatar: "assets/adrian-cole.png",
@@ -117,53 +169,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Submit audit report",
-            hint: "Send your findings to Adrian.",
+            hint: `Reply to ${Q01_REPORT_RECIPIENT} with subject \"${Q01_REPORT_SUBJECT}\". The report text is provided in Adrian's audit email.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
-        },
-    ];
-
-    override Mails = [
-        {
-            title: Q01_REPORT_SUBJECT,
-            content: [
-                "I have a client looking for a short security audit.",
-                "",
-                "Nothing complicated.",
-                "One external network.",
-                "A few services.",
-                "Basic vulnerability assessment.",
-                "",
-                "CLIENT",
-                `Company: ${Q01_CLIENT_NAME}`,
-                "Location: Jakarta",
-                `Target: ${Q01_TARGET_IP}`,
-                "",
-                "Scope:",
-                "External infrastructure only.",
-                "",
-                "Authorized:",
-                "Network discovery",
-                "Service enumeration",
-                "Basic vulnerability checks",
-                "",
-                "Web audit surface:",
-                `HTTP: ${Q01_WEB_HTTP_URL}`,
-                `HTTPS: ${Q01_WEB_HTTPS_URL}`,
-                "",
-                "Not Authorized:",
-                "Data extraction",
-                "Internal access",
-                "Credential attacks",
-                "",
-                "If you're interested, send the audit back when you're done.",
-                "",
-                "— Adrian",
-            ].join("\n"),
-        },
-        {
-            title: "Re: Security Audit — Jakarta",
-            content:
-                "Looks clean.\n\nClient should be happy.\n\nPayment's on the way.\n\nI'll let you know if they need anything else.\n\n— Adrian",
         },
     ];
 
@@ -213,7 +220,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         Network.registerDomain(Q01_WEB_HOST, this.Data.targetIp);
 
-        this.sendMail(0);
+        sendAdrianMail(Q01_REPORT_SUBJECT, Q01_INCOMING_MAIL_CONTENT);
         this.SetData("auditScopeReviewed", true);
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
     }
@@ -289,7 +296,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             Q01_FINAL_STATE_FLAG,
         );
 
-        this.sendMail(1);
+        sendAdrianMail("Re: Security Audit — Jakarta", Q01_COMPLETION_MAIL_CONTENT);
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Network.removeDomain(Q01_WEB_HOST);
         Network.destroyNetwork(this.Data.targetIp);
@@ -401,8 +408,10 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return false;
         }
 
-        return Q01_REPORT_REQUIRED_CONTENT.every((required) =>
-            normalizedContent.includes(required.toLowerCase()),
-        );
+        return Q01_REPORT_BODY
+            .toLowerCase()
+            .split("\n")
+            .filter((line) => line.length > 0)
+            .every((required) => normalizedContent.includes(required));
     }
 }
