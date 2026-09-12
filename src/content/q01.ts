@@ -22,9 +22,11 @@ export const Q01_WEB_SURFACE_PATHS = [
     "/api",
 ] as const;
 
-export const Q01_WEB_FORBIDDEN_PATHS = Q01_WEB_SURFACE_PATHS.filter(
-    (path) => path !== Q01_WEB_AUDIT_PATH,
-);
+export const Q01_WEB_FORBIDDEN_PATHS = [
+    "/admin",
+    "/portal",
+    "/api",
+] as const;
 
 export const Q01_ADRIAN_EMAIL = ADRIAN_COLE.email;
 export const Q01_REPORT_RECIPIENT = Q01_ADRIAN_EMAIL;
