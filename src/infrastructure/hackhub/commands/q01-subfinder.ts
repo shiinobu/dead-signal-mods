@@ -184,15 +184,6 @@ const formatProgressBar = (percent: number, width = 24): string => {
 
 @RegisterCommand({ default: true })
 export class Q01SubfinderCommand extends Command {
-    /**
-     * Q01 intentionally uses the plural command name so it does not collide
-     * with HackHub's native `subfinder` executable.
-     *
-     * Presentation uses native CommandTools.clear() so each frame redraws
-     * cleanly in the HackHub terminal without ANSI cursor control. Source
-     * enumeration is simulated and deterministic; Q01 never performs network
-     * enumeration against external providers.
-     */
     CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
 
@@ -329,7 +320,6 @@ export class Q01SubfinderCommand extends Command {
         tools.println("[INF] Enumeration completed");
         tools.println("");
 
-        const resultStartedAt = Date.now();
         const subdomains = Q01_SUBFINDER_RESULT.split("\n");
 
         for (const subdomain of subdomains) {
@@ -337,7 +327,7 @@ export class Q01SubfinderCommand extends Command {
             tools.println(subdomain);
         }
 
-        const elapsedMs = Date.now() - resultStartedAt;
+        const elapsedMs = Date.now() - animationStartedAt;
         tools.println(
             `[INF] Found ${subdomains.length} unique subdomains for ${normalizedTarget} in ${elapsedMs} milliseconds`,
         );
