@@ -95,7 +95,7 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_WEB_AUDIT_URL, "https://security.skynet-logistics.idx/");
     });
 
-    it("defines the Lynx target and format-tolerant subfinder reconnaissance contract", () => {
+    it("defines the Lynx target and format-tolerant subfinders reconnaissance contract", () => {
         assert.equal(Q01_LYNX_INPUT_IP, "203.0.113.42");
         assert.equal(
             Q01_LYNX_INPUT_URL,
@@ -122,14 +122,14 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         );
     });
 
-    it("registers the Q01 custom subfinder command in production and replay", () => {
+    it("registers the Q01 custom subfinders command in production and replay", () => {
         assert.match(
             subfinderCommandSource,
             /@RegisterCommand\(\{\s*default:\s*true\s*\}\)/,
         );
         assert.match(
             subfinderCommandSource,
-            /CommandName\s*=\s*"subfinder"/,
+            /CommandName\s*=\s*"subfinders"/,
         );
         assert.match(
             subfinderCommandSource,
