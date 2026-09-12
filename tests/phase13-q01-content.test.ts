@@ -2,9 +2,13 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+    Q01_ADRIAN_EMAIL,
     Q01_CLIENT_NAME,
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
+    Q01_REPORT_BODY,
+    Q01_REPORT_RECIPIENT,
+    Q01_REPORT_SUBJECT,
     Q01_REWARDS,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
@@ -43,6 +47,16 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(
             Q01_WEB_HTTPS_URL,
             "https://skynet-logistics.test/security",
+        );
+    });
+
+    it("defines a canonical non-random Adrian email and deterministic report template", () => {
+        assert.equal(Q01_ADRIAN_EMAIL, "adrian.cole@deadsignal.lock");
+        assert.equal(Q01_REPORT_RECIPIENT, Q01_ADRIAN_EMAIL);
+        assert.equal(Q01_REPORT_SUBJECT, "Security Audit — Jakarta");
+        assert.equal(
+            Q01_REPORT_BODY,
+            "Target: Skynet Logistics\nOpen Ports: 22, 80, 443\n\nNo critical vulnerabilities identified.\nFurther internal assessment is recommended.",
         );
     });
 
