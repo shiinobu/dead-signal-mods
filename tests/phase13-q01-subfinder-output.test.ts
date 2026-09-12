@@ -54,7 +54,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.doesNotMatch(subfinderCommandSource, /ANSI_CARRIAGE_RETURN/);
     });
 
-    it("uses the reference braille frame sequence", () => {
+    it("uses the reference braille frame sequence and a slightly extended duration", () => {
         assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
         assert.match(subfinderCommandSource, /"⠋"/);
         assert.match(subfinderCommandSource, /"⠙"/);
@@ -67,7 +67,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.match(subfinderCommandSource, /"⠇"/);
         assert.match(subfinderCommandSource, /"⠏"/);
         assert.match(subfinderCommandSource, /SPINNER_DELAY_MS = 100/);
-        assert.match(subfinderCommandSource, /SPINNER_DURATION_MS = 2400/);
+        assert.match(subfinderCommandSource, /SPINNER_DURATION_MS = 5000/);
     });
 
     it("streams the deterministic Q01 result after the clear-based animation", () => {
