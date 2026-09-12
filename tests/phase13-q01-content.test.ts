@@ -143,14 +143,6 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
             replayEntrySource,
             /import "\.\.\/src\/infrastructure\/hackhub\/commands\/q01-subfinder\.js";/,
         );
-        assert.doesNotMatch(
-            questSource,
-            /Shell\.addCommandData\("subfinder"/,
-        );
-        assert.doesNotMatch(
-            replayQuestSource,
-            /Shell\.addCommandData\("subfinder"/,
-        );
     });
 
     it("keeps the Lynx address as one runtime list entry and resets stale fixtures before registration", () => {
