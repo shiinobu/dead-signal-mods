@@ -34,14 +34,7 @@ const DSS_DIRECT_INTERACTION_PATCH = `
     sdk.Events.emit('DSS.Command.Request', { commandLine });
     return true;
   };
-  const startRecon = async (target) => {
-    const exported = globalThis.startRecon;
-    if (typeof exported === 'function') {
-      await Promise.resolve(exported(target));
-      return true;
-    }
-    return emit('recon -d ' + target);
-  };
+  const startRecon = (target) => emit('recon -d ' + target);
   const bind = () => {
     const reconForm = document.getElementById('recon-form');
     const reconButton = document.getElementById('recon-run');
