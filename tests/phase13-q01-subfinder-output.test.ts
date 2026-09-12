@@ -35,7 +35,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         );
         assert.match(
             subfinderCommandSource,
-            /\[INF\] Found \$\{Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)\.length\} subdomains for \$\{normalizedTarget\} in \$\{elapsedMs\} milliseconds/,
+            /\[INF\] Found \$\{subdomains\.length\} subdomains for \$\{normalizedTarget\} in \$\{elapsedMs\} milliseconds/,
         );
     });
 
