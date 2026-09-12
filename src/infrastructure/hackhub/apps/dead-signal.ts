@@ -24,12 +24,81 @@ import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
 
+const DSS_NAVIGATION_PATCH = `
+<script>
+(() => {
+    const views = {
+        terminal: "view-terminal",
+        recon: "view-recon",
+        wireshark: "view-wireshark",
+    };
+
+    const showDssView = (id) => {
+        const activeView = Object.prototype.hasOwnProperty.call(views, id)
+            ? id
+            : "recon";
+
+        for (const key of Object.keys(views)) {
+            const view = document.getElementById(views[key]);
+            if (view) {
+                view.classList.toggle("active", key === activeView);
+            }
+        }
+
+        document.querySelectorAll("#nav button").forEach((button) => {
+            button.classList.toggle("active", button.dataset.view === activeView);
+        });
+
+        const crumb = document.getElementById("crumb");
+        if (crumb) {
+            crumb.textContent = activeView === "wireshark"
+                ? "Wireshark+"
+                : activeView === "terminal"
+                    ? "Terminal+"
+                    : "Recon";
+        }
+
+        if (activeView === "terminal") {
+            setTimeout(() => document.getElementById("cmd-input")?.focus(), 0);
+        }
+    };
+
+    const bindNavigation = () => {
+        const nav = document.getElementById("nav");
+        if (!nav) {
+            return;
+        }
+
+        nav.querySelectorAll("button").forEach((button) => {
+            if (button.dataset.dssNavigationBound === "true") {
+                return;
+            }
+
+            button.dataset.dssNavigationBound = "true";
+            button.addEventListener("click", () => {
+                showDssView(button.dataset.view || "recon");
+            });
+        });
+
+        showDssView("recon");
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindNavigation, { once: true });
+    } else {
+        bindNavigation();
+    }
+})();
+</script>`;
+
+const dssHTML = `${appHTML}${DSS_NAVIGATION_PATCH}`;
+
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = appHTML;
+    HTML = dssHTML;
     DefaultSize = { width: 1220, height: 800 };
     override MinSize = { width: 1200, height: 780 };
     override Unlocked = true;
