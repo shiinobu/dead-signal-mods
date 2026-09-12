@@ -60,11 +60,11 @@ interface Q01NmapPort {
 }
 
 // Keep the response shape compatible with the HackHub SDK's LynxData.
-// The SDK defines LynxData.address and LynxData.ips as mutable string arrays.
+// SDK array fields are mutable string arrays and additional is a mixed array.
 interface Q01LynxResult {
     readonly ips: string[];
     readonly address: string[];
-    readonly additional?: string;
+    readonly additional?: Array<string | Record<string, unknown>>;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -79,8 +79,8 @@ const Q01_LYNX_RESULT: Q01LynxResult = {
     additional: [
         "Skynet Logistics",
         "Jakarta Operations",
-        "Canonical public web host discovered from the target IP.",
-    ].join("\n"),
+        "Canonical public host discovered from the target IP.",
+    ],
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
