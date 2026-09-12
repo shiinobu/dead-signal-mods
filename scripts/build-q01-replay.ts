@@ -62,6 +62,7 @@ const requiredBundleMarkers = [
     "dss",
     "ReconCommand",
     "Q01_RECON_PROFILE",
+    "OPERATIONS WORKSPACE",
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
     "www.skynet-logistics.idx",
@@ -99,6 +100,8 @@ await cp(sourceAssetsDir, replayAssetsDir, {
     recursive: true,
     force: true,
 });
+// Keep a readable source copy in the replay package for inspection. The
+// runtime App HTML is now bundled into mod.js via the HTML module import.
 await cp(sourceDssAppPath, replayAppPath, { force: true });
 
 const requiredFiles = [
@@ -129,7 +132,7 @@ for (const marker of requiredBundleMarkers) {
 console.log("Package contents:");
 console.log("  - mod.js");
 console.log("  - manifest.json");
-console.log("  - dead-signal.html");
+console.log("  - dead-signal.html (inspection copy)");
 console.log("  - assets/adrian-cole.png");
 console.log("  - assets/dss.svg");
 console.log(
