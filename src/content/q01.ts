@@ -15,7 +15,7 @@ export const Q01_REPORT_RECIPIENT = Q01_ADRIAN_EMAIL;
 export const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
 export const Q01_REPORT_BODY = [
     `Target: ${Q01_CLIENT_NAME}`,
-    "Open Ports: 22, 80, 443",
+    "Open Ports: 443",
     "",
     "No critical vulnerabilities identified.",
     "Further internal assessment is recommended.",
