@@ -35,7 +35,7 @@ export class Q01SkynetLogisticsWebsite extends Website {
         },
     ];
 
-    Exports = {
+    override Exports = {
         clientName: Q01_CLIENT_NAME,
         targetIp: Q01_TARGET_IP,
     };
