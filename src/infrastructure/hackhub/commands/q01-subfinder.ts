@@ -40,9 +40,17 @@ const SPINNER_FRAMES = [
     "⠏",
 ] as const;
 
-const ANSI_CURSOR_UP = "\u001B[1A";
-const ANSI_CLEAR_LINE = "\u001B[2K";
-const ANSI_CARRIAGE_RETURN = "\r";
+const getDomainArgument = (args: string[]): string | null => {
+    const domainFlagIndex = args.findIndex(
+        (arg) => arg === "-d" || arg === "--domain",
+    );
+
+    if (domainFlagIndex >= 0) {
+        return args[domainFlagIndex + 1] ?? null;
+    }
+
+    return args[0] ?? null;
+};
 
 const normalizeTarget = (rawTarget: string): string | null => {
     const value = rawTarget.trim().replace(/^[\'"]|[\'"]$/g, "");
@@ -62,21 +70,6 @@ const normalizeTarget = (rawTarget: string): string | null => {
     }
 };
 
-const getDomainArgument = (args: string[]): string | null => {
-    const domainFlagIndex = args.findIndex(
-        (arg) => arg === "-d" || arg === "--domain",
-    );
-
-    if (domainFlagIndex >= 0) {
-        return args[domainFlagIndex + 1] ?? null;
-    }
-
-    return args[0] ?? null;
-};
-
-const sleep = (milliseconds: number): Promise<void> =>
-    new Promise((resolve) => setTimeout(resolve, milliseconds));
-
 type Q01SubfinderTools = Parameters<Command["Run"]>[0];
 
 @RegisterCommand({ default: true })
@@ -85,12 +78,40 @@ export class Q01SubfinderCommand extends Command {
      * Q01 intentionally uses the plural command name so it does not collide
      * with HackHub's native `subfinder` executable.
      *
-     * Terminal presentation is adapted from the current ProjectDiscovery
-     * subfinder CLI and the supplied HackHub reference capture. The Q01 result
-     * itself remains deterministic and offline.
+     * The animation below is an experimental native-HackHub probe: it uses
+     * CommandTools.clear() instead of ANSI cursor control. If the runtime
+     * redraws the terminal correctly, this becomes the canonical animation.
+     * Otherwise Q01 falls back to the agreed append-only presentation.
      */
     CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
+
+    private printHeader(tools: Q01SubfinderTools): void {
+        for (const line of SUBFINDER_BANNER) {
+            tools.println(line);
+        }
+
+        tools.println("");
+        tools.println("\t\tprojectdiscovery.io");
+        tools.println("");
+
+        for (const warning of SUBFINDER_WARNINGS) {
+            tools.println(warning);
+        }
+    }
+
+    private printFrame(
+        tools: Q01SubfinderTools,
+        normalizedTarget: string,
+        frame: string,
+    ): void {
+        tools.clear();
+        this.printHeader(tools);
+        tools.println("");
+        tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
+        tools.println("");
+        tools.println(`  ${frame} Enumerating...`);
+    }
 
     override async Run(tools: Q01SubfinderTools) {
         const args = tools.getArgs();
@@ -104,52 +125,40 @@ export class Q01SubfinderCommand extends Command {
             return;
         }
 
-        for (const line of SUBFINDER_BANNER) {
-            tools.println(line);
-        }
-
-        tools.println("");
-        tools.println("\t\tprojectdiscovery.io");
-        tools.println("");
-
-        for (const warning of SUBFINDER_WARNINGS) {
-            tools.println(warning);
-        }
-
-        tools.println("");
-        tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
-        tools.println("⠋");
-
         if (
             normalizedTarget !== Q01_WEB_HOST &&
             normalizedTarget !== Q01_WEB_HOME_HOST
         ) {
-            await sleep(SPINNER_DELAY_MS * 2);
-            tools.println(`${ANSI_CURSOR_UP}${ANSI_CLEAR_LINE}${ANSI_CARRIAGE_RETURN}`);
+            this.printHeader(tools);
+            tools.println("");
             tools.println(`[WRN] No subdomains found for ${normalizedTarget}`);
             return;
         }
 
-        const spinnerStartedAt = Date.now();
         let spinnerFrame = 0;
+        const spinnerStartedAt = Date.now();
 
         while (Date.now() - spinnerStartedAt < SPINNER_DURATION_MS) {
-            await sleep(SPINNER_DELAY_MS);
-            spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES.length;
-            tools.println(
-                `${ANSI_CURSOR_UP}${ANSI_CLEAR_LINE}${ANSI_CARRIAGE_RETURN}${SPINNER_FRAMES[spinnerFrame]}`,
+            this.printFrame(
+                tools,
+                normalizedTarget,
+                SPINNER_FRAMES[spinnerFrame],
             );
+            spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES.length;
+            await tools.sleep(SPINNER_DELAY_MS);
         }
 
-        tools.println(
-            `${ANSI_CURSOR_UP}${ANSI_CLEAR_LINE}${ANSI_CARRIAGE_RETURN}`,
-        );
+        tools.clear();
+        this.printHeader(tools);
+        tools.println("");
+        tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
+        tools.println("");
 
         const startedAt = Date.now();
         const subdomains = Q01_SUBFINDER_RESULT.split("\n");
 
         for (const subdomain of subdomains) {
-            await sleep(RESULT_DELAY_MS);
+            await tools.sleep(RESULT_DELAY_MS);
             tools.println(subdomain);
         }
 
