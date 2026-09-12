@@ -59,14 +59,9 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-// HackHub's LynxData exposes optional list-valued metadata fields. In the
-// observed game renderer, the address section incorrectly iterates scalar URL
-// values. Keep address empty and surface the canonical URL through additional
-// as one list item, which is still part of the official LynxData contract.
 interface Q01LynxResult {
     readonly ips: string[];
-    readonly address?: string[];
-    readonly additional?: Array<string | Record<string, unknown>>;
+    readonly address: string[];
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -77,7 +72,24 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
 
 const Q01_LYNX_RESULT: Q01LynxResult = {
     ips: [Q01_TARGET_IP],
-    additional: [`Canonical web host: ${Q01_WEB_HOME_URL}`],
+    address: [Q01_WEB_HOME_URL],
+};
+
+const resetQ01ShellFixtures = (): void => {
+    Shell.removeCommandData("nmap", Q01_TARGET_IP);
+    Shell.removeCommandData("nmap", "");
+    Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
+    Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
+    Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
+};
+
+const registerQ01ShellFixtures = (): void => {
+    resetQ01ShellFixtures();
+    Shell.addCommandData("nmap", Q01_TARGET_IP, Q01_NMAP_RESULT);
+    Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
+    Shell.addCommandData("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT);
+    Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
+    Shell.addCommandData("subfinder", Q01_SUBFINDER_INPUT, Q01_SUBFINDER_RESULT);
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -243,11 +255,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     }
 
     override OnObjectivesStart() {
-        Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
-        Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
-        Shell.addCommandData("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT);
-        Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
-        Shell.addCommandData("subfinder", Q01_SUBFINDER_INPUT, Q01_SUBFINDER_RESULT);
+        registerQ01ShellFixtures();
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data);
@@ -315,11 +323,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         );
 
         sendAdrianMail("Re: Security Audit — Jakarta", Q01_COMPLETION_MAIL_CONTENT);
-        Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData("nmap", "");
-        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
-        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
-        Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
+        resetQ01ShellFixtures();
         Network.removeDomain(Q01_WEB_HOST);
         Q01_WEB_SUBDOMAINS.forEach((hostname) => {
             Network.removeDomain(hostname);
@@ -329,11 +333,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
     }
 
     override OnAbandon() {
-        Shell.removeCommandData("nmap", this.Data.targetIp);
-        Shell.removeCommandData("nmap", "");
-        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
-        Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
-        Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
+        resetQ01ShellFixtures();
         Network.removeDomain(Q01_WEB_HOST);
         Q01_WEB_SUBDOMAINS.forEach((hostname) => {
             Network.removeDomain(hostname);
@@ -471,18 +471,11 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return false;
         }
 
-        if (
-            !("additional" in result) ||
-            !Array.isArray(result.additional)
-        ) {
+        if (!("address" in result) || !Array.isArray(result.address)) {
             return false;
         }
 
-        return result.additional.some(
-            (value) =>
-                typeof value === "string" &&
-                value.includes(Q01_WEB_HOME_URL),
-        );
+        return result.address.includes(Q01_WEB_HOME_URL);
     }
 
     private isAuditReport(subject: string, content: string): boolean {
