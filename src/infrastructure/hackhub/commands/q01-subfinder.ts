@@ -59,7 +59,7 @@ export class Q01SubfinderCommand extends Command {
         tools.println("");
         tools.println("               SUBFINDER");
         tools.println("");
-        tools.println("[INF] Enumerating subdomains for ${normalizedTarget}");
+        tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
 
         if (
             normalizedTarget !== Q01_WEB_HOST &&
