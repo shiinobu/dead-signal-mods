@@ -28,7 +28,9 @@ export const Q01_WEB_HTTPS_URL = Q01_WEB_HOME_URL;
 export const Q01_LYNX_INPUT_IP = Q01_TARGET_IP;
 export const Q01_LYNX_INPUT_URL = `https://${Q01_TARGET_IP}/`;
 
-export const Q01_SUBFINDER_INPUT = `-d ${Q01_WEB_HOST}`;
+// Q01 passes the canonical URL discovered by lynx into subfinder so the
+// reconnaissance flow remains faithful to the player-discovered web target.
+export const Q01_SUBFINDER_INPUT = `-d ${Q01_WEB_HOME_URL}`;
 export const Q01_SUBFINDER_RESULT = [
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
