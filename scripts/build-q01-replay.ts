@@ -29,6 +29,11 @@ const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
 const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
 
+// One-time development reinstall namespace. This forces HackHub to load the
+// replay as a clean mod installation while the DSS application identity stays
+// stable as AppName = "dss" and the quest remains uniquely replayed.
+const replayModId = "dead-signal-dev-refresh";
+
 const previousRun = Number.parseInt(
     await readFile(replayStatePath, "utf8").catch(() => "0"),
     10,
@@ -76,8 +81,8 @@ const sourceManifest = JSON.parse(
 
 const manifest: Record<string, unknown> = {
     ...sourceManifest,
-    id: "dead-signal-dev",
-    name: "DEAD SIGNAL (Development)",
+    id: replayModId,
+    name: "DSS (Development Refresh)",
     version: `0.1.0-dev.${replayId}`,
     description:
         `Development build for repeating Q01 live tests (${replayId}).`,
@@ -116,6 +121,7 @@ for (const requiredFile of requiredFiles) {
 
 console.log(`Q01 replay build created: ${replayId}`);
 console.log(`Output: ${replayOutputDir}`);
+console.log(`Replay mod id: ${replayModId}`);
 console.log("Verified bundle markers:");
 for (const marker of requiredBundleMarkers) {
     console.log(`  - ${marker}`);
@@ -127,5 +133,5 @@ console.log("  - dead-signal.html");
 console.log("  - assets/adrian-cole.png");
 console.log("  - assets/dss.svg");
 console.log(
-    "Install the complete dist-replay contents into HackHub/mods/dead-signal-dev and restart HackHub.",
+    `Install the complete dist-replay contents into HackHub/mods/${replayModId} and restart HackHub.`,
 );
