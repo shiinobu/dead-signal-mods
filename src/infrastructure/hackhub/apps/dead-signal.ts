@@ -120,6 +120,15 @@ const DSS_DIRECT_INTERACTION_PATCH = `
     renderReconSession(session);
   };
 
+  const installReconScroller=()=>{
+    const view=$('view-recon');
+    if(!view||view.querySelector(':scope > .dss-recon-scroll'))return;
+    const scroller=document.createElement('div');
+    scroller.className='dss-recon-scroll';
+    while(view.firstChild)scroller.appendChild(view.firstChild);
+    view.appendChild(scroller);
+  };
+
   let reconProjectionTimer=setInterval(projectReconSession,100);
 
   const invokeCommand=async(commandLine)=>{
@@ -131,6 +140,7 @@ const DSS_DIRECT_INTERACTION_PATCH = `
   const startRecon=(target)=>invokeCommand('recon -d '+target);
 
   const bind=()=>{
+    installReconScroller();
     const reconForm=$('recon-form');
     const reconButton=$('recon-run');
     const reconTarget=$('recon-target');
@@ -191,16 +201,28 @@ const DSS_DIRECT_INTERACTION_PATCH = `
         if(commandInput)commandInput.value='';
         if(commandLine.toLowerCase()==='clear'){
           if(commandOutput)commandOutput.innerHTML='';
-          appendLine('DSS // Dead Signal System');
-          appendLine('Terminal+ ready.');
+          const line=document.createElement('div');
+          line.className='line line-info';
+          line.textContent='DSS // Dead Signal System';
+          commandOutput?.append(line);
           commandInput?.focus();
           return;
         }
         try{
           const ok=await invokeCommand(commandLine);
-          if(!ok&&commandOutput)appendLine('DSS command bridge is unavailable.','line-warn');
+          if(!ok&&commandOutput){
+            const line=document.createElement('div');
+            line.className='line line-warn';
+            line.textContent='DSS command bridge is unavailable.';
+            commandOutput.append(line);
+          }
         }catch(error){
-          if(commandOutput)appendLine(error instanceof Error?error.message:'Command execution failed.','line-warn');
+          if(commandOutput){
+            const line=document.createElement('div');
+            line.className='line line-warn';
+            line.textContent=error instanceof Error?error.message:'Command execution failed.';
+            commandOutput.append(line);
+          }
         }
         commandInput?.focus();
       });
@@ -219,12 +241,25 @@ const DSS_RECON_SCROLL_STYLE = `
 <style>
 .view-recon.active{
   display:block;
-  overflow-y:auto;
-  overflow-x:hidden;
-  scrollbar-gutter:stable;
-  padding-right:8px;
-  padding-bottom:24px;
+  overflow:hidden;
+  padding-right:0;
+  padding-bottom:0;
 }
+.view-recon.active > .dss-recon-scroll{
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow-y:scroll;
+  overflow-x:hidden;
+  box-sizing:border-box;
+  padding-right:10px;
+  padding-bottom:24px;
+  scrollbar-gutter:stable;
+}
+.view-recon.active > .dss-recon-scroll::-webkit-scrollbar{width:10px}
+.view-recon.active > .dss-recon-scroll::-webkit-scrollbar-track{background:#061015}
+.view-recon.active > .dss-recon-scroll::-webkit-scrollbar-thumb{background:#18343d;border-radius:8px}
+.view-recon.active > .dss-recon-scroll{scrollbar-width:thin;scrollbar-color:#18343d #061015}
 </style>`;
 
 const dssHTML = appHTML.includes('</body>')
