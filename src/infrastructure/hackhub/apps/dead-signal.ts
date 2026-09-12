@@ -23,18 +23,21 @@ import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
 
-const DSS_APP_TITLE = "DEAD-SIGNAL";
-
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
-    Title = DSS_APP_TITLE;
+    Title = "DEAD-SIGNAL";
     Icon = "./assets/dss.svg";
     HTML = "./dead-signal.html";
     DefaultSize = { width: 1100, height: 720 };
-    Unlocked = true;
+    override Unlocked = true;
 
-    Exports = {
+    Store = {
+        title: "DEAD-SIGNAL",
+        description: "DSS // Dead Signal System — integrated investigation workspace.",
+    };
+
+    override Exports = {
         getToolCatalog: (): readonly OpsToolDefinition[] =>
             opsRuntime.tools.getAll(),
         getCommandCatalog: (): readonly OpsCommandDefinition[] =>
