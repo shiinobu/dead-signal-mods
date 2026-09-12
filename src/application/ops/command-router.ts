@@ -1,6 +1,8 @@
 import type {
-    ReconObserver,
     ReconResult,
+} from "../../domain/recon/index.js";
+import type {
+    ReconObserver,
 } from "./recon-service.js";
 import {
     OpsCommandRegistry,
