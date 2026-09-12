@@ -24,10 +24,7 @@ const replayModPath = resolve(replayOutputDir, "mod.js");
 const replayAppPath = resolve(replayOutputDir, "dead-signal.html");
 const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
-const sourceDssAppPath = resolve(
-    projectRoot,
-    "public/dead-signal.html",
-);
+const sourceDssAppPath = resolve(projectRoot, "src/dead-signal.html");
 const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
 const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
