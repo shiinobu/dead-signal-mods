@@ -17,6 +17,7 @@ import {
     Q01_REPORT_SUBJECT,
     Q01_REWARDS,
     Q01_SUBFINDER_INPUT,
+    Q01_SUBFINDER_INPUT_VARIANTS,
     Q01_SUBFINDER_RESULT,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
@@ -43,6 +44,11 @@ import { QuestService } from "../src/application/index.js";
 
 const questSource = readFileSync(
     resolve(fileURLToPath(new URL("../src/infrastructure/hackhub/q01-quest.ts", import.meta.url))),
+    "utf8",
+);
+
+const replayQuestSource = readFileSync(
+    resolve(fileURLToPath(new URL("../dev/q01-replay-quest.ts", import.meta.url))),
     "utf8",
 );
 
@@ -74,19 +80,43 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_WEB_AUDIT_URL, "https://security.skynet-logistics.idx/");
     });
 
-    it("defines the deterministic lynx and subfinder reconnaissance contract", () => {
+    it("defines the Lynx target and format-tolerant subfinder reconnaissance contract", () => {
         assert.equal(Q01_LYNX_INPUT_IP, "203.0.113.42");
         assert.equal(
             Q01_LYNX_INPUT_URL,
             "https://203.0.113.42/",
         );
-        assert.equal(
-            Q01_SUBFINDER_INPUT,
+        assert.equal(Q01_SUBFINDER_INPUT, "-d skynet-logistics.idx");
+        assert.deepEqual(Q01_SUBFINDER_INPUT_VARIANTS, [
+            "-d skynet-logistics.idx",
+            "-d www.skynet-logistics.idx",
+            "-d https://skynet-logistics.idx",
+            "-d https://skynet-logistics.idx/",
+            "-d https://www.skynet-logistics.idx",
             "-d https://www.skynet-logistics.idx/",
-        );
+        ]);
         assert.equal(
             Q01_SUBFINDER_RESULT,
             "portal.skynet-logistics.idx\nsecurity.skynet-logistics.idx\nstatus.skynet-logistics.idx\nwww.skynet-logistics.idx",
+        );
+    });
+
+    it("registers every subfinder value variant in production and dev replay", () => {
+        assert.match(
+            questSource,
+            /const Q01_SUBFINDER_INPUT_VARIANTS = \[[\s\S]*?\] as const;/,
+        );
+        assert.match(
+            questSource,
+            /Q01_SUBFINDER_INPUT_VARIANTS\.forEach\(\(input\) => \{[\s\S]*Shell\.addCommandData\("subfinder", input, Q01_SUBFINDER_RESULT\);[\s\S]*\}\);/,
+        );
+        assert.match(
+            replayQuestSource,
+            /Q01_SUBFINDER_INPUT_VARIANTS\.forEach\(\(input\) => \{[\s\S]*Shell\.addCommandData\("subfinder", input, Q01_SUBFINDER_RESULT\);[\s\S]*\}\);/,
+        );
+        assert.match(
+            replayQuestSource,
+            /Q01_SUBFINDER_INPUT_VARIANTS\.forEach\(\(input\) => \{[\s\S]*Shell\.removeCommandData\("subfinder", input\);[\s\S]*\}\);/,
         );
     });
 
