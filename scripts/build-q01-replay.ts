@@ -26,6 +26,7 @@ const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
 const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
+const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
 
 const previousRun = Number.parseInt(
     await readFile(replayStatePath, "utf8").catch(() => "0"),
@@ -98,6 +99,7 @@ const requiredFiles = [
     replayManifestPath,
     replayAppPath,
     replayAvatarPath,
+    replayDssIconPath,
 ];
 
 for (const requiredFile of requiredFiles) {
