@@ -24,6 +24,7 @@ import {
     Q01_THE_CONTRACT,
     Q01_WEB_AUDIT_HOST,
     Q01_WEB_HOST,
+    Q01_WEB_HOME_HOST,
     Q01_WEB_HOME_URL,
     Q01_WEB_SUBDOMAINS,
 } from "../../content/index.js";
@@ -75,12 +76,23 @@ const Q01_LYNX_RESULT: Q01LynxResult = {
     address: [Q01_WEB_HOME_URL],
 };
 
+const Q01_SUBFINDER_INPUT_VARIANTS = [
+    Q01_SUBFINDER_INPUT,
+    `-d ${Q01_WEB_HOME_HOST}`,
+    `-d https://${Q01_WEB_HOST}`,
+    `-d https://${Q01_WEB_HOME_HOST}`,
+    `-d https://${Q01_WEB_HOST}/`,
+    `-d ${Q01_WEB_HOME_URL}`,
+] as const;
+
 const resetQ01ShellFixtures = (): void => {
     Shell.removeCommandData("nmap", Q01_TARGET_IP);
     Shell.removeCommandData("nmap", "");
     Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
     Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
-    Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
+    Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
+        Shell.removeCommandData("subfinder", input);
+    });
 };
 
 const registerQ01ShellFixtures = (): void => {
@@ -89,7 +101,9 @@ const registerQ01ShellFixtures = (): void => {
     Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
     Shell.addCommandData("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT);
     Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
-    Shell.addCommandData("subfinder", Q01_SUBFINDER_INPUT, Q01_SUBFINDER_RESULT);
+    Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
+        Shell.addCommandData("subfinder", input, Q01_SUBFINDER_RESULT);
+    });
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -390,7 +404,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
 
         if (data.command === "subfinder") {
-            if (input !== Q01_SUBFINDER_INPUT) {
+            if (!Q01_SUBFINDER_INPUT_VARIANTS.includes(input as typeof Q01_SUBFINDER_INPUT_VARIANTS[number])) {
                 return;
             }
 
