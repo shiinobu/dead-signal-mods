@@ -34,7 +34,7 @@ Perform basic vulnerability checks
 Submit audit report
 ```
 
-5. Confirm the client is discoverable as **Skynet Logistics** and the target is `203.0.113.42` in the audit material.
+5. Confirm the audit mail provides target `203.0.113.42` but does **not** directly provide the company name in the report template.
 6. Open Terminal and run the scan command from Objective 02:
 
 ```bash
