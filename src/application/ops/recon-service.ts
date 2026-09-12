@@ -94,6 +94,32 @@ export class ReconService {
             throw new Error(`Recon profile '${profile.id}' has no sources.`);
         }
 
+        for (const target of profile.targets) {
+            const normalizedTarget = normalizeReconTarget(target);
+            if (!normalizedTarget) {
+                throw new Error(
+                    `Recon profile '${profile.id}' contains an invalid target '${target}'.`,
+                );
+            }
+
+            for (const [existingId, existingProfile] of this.profiles) {
+                if (existingId === profile.id) {
+                    continue;
+                }
+
+                if (
+                    existingProfile.targets.some(
+                        (existingTarget) =>
+                            normalizeReconTarget(existingTarget) === normalizedTarget,
+                    )
+                ) {
+                    throw new Error(
+                        `Recon target '${normalizedTarget}' is already owned by profile '${existingId}'.`,
+                    );
+                }
+            }
+        }
+
         this.profiles.set(profile.id, profile);
     }
 
