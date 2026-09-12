@@ -1,7 +1,7 @@
 # DEAD SIGNAL — Q01 Revised Implementation
 
-Date: 2026-09-12
-Status: **IMPLEMENTED — LYNX/SUBDOMAIN RECON; LIVE VALIDATION PENDING**
+Date: 2026-09-13
+Status: **IMPLEMENTED — LYNX/DSS RECON; LIVE VALIDATION PENDING**
 
 ## Identity
 
@@ -39,9 +39,9 @@ lynx 203.0.113.42
         ↓
 https://www.skynet-logistics.idx/
         ↓
-subfinder -d skynet-logistics.idx
+recon -d skynet-logistics.idx
         ↓
-4 subdomains
+4 discovered hosts
         ↓
 security.skynet-logistics.idx
         ↓
@@ -72,7 +72,7 @@ Objective 02 presents only `nmap`; the target IP is supplied in Adrian's audit m
 
 Objective 03 has no hint.
 
-Objective 04 guides the player to discover the public host, enumerate subdomains, and inspect the authorized security surface.
+Objective 04 guides the player to discover the public host, run the DSS reconnaissance module, and inspect the authorized security surface.
 
 Objective 05 requires the player to resolve `<COMPANY>` and `<PORTS>` from audit evidence.
 
@@ -106,11 +106,11 @@ status   → 403 FORBIDDEN
 security → Q01 audit target
 ```
 
-The apex domain is the subdomain-enumeration root and is registered on the target network but intentionally has no Q01 Website page.
+The apex domain is the reconnaissance root and intentionally has no Q01 Website page.
 
 ## Lynx
 
-HackHub's typed `lynx` command is populated via `Shell.addCommandData()` with deterministic Q01 data. The official SDK documents `lynx` as a built-in command whose response can include `address` and `ips`. citeturn313821search0
+HackHub's typed `lynx` command is populated with deterministic Q01 data.
 
 Accepted inputs:
 
@@ -125,17 +125,19 @@ Expected address:
 https://www.skynet-logistics.idx/
 ```
 
-## Subfinder
+## DSS Recon
 
-HackHub does not document `subfinder` as a typed built-in command. Q01 therefore models it as a deterministic custom Shell command using the SDK's arbitrary command-data facility. The official SDK documents `Shell.addCommandData()` as the primary mechanism for injecting command responses. citeturn313821search0
+Reconnaissance is a shared DEAD SIGNAL System capability, not Q01-specific command logic.
 
-Accepted command:
+Canonical command:
 
 ```text
-subfinder -d skynet-logistics.idx
+recon -d skynet-logistics.idx
 ```
 
-Expected result:
+Equivalent target forms remain accepted, including `www` and HTTPS URL forms.
+
+Q01 registers profile `q01` with five deterministic simulated sources, eight total candidates, and four unique hosts:
 
 ```text
 portal.skynet-logistics.idx
@@ -144,6 +146,25 @@ status.skynet-logistics.idx
 www.skynet-logistics.idx
 ```
 
+The shared `ReconService` owns:
+
+```text
+Target normalization
+Profile resolution
+Source sequencing
+Source progress
+Candidates / Unique counters
+Progress-bar calculation
+Spinner-frame configuration
+Source timing
+Result timing
+Result streaming
+```
+
+The HackHub command under `src/infrastructure/hackhub/commands/recon.ts` is only an adapter. It does not own Q01 source data or animation timing.
+
+The terminal presentation is append-only. It does not call `CommandTools.clear()` and does not emit ANSI cursor-control sequences, preserving existing player terminal history.
+
 ## Objective 04 — Browser Boundary
 
 Objective 04 completes only after:
@@ -151,7 +172,7 @@ Objective 04 completes only after:
 ```text
 nmap completed
 lynx discovery completed
-subfinder enumeration completed
+recon completed
 ```
 
 and the player opens:
@@ -168,7 +189,7 @@ hostname = security.skynet-logistics.idx
 pathname = /
 ```
 
-Port 443 is enforced by the world network definition rather than by an undocumented Browser.Meta field.
+Port 443 is enforced by the world network definition.
 
 ## Website Presentation
 
@@ -212,11 +233,12 @@ At completion or abandonment the quest removes:
 ```text
 nmap command data
 lynx command data
-subfinder command data
 apex/domain registrations
 all four subdomain registrations
 Q01 target network
 ```
+
+Recon profile ownership is shared by DSS and is not removed by the Q01 quest.
 
 ## Validation Gate
 
@@ -241,9 +263,9 @@ lynx 203.0.113.42
         ↓
 Verify https://www.skynet-logistics.idx/
         ↓
-subfinder -d skynet-logistics.idx
+recon -d skynet-logistics.idx
         ↓
-Verify exactly four subdomains
+Verify exactly four discovered hosts
         ↓
 Verify portal/status = 403
         ↓
