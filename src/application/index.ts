@@ -5,3 +5,5 @@ export * from "./game-runtime.js";
 export * from "./narrative-state-service.js";
 export * from "./reward-service.js";
 export * from "./quest-service.js";
+export * from "./ops-runtime.js";
+export * from "./ops/recon-service.js";
