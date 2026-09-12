@@ -31,6 +31,7 @@ export class DeadSignalApp extends App {
     Icon = "./assets/dss.svg";
     HTML = appHTML;
     DefaultSize = { width: 1220, height: 800 };
+    MinSize = { width: 1180, height: 740 };
     override Unlocked = true;
 
     override Store = {
