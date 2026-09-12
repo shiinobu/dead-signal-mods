@@ -7,6 +7,12 @@ export const DSS_RECON_EVENTS = {
     failed: "DSS.Recon.Failed",
 } as const;
 
+export const DSS_COMMAND_EVENTS = {
+    request: "DSS.Command.Request",
+    result: "DSS.Command.Result",
+} as const;
+
 export const DSS_OPS_EVENTS = {
     recon: DSS_RECON_EVENTS,
+    command: DSS_COMMAND_EVENTS,
 } as const;
