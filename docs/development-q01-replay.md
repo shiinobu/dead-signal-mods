@@ -42,7 +42,7 @@ dead_signal.q01
 
 ## Revised Q01 Gameplay
 
-The replay follows the revised HTTPS audit flow. Native SSH is no longer part of Q01.
+The replay follows the revised HTTPS audit flow. Native SSH is not part of Q01.
 
 ```text
 Apply
@@ -53,11 +53,15 @@ nmap
   ↓
 Identify exposed services
   ↓
-Open https://skynet-logistics.test/security
+Open https://skynet-logistics.idx/
+  ↓
+Open https://skynet-logistics.idx/security
   ↓
 Perform basic vulnerability checks
   ↓
-Submit the canonical audit report
+Discover company + open ports
+  ↓
+Fill the audit report format
 ```
 
 ## Workflow
@@ -113,10 +117,16 @@ Identify the exposed HTTPS service on port 443. There is intentionally no object
 
 ### Objective 04
 
-Open:
+Open the public home page first:
 
 ```text
-https://skynet-logistics.test/security
+https://skynet-logistics.idx/
+```
+
+Use the homepage to discover the client identity and follow its security-review link to:
+
+```text
+https://skynet-logistics.idx/security
 ```
 
 The security review page displays the basic external-assessment findings. The quest completes Objective 04 from the matching `Browser.Meta` interaction only after Objective 03 is complete.
@@ -125,20 +135,40 @@ HTTP is not accepted for Objective 04.
 
 ### Objective 05
 
-Send the canonical audit report:
+Adrian supplies the report format without the answer values:
 
 ```text
-To: adrian.cole@deadsignal.lock
+Format report audit:
 Subject: Security Audit — Jakarta
 
-Target: Skynet Logistics
-Open Ports: 443
+Target: <COMPANY>
+Open Ports: <PORTS>
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-Objective 05 completes when the sent subject and plain-text body match the canonical report contract.
+Replace the placeholders using the values discovered during the audit, then send the normal in-game reply to Adrian.
+
+For the current Q01 world state the resolved values are:
+
+```text
+Target: Skynet Logistics
+Open Ports: 443
+```
+
+Literal placeholders do not satisfy Objective 05.
+
+## Web Surface Boundary
+
+Only the following Q01 pages are registered:
+
+```text
+/
+/security
+```
+
+Other web paths are intentionally not registered and do not have Q01 pages.
 
 ## Development Isolation
 
@@ -157,5 +187,3 @@ The maintained replay tool is:
 ```text
 scripts/build-q01-replay.ts
 ```
-
-The old SSH-only diagnostic builders are intentionally removed after the Q01 methodology revision.
