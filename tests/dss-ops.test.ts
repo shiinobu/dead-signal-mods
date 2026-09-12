@@ -83,10 +83,9 @@ const replayQuestSource = readFileSync(
 describe("DSS operations application foundation", () => {
     it("registers DSS as the canonical desktop application", () => {
         assert.match(appSource, /@RegisterApp/);
-        assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/dead-signal\.html";/);
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
-        assert.match(appSource, /HTML\s*=\s*(?:appHTML|dssHTML)/);
+        assert.match(appSource, /HTML\s*=\s*"dead-signal\.html"/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1220,\s*height:\s*800\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
@@ -124,6 +123,16 @@ describe("DSS operations application foundation", () => {
         assert.match(appHtml, /font:700 14px\/1 ui-monospace/);
         assert.match(appHtml, /font:600 13px\/1 ui-monospace/);
         assert.doesNotMatch(appHtml, /@media\(/);
+    });
+
+    it("keeps the complete DSS document free of page and panel scrollbars", () => {
+        assert.match(appHtml, /html,body\{[^}]*overflow:hidden/);
+        assert.match(appHtml, /\.app\{[^}]*overflow:hidden/);
+        assert.match(appHtml, /\.content\{[^}]*overflow:hidden/);
+        assert.match(appHtml, /\.view\{[^}]*overflow:hidden/);
+        assert.match(appHtml, /\.output\{[^}]*overflow:hidden/);
+        assert.doesNotMatch(appHtml, /overflow:(?:auto|scroll)/);
+        assert.doesNotMatch(appHtml, /scrollTop/);
     });
 
     it("is imported by both production and Q01 replay entries", () => {
@@ -290,9 +299,17 @@ describe("DSS operations application foundation", () => {
         assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.completed/);
     });
 
+    it("bridges DSS Terminal+ nmap and lynx commands to HackHub terminal events", () => {
+        assert.match(appSource, /Shell\.getCommandData\(command, input\)/);
+        assert.match(appSource, /Events\.emit\("Terminal\.Command"/);
+        assert.match(appSource, /Events\.emit\("Terminal\.NmapScan"/);
+        assert.match(appSource, /command === "nmap"/);
+        assert.match(appSource, /command === "lynx"/);
+    });
+
     it("routes desktop commands through the shared HackHub event bridge", () => {
         assert.match(appSource, /DSS_COMMAND_EVENTS/);
-        assert.match(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
+        assert.match(appSource, /DSS_COMMAND_EVENTS\.request/);
         assert.match(appSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
         assert.match(appSource, /executeDssCommand\(commandLine\)/);
         assert.doesNotMatch(appSource, /throw new Error\(/);
