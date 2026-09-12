@@ -11,7 +11,9 @@ import {
 
 const RESULT_DELAY_MS = 90;
 const SPINNER_DELAY_MS = 100;
-const SPINNER_DURATION_MS = 2400;
+// The reference capture keeps the enumeration spinner visible for roughly
+// 4.5–4.6 seconds; Q01 intentionally runs slightly longer for readability.
+const SPINNER_DURATION_MS = 5000;
 
 const SUBFINDER_BANNER = [
     "               __    _____           __         ",
@@ -78,10 +80,8 @@ export class Q01SubfinderCommand extends Command {
      * Q01 intentionally uses the plural command name so it does not collide
      * with HackHub's native `subfinder` executable.
      *
-     * The animation below is an experimental native-HackHub probe: it uses
-     * CommandTools.clear() instead of ANSI cursor control. If the runtime
-     * redraws the terminal correctly, this becomes the canonical animation.
-     * Otherwise Q01 falls back to the agreed append-only presentation.
+     * The animation uses native CommandTools.clear() instead of ANSI cursor
+     * control. The Q01 result itself remains deterministic and offline.
      */
     CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
