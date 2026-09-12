@@ -37,26 +37,23 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_TARGET_IP, "203.0.113.42");
     });
 
-    it("defines the revised HTTP/HTTPS audit interaction", () => {
+    it("defines the HTTPS audit surface", () => {
         assert.equal(Q01_WEB_HOST, "skynet-logistics.test");
         assert.equal(Q01_WEB_AUDIT_PATH, "/security");
-        assert.equal(
-            Q01_WEB_HTTP_URL,
-            "http://skynet-logistics.test/security",
-        );
+        assert.equal(Q01_WEB_HTTP_URL, "http://skynet-logistics.test/security");
         assert.equal(
             Q01_WEB_HTTPS_URL,
             "https://skynet-logistics.test/security",
         );
     });
 
-    it("defines a canonical non-random Adrian email and deterministic report template", () => {
+    it("defines the canonical email and deterministic report template", () => {
         assert.equal(Q01_ADRIAN_EMAIL, "adrian.cole@deadsignal.lock");
         assert.equal(Q01_REPORT_RECIPIENT, Q01_ADRIAN_EMAIL);
         assert.equal(Q01_REPORT_SUBJECT, "Security Audit — Jakarta");
         assert.equal(
             Q01_REPORT_BODY,
-            "Target: Skynet Logistics\nOpen Ports: 22, 80, 443\n\nNo critical vulnerabilities identified.\nFurther internal assessment is recommended.",
+            "Target: Skynet Logistics\nOpen Ports: 443\n\nNo critical vulnerabilities identified.\nFurther internal assessment is recommended.",
         );
     });
 
