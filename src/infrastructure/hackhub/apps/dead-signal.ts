@@ -32,8 +32,9 @@ export class DeadSignalApp extends App {
     DefaultSize = { width: 1100, height: 720 };
     override Unlocked = true;
 
-    Store = {
+    override Store = {
         title: "DEAD-SIGNAL",
+        ratings: 0,
         description: "DSS // Dead Signal System — integrated investigation workspace.",
     };
 
