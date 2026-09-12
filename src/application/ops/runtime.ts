@@ -1,4 +1,7 @@
-import {
+import type {
+    ReconObserver,
+    ReconProgress,
+    ReconResult,
     ReconService,
 } from "./recon-service.js";
 import {
@@ -20,10 +23,50 @@ export class OpsRuntime {
     readonly tools: OpsToolRegistry;
 
     constructor(services?: Partial<OpsRuntimeServices>) {
-        this.recon = services?.recon ?? new ReconService();
+        this.recon = services?.recon ?? new (requireReconService())();
         this.session = services?.session ?? new OpsSessionStore();
         this.tools = services?.tools ?? new OpsToolRegistry();
     }
+
+    async runRecon(
+        rawTarget: string,
+        observer: ReconObserver,
+    ): Promise<ReconResult | null> {
+        return this.recon.run(rawTarget, {
+            ...observer,
+            onStarted: (event) => {
+                this.session.startRecon(
+                    event.profileId,
+                    event.target,
+                    event.totalSources,
+                );
+                observer.onStarted(event);
+            },
+            onSourceStarted: (event: ReconProgress) => {
+                this.session.applySourceProgress(event, false);
+                observer.onSourceStarted(event);
+            },
+            onSourceCompleted: (event: ReconProgress) => {
+                this.session.applySourceProgress(event, true);
+                observer.onSourceCompleted(event);
+            },
+            onHostDiscovered: (host: string) => {
+                this.session.addHost(host);
+                observer.onHostDiscovered(host);
+            },
+            onCompleted: (result: ReconResult) => {
+                this.session.completeRecon(result);
+                observer.onCompleted(result);
+            },
+        });
+    }
 }
+
+const requireReconService = () => {
+    const { ReconService: Service } = require("./recon-service.js") as {
+        ReconService: typeof import("./recon-service.js").ReconService;
+    };
+    return Service;
+};
 
 export const opsRuntime = new OpsRuntime();
