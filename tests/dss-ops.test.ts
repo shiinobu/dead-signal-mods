@@ -32,6 +32,18 @@ const appSource = readFileSync(
     "utf8",
 );
 
+const commandRuntimeSource = readFileSync(
+    resolve(
+        fileURLToPath(
+            new URL(
+                "../src/infrastructure/hackhub/dss-command-runtime.ts",
+                import.meta.url,
+            ),
+        ),
+    ),
+    "utf8",
+);
+
 const appHtml = readFileSync(
     resolve(
         fileURLToPath(
@@ -80,27 +92,27 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
         assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/dead-signal\.html"/);
-        assert.match(appSource, /HTML\s*=\s*appHTML/);
+        assert.match(appSource, /HTML\s*=\s*dssHTML/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1220,\s*height:\s*800\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
     });
 
     it("exposes the DSS runtime boundary to the desktop application", () => {
-        assert.match(appSource, /opsRuntime\.tools\.getAll\(\)/);
-        assert.match(appSource, /opsRuntime\.session\.getSnapshot\(\)/);
-        assert.match(appSource, /OpsCommandRouter\(opsRuntime\)/);
+        assert.match(commandRuntimeSource, /const commandRouter = new OpsCommandRouter\(opsRuntime\)/);
+        assert.match(commandRuntimeSource, /export const executeDssCommand/);
+        assert.match(commandRuntimeSource, /DSS_RECON_EVENTS\.started/);
+        assert.match(commandRuntimeSource, /DSS_RECON_EVENTS\.sourceStarted/);
+        assert.match(commandRuntimeSource, /DSS_RECON_EVENTS\.sourceCompleted/);
+        assert.match(commandRuntimeSource, /DSS_RECON_EVENTS\.hostDiscovered/);
+        assert.match(commandRuntimeSource, /DSS_RECON_EVENTS\.completed/);
+        assert.match(commandRuntimeSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
+        assert.match(commandRuntimeSource, /export const registerDssCommandBridge/);
+        assert.match(commandRuntimeSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
         assert.match(appSource, /executeDssCommand\(commandLine/);
         assert.match(appSource, /getCommandCatalog/);
-        assert.match(appSource, /DSS_RECON_EVENTS\.started/);
-        assert.match(appSource, /DSS_RECON_EVENTS\.sourceStarted/);
-        assert.match(appSource, /DSS_RECON_EVENTS\.sourceCompleted/);
-        assert.match(appSource, /DSS_RECON_EVENTS\.hostDiscovered/);
-        assert.match(appSource, /DSS_RECON_EVENTS\.completed/);
-        assert.match(appSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
         assert.match(appSource, /startRecon:\s*\(target: string\)/);
         assert.match(appSource, /executeCommand:\s*\(commandLine: string\)/);
-        assert.match(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
     });
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
@@ -298,19 +310,23 @@ describe("DSS operations application foundation", () => {
     });
 
     it("bridges DSS Terminal+ nmap and lynx commands to HackHub terminal events", () => {
-        assert.match(appSource, /Shell\.getCommandData\(command, input\)/);
-        assert.match(appSource, /Events\.emit\("Terminal\.Command"/);
-        assert.match(appSource, /Events\.emit\("Terminal\.NmapScan"/);
-        assert.match(appSource, /command === "nmap"/);
-        assert.match(appSource, /command === "lynx"/);
+        assert.match(commandRuntimeSource, /Shell\.getCommandData\(command, input\)/);
+        assert.match(commandRuntimeSource, /Events\.emit\("Terminal\.Command"/);
+        assert.match(commandRuntimeSource, /Events\.emit\("Terminal\.NmapScan"/);
+        assert.match(commandRuntimeSource, /command === "nmap"/);
+        assert.match(commandRuntimeSource, /command === "lynx"/);
     });
 
-    it("uses the DSS exported command entrypoint and request listener for desktop command execution", () => {
+    it("uses a lifecycle-registered DSS command bridge and exported app entrypoints", () => {
         assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*startRecon/);
         assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*executeCommand/);
         assert.match(appSource, /startRecon:\s*\(target: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand/);
         assert.match(appSource, /executeCommand:\s*\(commandLine: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand/);
-        assert.match(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
+        assert.match(commandRuntimeSource, /export const registerDssCommandBridge/);
+        assert.match(commandRuntimeSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
+        assert.doesNotMatch(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
         assert.doesNotMatch(appSource, /throw new Error\(/);
+        assert.match(productionEntrySource, /registerDssCommandBridge\(\);/);
+        assert.match(replayEntrySource, /registerDssCommandBridge\(\);/);
     });
 });
