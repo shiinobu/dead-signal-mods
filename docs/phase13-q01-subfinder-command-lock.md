@@ -54,25 +54,42 @@ The result order is deterministic and is the authoritative Q01 enumeration outpu
 
 ## Presentation Contract
 
-The terminal presentation is adapted from the current ProjectDiscovery Subfinder `dev` branch. The upstream source defines the banner, `projectdiscovery.io` attribution, current version line, enumeration log, and final found-count log. The upstream project is MIT licensed.
+The terminal presentation is adapted from the current ProjectDiscovery Subfinder `dev` branch and matched against the supplied HackHub reference capture. The upstream source provides the banner and `projectdiscovery.io` attribution; Q01 also reproduces the warning block visible in the reference capture and uses a braille spinner for the enumeration wait state. The upstream project is MIT licensed.
 
-The Q01 command uses the current upstream version identifier:
+The Q01 command uses the current upstream version identifier internally:
 
 ```text
 v2.16.0
 ```
 
-The discovery output is streamed with a small deterministic delay between result lines so the HackHub terminal visibly behaves like an active enumeration rather than dumping all four hosts in one frame. This timing is presentation-only and does not alter the Q01 result.
-
-Representative terminal sequence:
+The player-facing flow is:
 
 ```text
 <Subfinder banner>
 
         projectdiscovery.io
 
-[INF] Current subfinder version v2.16.0
+[WRN] Use with caution. You are responsible for your actions.
+[WRN] Developers assume no liability and are not responsible for any misuse or damage.
+[WRN] By using subfinder, you also agree to the terms of the APIs used.
+
 [INF] Enumerating subdomains for <normalized-target>
+⠋
+```
+
+The spinner uses the braille sequence:
+
+```text
+⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+```
+
+The frame is updated in place with ANSI cursor-up, clear-line, and carriage-return control sequences. It runs for a fixed presentation duration of 2400 ms before the deterministic Q01 results are streamed.
+
+The final flow is:
+
+```text
+[INF] Enumerating subdomains for <normalized-target>
+<animated spinner>
 portal.skynet-logistics.idx
 security.skynet-logistics.idx
 status.skynet-logistics.idx
@@ -80,7 +97,7 @@ www.skynet-logistics.idx
 [INF] Found 4 subdomains for <normalized-target> in <elapsed> milliseconds
 ```
 
-The banner and log wording are adapted from ProjectDiscovery's `banners.go` and `enumerate.go` implementation. Q01 intentionally does not import or execute the upstream enumeration engine.
+The animation is presentation-only and does not alter the Q01 result.
 
 ## Non-Q01 Targets
 
@@ -96,4 +113,4 @@ The production runtime previously rejected `subfinders` because the custom comma
 
 ## Final Disposition
 
-`subfinders` is the **finalized Q01 gameplay command**. Future changes to command ownership, target normalization, result ordering, or terminal presentation require explicit Q01 change control.
+`subfinders` is the **finalized Q01 gameplay command**. Future changes to command ownership, target normalization, result ordering, warning text, spinner behavior, or terminal presentation require explicit Q01 change control.
