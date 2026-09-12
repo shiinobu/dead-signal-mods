@@ -75,11 +75,11 @@ const replayEntrySource = readFileSync(
 );
 
 describe("DSS operations application foundation", () => {
-    it("registers DEAD-SIGNAL as the canonical desktop application", () => {
+    it("registers DSS as the canonical desktop application", () => {
         assert.match(appSource, /@RegisterApp/);
         assert.match(appSource, /AppName\s*=\s*"dss"/);
-        assert.match(appSource, /Title\s*=\s*"DEAD-SIGNAL"/);
-        assert.match(appSource, /HTML\s*=\s*"\.\/dead-signal\.html"/);
+        assert.match(appSource, /Title\s*=\s*"DSS"/);
+        assert.match(appSource, /HTML\s*=\s*"dead-signal\.html"/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1100,\s*height:\s*720\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
@@ -232,7 +232,7 @@ describe("DSS operations application foundation", () => {
         runtime.recon.registerProfile(Q01_RECON_PROFILE);
         const router = new OpsCommandRouter(runtime);
 
-        const result = await router.execute(`recon ${Q01_RECON_INPUT}`, {
+        const result = await router.execute(Q01_RECON_INPUT, {
             observer: {
                 onStarted: () => undefined,
                 onSourceStarted: () => undefined,
