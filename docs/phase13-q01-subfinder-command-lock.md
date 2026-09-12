@@ -19,7 +19,7 @@ and is named:
 subfinders
 ```
 
-The plural spelling is intentional. It avoids collision with HackHub's native `subfinder` executable while preserving the ProjectDiscovery-style terminal presentation.
+The plural spelling is intentional. It avoids collision with HackHub's native `subfinder` executable while preserving the ProjectDiscovery terminal presentation.
 
 ## Accepted Target Forms
 
@@ -54,22 +54,33 @@ The result order is deterministic and is the authoritative Q01 enumeration outpu
 
 ## Presentation Contract
 
-The command deliberately resembles the ProjectDiscovery subfinder terminal presentation while remaining a game fixture:
+The terminal presentation is adapted from the current ProjectDiscovery Subfinder `dev` branch. The upstream source defines the banner, `projectdiscovery.io` attribution, current version line, enumeration log, and final found-count log. The upstream project is MIT licensed.
+
+The Q01 command uses the current upstream version identifier:
 
 ```text
-                   __    _____           __
-      _______  __/ /_  / __(_)___  ____/ /__  _____
-     / ___/ / / / __ \\/ /_/ / __ \\/ __  / _ \\/ ___/
-    (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /
-   /____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/
-
-    projectdiscovery.io
-
-[INF] Current subfinder version v2.15.0
-[INF] Enumerating subdomains for <normalized-target>
+v2.16.0
 ```
 
-The banner is presentation-only. Q01 gameplay depends on the four returned hostnames, not on banner text or version parsing.
+The discovery output is streamed with a small deterministic delay between result lines so the HackHub terminal visibly behaves like an active enumeration rather than dumping all four hosts in one frame. This timing is presentation-only and does not alter the Q01 result.
+
+Representative terminal sequence:
+
+```text
+<Subfinder banner>
+
+        projectdiscovery.io
+
+[INF] Current subfinder version v2.16.0
+[INF] Enumerating subdomains for <normalized-target>
+portal.skynet-logistics.idx
+security.skynet-logistics.idx
+status.skynet-logistics.idx
+www.skynet-logistics.idx
+[INF] Found 4 subdomains for <normalized-target> in <elapsed> milliseconds
+```
+
+The banner and log wording are adapted from ProjectDiscovery's `banners.go` and `enumerate.go` implementation. Q01 intentionally does not import or execute the upstream enumeration engine.
 
 ## Non-Q01 Targets
 
@@ -81,8 +92,8 @@ Unknown targets do not receive Q01 subdomains:
 
 ## Runtime Observation
 
-The production runtime previously rejected `subfinders` because the custom command was incorrectly registered as `subfinder`. That mismatch is corrected by this lock revision.
+The production runtime previously rejected `subfinders` because the custom command was incorrectly registered as `subfinder`. That mismatch is corrected and locked as the plural Q01 command name.
 
 ## Final Disposition
 
-`subfinders` is now the **finalized Q01 gameplay command**. Future changes to command ownership, target normalization, result ordering, or terminal presentation require explicit Q01 change control.
+`subfinders` is the **finalized Q01 gameplay command**. Future changes to command ownership, target normalization, result ordering, or terminal presentation require explicit Q01 change control.
