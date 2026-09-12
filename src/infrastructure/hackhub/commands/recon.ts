@@ -7,7 +7,7 @@ import {
     formatReconProgressBar,
     normalizeReconTarget,
 } from "../../../application/ops/recon-service.js";
-import { opsRuntime } from "../../../application/ops-runtime.js";
+import { opsRuntime } from "../../../application/ops/runtime.js";
 
 type ReconTools = Parameters<Command["Run"]>[0];
 
