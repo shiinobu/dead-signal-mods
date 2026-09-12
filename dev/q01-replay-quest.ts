@@ -76,7 +76,7 @@ const resetQ01ShellFixtures = (): void => {
     Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
 };
 
-const normalizeSubfinderTarget = (rawTarget: string): string | null => {
+const normalizeReconTarget = (rawTarget: string): string | null => {
     const value = rawTarget.trim().replace(/^['"]|['"]$/g, "");
 
     if (!value) {
@@ -94,7 +94,7 @@ const normalizeSubfinderTarget = (rawTarget: string): string | null => {
     }
 };
 
-const getSubfinderTarget = (args: string[]): string | null => {
+const getReconTarget = (args: string[]): string | null => {
     const domainFlagIndex = args.findIndex(
         (arg) => arg === "-d" || arg === "--domain",
     );
@@ -104,10 +104,10 @@ const getSubfinderTarget = (args: string[]): string | null => {
         : args[0] ?? null;
 };
 
-const isExpectedSubfinderTarget = (args: string[]): boolean => {
-    const rawTarget = getSubfinderTarget(args);
+const isExpectedReconTarget = (args: string[]): boolean => {
+    const rawTarget = getReconTarget(args);
     const normalizedTarget = rawTarget
-        ? normalizeSubfinderTarget(rawTarget)
+        ? normalizeReconTarget(rawTarget)
         : null;
 
     return (
@@ -193,7 +193,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: "Discover the public web host with lynx, enumerate its subdomains, then inspect the authorized security surface.",
+            hint: "Discover the public web host with lynx, enumerate its subdomains with recon, then inspect the authorized security surface.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -342,8 +342,8 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             return;
         }
 
-        if (data.command === "subfinder") {
-            if (!isExpectedSubfinderTarget(data.args)) {
+        if (data.command === "recon") {
+            if (!isExpectedReconTarget(data.args)) {
                 return;
             }
 
