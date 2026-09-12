@@ -52,6 +52,21 @@ const replayQuestSource = readFileSync(
     "utf8",
 );
 
+const subfinderCommandSource = readFileSync(
+    resolve(fileURLToPath(new URL("../src/infrastructure/hackhub/commands/q01-subfinder.ts", import.meta.url))),
+    "utf8",
+);
+
+const productionEntrySource = readFileSync(
+    resolve(fileURLToPath(new URL("../src/index.ts", import.meta.url))),
+    "utf8",
+);
+
+const replayEntrySource = readFileSync(
+    resolve(fileURLToPath(new URL("../dev/q01-replay-entry.ts", import.meta.url))),
+    "utf8",
+);
+
 describe("Phase 13 Q01 — THE CONTRACT", () => {
     it("matches the revised quest identity, client, target, and apex domain", () => {
         assert.equal(Q01_THE_CONTRACT.id, "dead_signal.q01");
@@ -107,18 +122,34 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         );
     });
 
-    it("registers every subfinder value variant in production and dev replay", () => {
+    it("registers the Q01 custom subfinder command in production and replay", () => {
         assert.match(
+            subfinderCommandSource,
+            /@RegisterCommand/,
+        );
+        assert.match(
+            subfinderCommandSource,
+            /CommandName\s*=\s*"subfinder"/,
+        );
+        assert.match(
+            subfinderCommandSource,
+            /async Run\(tools\)/,
+        );
+        assert.match(
+            productionEntrySource,
+            /import "\.\/infrastructure\/hackhub\/commands\/q01-subfinder\.js";/,
+        );
+        assert.match(
+            replayEntrySource,
+            /import "\.\.\/src\/infrastructure\/hackhub\/commands\/q01-subfinder\.js";/,
+        );
+        assert.doesNotMatch(
             questSource,
-            /Q01_SUBFINDER_INPUT_VARIANTS\.forEach\(\(input\) => \{[\s\S]*Shell\.addCommandData\("subfinder", input, Q01_SUBFINDER_RESULT\);[\s\S]*\}\);/,
+            /Shell\.addCommandData\("subfinder"/,
         );
-        assert.match(
+        assert.doesNotMatch(
             replayQuestSource,
-            /Q01_SUBFINDER_INPUT_VARIANTS\.forEach\(\(input\) => \{[\s\S]*Shell\.addCommandData\("subfinder", input, Q01_SUBFINDER_RESULT\);[\s\S]*\}\);/,
-        );
-        assert.match(
-            replayQuestSource,
-            /Q01_SUBFINDER_INPUT_VARIANTS\.forEach\(\(input\) => \{[\s\S]*Shell\.removeCommandData\("subfinder", input\);[\s\S]*\}\);/,
+            /Shell\.addCommandData\("subfinder"/,
         );
     });
 
