@@ -50,7 +50,7 @@ interface BrowserMetaData {
 
 interface Q01LynxResult {
     readonly ips?: readonly string[];
-    readonly address?: string;
+    readonly address?: readonly string[];
     readonly additional?: string;
 }
 
@@ -62,7 +62,7 @@ const Q01_NMAP_RESULT = [
 
 const Q01_LYNX_RESULT: Q01LynxResult = {
     ips: [Q01_TARGET_IP],
-    address: Q01_WEB_HOME_URL,
+    address: [Q01_WEB_HOME_URL],
     additional: [
         Q01_CLIENT_NAME,
         "Jakarta Operations",
@@ -371,7 +371,11 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
             return false;
         }
 
-        if (!("address" in result) || result.address !== Q01_WEB_HOME_URL) {
+        if (
+            !("address" in result) ||
+            !Array.isArray(result.address) ||
+            !result.address.includes(Q01_WEB_HOME_URL)
+        ) {
             return false;
         }
 
