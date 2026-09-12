@@ -7,7 +7,7 @@ Status: **FINAL LOCK — REVISED DESIGN & IMPLEMENTATION METHOD; LIVE PRODUCTION
 
 This document is the final implementation lock for Q01 after the explicit project-owner methodology revision.
 
-The lock preserves the recovered story contract while changing only the explicitly approved client name and the gameplay method used for Objective 04.
+The lock preserves the recovered story contract while changing only the explicitly approved client name, the gameplay method used for Objective 04, and the now-canonical email identity/submission contract.
 
 ## Canonical Identity
 
@@ -110,17 +110,35 @@ SSH access
 
 The web page is an evidence surface for the basic external assessment.
 
-## Report Contract
+## Locked Character Email Contract
 
-A valid report contains:
+Adrian Cole has a canonical, non-random email identity:
 
 ```text
+character.adrian.cole
+adrian.cole@deadsignal.lock
+```
+
+Recurring character addresses must be defined in the content layer and must never be generated with random APIs.
+
+Future organization mailboxes should use stable `.lock` addresses appropriate to their story organization.
+
+## Locked Q01 Report Submission Contract
+
+```text
+To:      adrian.cole@deadsignal.lock
+Subject: Security Audit — Jakarta
+
 Target: Skynet Logistics
 Open Ports: 22, 80, 443
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
+
+The exact plain-text report is provided in Adrian's contract email so the player does not have to invent or guess the quest-critical wording.
+
+The interim implementation uses the normal in-game mail compose/reply flow. No undocumented custom draft/prefill API or keyboard-capture mechanism is introduced.
 
 ## Rewards
 
@@ -140,16 +158,16 @@ $200
 No Phase 9–12 ownership boundary changes are introduced.
 
 ```text
-StateStore          canonical root state
-FlagStore           state facade
-ConditionNode       canonical condition representation
-QuestService        quest lifecycle
+StateStore            canonical root state
+FlagStore             state facade
+ConditionNode         canonical condition representation
+QuestService          quest lifecycle
 NarrativeStateService narrative state
-AccessService       capabilities/access
-RewardService       XP
-EconomyService      cash
-EndingService       endings
-HackHub adapters    SDK/game integration only
+AccessService         capabilities/access
+RewardService         XP
+EconomyService        cash
+EndingService         endings
+HackHub adapters      SDK/game integration only
 ```
 
 ## Replay Tooling
@@ -171,19 +189,7 @@ Q02–Q16 registration
 
 ## Cleanup Lock
 
-The following obsolete SSH-only smoke-test tooling is removed from the active repository:
-
-```text
-dev/ssh-full-scaffold-smoke-*
-dev/ssh-native-smoke-*
-scripts/build-ssh-full-scaffold-smoke.ts
-scripts/build-ssh-native-smoke.ts
-scripts/build-ssh-native-random-smoke.ts
-docs/phase13-ssh-full-scaffold-smoke.md
-docs/phase13-ssh-native-smoke-test.md
-```
-
-The active replay fixture is retained.
+SSH-only diagnostic tooling is not part of the active repository. The maintained Q01 replay remains the supported repeatable validation tool.
 
 ## Production Validation Status
 
@@ -204,7 +210,7 @@ open /security over HTTP or HTTPS
  ↓
 complete Objective 04
  ↓
-submit correct Skynet Logistics report
+submit canonical Skynet Logistics report
  ↓
 verify Q01 completion + $200 + 80 XP
  ↓
@@ -217,4 +223,4 @@ Until that real-game gate is observed, Q02 must not be activated in production.
 
 **Q01 REVISED IMPLEMENTATION LOCKED.**
 
-The story sequence is preserved. The client is now `Skynet Logistics`. Objective 04 uses HTTP/HTTPS web inspection instead of the unreliable native SSH path. Further changes require explicit change control after this lock.
+The story sequence is preserved. The client is now `Skynet Logistics`. Objective 04 uses HTTP/HTTPS web inspection instead of the unreliable native SSH path. Adrian's email identity and Q01 report contract are canonical and non-random. Further changes require explicit change control after this lock.
