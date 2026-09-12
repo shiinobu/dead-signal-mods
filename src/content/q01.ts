@@ -30,14 +30,20 @@ export const Q01_LYNX_INPUT_URL = `https://${Q01_TARGET_IP}/`;
 
 // The player may provide the same web target in normal subfinder value forms.
 // Formatting (scheme, www prefix, trailing slash) is not a gameplay constraint.
-export const Q01_SUBFINDER_INPUT = `-d ${Q01_WEB_HOST}`;
+export const Q01_SUBFINDER_INPUT = `-d ${Q01_WEB_HOME_URL}`;
 export const Q01_SUBFINDER_INPUT_VARIANTS = [
     Q01_SUBFINDER_INPUT,
+    `-d ${Q01_WEB_HOST}`,
     `-d ${Q01_WEB_HOME_HOST}`,
     `-d https://${Q01_WEB_HOST}`,
     `-d https://${Q01_WEB_HOST}/`,
     `-d https://${Q01_WEB_HOME_HOST}`,
-    `-d ${Q01_WEB_HOME_URL}`,
+    Q01_WEB_HOST,
+    Q01_WEB_HOME_HOST,
+    `https://${Q01_WEB_HOST}`,
+    `https://${Q01_WEB_WEB_HOST}`,
+    `https://${Q01_WEB_HOST}/`,
+    Q01_WEB_HOME_URL,
 ] as const;
 export const Q01_SUBFINDER_RESULT = [
     "portal.skynet-logistics.idx",
