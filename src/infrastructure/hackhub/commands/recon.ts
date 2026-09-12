@@ -62,7 +62,7 @@ export class ReconCommand extends Command {
             return;
         }
 
-        const result = await opsRuntime.recon.run(rawTarget, {
+        const result = await opsRuntime.runRecon(rawTarget, {
             onStarted: ({ target }) => {
                 printBanner(tools);
                 tools.println("");
