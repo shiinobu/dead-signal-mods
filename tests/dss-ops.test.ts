@@ -129,6 +129,15 @@ describe("DSS operations application foundation", () => {
         );
     });
 
+    it("keeps the DSS app stable while making only the Q01 replay quest instance unique", () => {
+        assert.match(appSource, /AppName\s*=\s*"dss"/);
+        assert.match(appSource, /Title\s*=\s*"DSS"/);
+        assert.doesNotMatch(appSource, /DEV_Q01_REPLAY_ID/);
+        assert.match(replayQuestSource, /override Name = `dead_signal\.dev\.q01\.\$\{DEV_Q01_REPLAY_ID\}`;/);
+        assert.match(replayQuestSource, /override Title = "THE CONTRACT — DEV REPLAY";/);
+        assert.match(replayEntrySource, /opsRuntime\.recon\.registerProfile\(Q01_RECON_PROFILE\)/);
+    });
+
     it("keeps the Q01 replay wired to the shared recon command", () => {
         assert.match(replayQuestSource, /data\.command === "recon"/);
         assert.doesNotMatch(replayQuestSource, /data\.command === "subfinder"/);
