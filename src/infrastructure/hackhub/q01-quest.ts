@@ -17,10 +17,9 @@ import {
     Q01_REWARDS,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
-    Q01_WEB_HTTP_URL,
     Q01_WEB_AUDIT_PATH,
-    Q01_WEB_HTTPS_URL,
     Q01_WEB_HOST,
+    Q01_WEB_HTTPS_URL,
 } from "../../content/index.js";
 
 import { asId } from "../../core/index.js";
@@ -48,13 +47,13 @@ interface BrowserMetaData {
 
 interface Q01NmapPort {
     readonly port: number;
-    readonly status: "OPEN";
+    readonly status: "OPEN" | "CLOSED";
     readonly service: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
-    { port: 22, status: "OPEN", service: "ssh" },
-    { port: 80, status: "OPEN", service: "http" },
+    { port: 22, status: "CLOSED", service: "ssh" },
+    { port: 80, status: "CLOSED", service: "http" },
     { port: 443, status: "OPEN", service: "https" },
 ];
 
@@ -80,7 +79,6 @@ const Q01_INCOMING_MAIL_CONTENT = [
     "Basic vulnerability checks",
     "",
     "Web audit surface:",
-    `HTTP: ${Q01_WEB_HTTP_URL}`,
     `HTTPS: ${Q01_WEB_HTTPS_URL}`,
     "",
     "Not Authorized:",
@@ -150,20 +148,19 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         },
         {
             name: Q01_OBJECTIVE_IDS.scanNetwork,
-            description: `Scan ${Q01_TARGET_IP}`,
-            terminalCommand: `nmap ${Q01_TARGET_IP}`,
+            description: "Scan the ip target",
+            terminalCommand: "nmap",
             unlocksAfter: [Q01_OBJECTIVE_IDS.reviewScope],
         },
         {
             name: Q01_OBJECTIVE_IDS.identifyServices,
             description: "Identify exposed services",
-            hint: "Check the scan for 22/ssh, 80/http, and 443/https.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.scanNetwork],
         },
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: `Inspect ${Q01_WEB_HTTP_URL} or ${Q01_WEB_HTTPS_URL} and review the security findings.`,
+            hint: "Inspect web service and review the security findings.",
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -198,13 +195,13 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 {
                     external: 22,
                     internal: 22,
-                    active: true,
+                    active: false,
                     service: "ssh",
                 },
                 {
                     external: 80,
                     internal: 80,
-                    active: true,
+                    active: false,
                     service: "http",
                 },
                 {
@@ -227,6 +224,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
+        Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data);
@@ -237,10 +235,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         });
 
         this.Events.on("Mail.Sent", (data) => {
-            if (
-                !this.isAuditReport(data.subject, data.content) ||
-                !this.Data.basicVulnerabilityChecksCompleted
-            ) {
+            if (!this.isAuditReport(data.subject, data.content)) {
                 return;
             }
 
@@ -298,6 +293,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         sendAdrianMail("Re: Security Audit — Jakarta", Q01_COMPLETION_MAIL_CONTENT);
         Shell.removeCommandData("nmap", this.Data.targetIp);
+        Shell.removeCommandData("nmap", "");
         Network.removeDomain(Q01_WEB_HOST);
         Network.destroyNetwork(this.Data.targetIp);
         gameRuntime.persistence.save();
@@ -305,13 +301,18 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
+        Shell.removeCommandData("nmap", "");
         Network.removeDomain(Q01_WEB_HOST);
         Network.destroyNetwork(this.Data.targetIp);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
+        if (data.command !== "nmap") {
+            return;
+        }
+
         if (
-            data.command !== "nmap" ||
+            data.args.length > 0 &&
             data.args[0] !== this.Data.targetIp
         ) {
             return;
@@ -319,7 +320,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
         const result = Shell.getCommandData(
             "nmap",
-            this.Data.targetIp,
+            data.args.length === 0 ? "" : this.Data.targetIp,
         );
 
         if (!this.isExpectedNmapResult(result)) {
@@ -345,11 +346,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return;
         }
 
-        const isSupportedProtocol =
-            data.protocol === "http:" || data.protocol === "https:";
-
         if (
-            !isSupportedProtocol ||
+            data.protocol !== "https:" ||
             data.hostname !== Q01_WEB_HOST ||
             data.pathname !== Q01_WEB_AUDIT_PATH
         ) {
@@ -378,7 +376,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 "status" in value &&
                 "service" in value &&
                 typeof value.port === "number" &&
-                value.status === "OPEN" &&
+                (value.status === "OPEN" || value.status === "CLOSED") &&
                 typeof value.service === "string",
             ) &&
             Q01_NMAP_RESULT.every((expected) =>
@@ -394,24 +392,12 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
 
     private isAuditReport(subject: string, content: string): boolean {
         const normalizedSubject = subject.trim().toLowerCase();
-        const normalizedContent = content.toLowerCase();
-        const reportBody = normalizedContent.trimStart();
+        const normalizedContent = content.trim();
 
-        if (
-            normalizedSubject !== Q01_REPORT_SUBJECT.toLowerCase() &&
-            normalizedSubject !== `re: ${Q01_REPORT_SUBJECT}`.toLowerCase()
-        ) {
-            return false;
-        }
+        const subjectMatches =
+            normalizedSubject === Q01_REPORT_SUBJECT.toLowerCase() ||
+            normalizedSubject === `re: ${Q01_REPORT_SUBJECT}`.toLowerCase();
 
-        if (!reportBody.startsWith(`target: ${Q01_CLIENT_NAME.toLowerCase()}`)) {
-            return false;
-        }
-
-        return Q01_REPORT_BODY
-            .toLowerCase()
-            .split("\n")
-            .filter((line) => line.length > 0)
-            .every((required) => normalizedContent.includes(required));
+        return subjectMatches && normalizedContent === Q01_REPORT_BODY;
     }
 }
