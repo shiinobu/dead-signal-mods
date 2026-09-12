@@ -1,5 +1,6 @@
 import { asId } from "../core/index.js";
 import { flagEquals } from "../domain/shared/index.js";
+import type { ReconProfile } from "../domain/recon/index.js";
 import type { Quest } from "../domain/quest/index.js";
 import { ADRIAN_COLE } from "./characters.js";
 
@@ -28,11 +29,11 @@ export const Q01_WEB_HTTPS_URL = Q01_WEB_HOME_URL;
 export const Q01_LYNX_INPUT_IP = Q01_TARGET_IP;
 export const Q01_LYNX_INPUT_URL = `https://${Q01_TARGET_IP}/`;
 
-// The player may provide the same web target in normal subfinder value forms.
+// The player may provide the same reconnaissance target in normal value forms.
 // Formatting (scheme, www prefix, trailing slash) is not a gameplay constraint.
-export const Q01_SUBFINDER_INPUT = `-d ${Q01_WEB_HOME_URL}`;
-export const Q01_SUBFINDER_INPUT_VARIANTS = [
-    Q01_SUBFINDER_INPUT,
+export const Q01_RECON_INPUT = `-d ${Q01_WEB_HOME_URL}`;
+export const Q01_RECON_INPUT_VARIANTS = [
+    Q01_RECON_INPUT,
     `-d ${Q01_WEB_HOST}`,
     `-d ${Q01_WEB_HOME_HOST}`,
     `-d https://${Q01_WEB_HOST}`,
@@ -45,12 +46,65 @@ export const Q01_SUBFINDER_INPUT_VARIANTS = [
     `https://${Q01_WEB_HOST}/`,
     Q01_WEB_HOME_URL,
 ] as const;
-export const Q01_SUBFINDER_RESULT = [
+
+export const Q01_RECON_RESULT = [
     "portal.skynet-logistics.idx",
     "security.skynet-logistics.idx",
     "status.skynet-logistics.idx",
     "www.skynet-logistics.idx",
 ].join("\n");
+
+export const Q01_RECON_PROFILE: ReconProfile = {
+    id: "q01",
+    targets: [Q01_WEB_HOST, Q01_WEB_HOME_HOST],
+    sources: [
+        {
+            id: "certificate-index",
+            name: "cert-index",
+            description: "certificate index",
+            candidates: [
+                Q01_WEB_HOME_HOST,
+                Q01_WEB_AUDIT_HOST,
+            ],
+        },
+        {
+            id: "passive-dns",
+            name: "passive-dns",
+            description: "passive DNS",
+            candidates: [
+                Q01_WEB_AUDIT_HOST,
+                `portal.${Q01_WEB_HOST}`,
+            ],
+        },
+        {
+            id: "host-intel",
+            name: "host-intel",
+            description: "host intelligence",
+            candidates: [
+                `status.${Q01_WEB_HOST}`,
+                Q01_WEB_HOME_HOST,
+            ],
+        },
+        {
+            id: "threat-feed",
+            name: "threat-feed",
+            description: "threat feed index",
+            candidates: [`status.${Q01_WEB_HOST}`],
+        },
+        {
+            id: "web-index",
+            name: "web-index",
+            description: "indexed web hosts",
+            candidates: [`portal.${Q01_WEB_HOST}`],
+        },
+    ],
+    resultHosts: [
+        `portal.${Q01_WEB_HOST}`,
+        Q01_WEB_AUDIT_HOST,
+        `status.${Q01_WEB_HOST}`,
+        Q01_WEB_HOME_HOST,
+    ],
+};
 
 export const Q01_ADRIAN_EMAIL = ADRIAN_COLE.email;
 export const Q01_REPORT_RECIPIENT = Q01_ADRIAN_EMAIL;
