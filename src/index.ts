@@ -7,11 +7,9 @@ import {
     RegisterModPackage,
 } from "@hotbunny/hackhub-content-sdk";
 
-import {
-    Q01_RECON_PROFILE,
-} from "./content/q01.js";
+import { Q01_RECON_PROFILE } from "./content/q01.js";
+import { opsRuntime } from "./application/ops/runtime.js";
 import { gameRuntime } from "./infrastructure/hackhub/runtime.js";
-import { opsRuntime } from "./application/ops-runtime.js";
 
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {
