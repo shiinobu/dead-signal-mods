@@ -10,28 +10,41 @@ import {
 } from "../../../content/q01.js";
 
 const SOURCE_DURATION_MS = 1000;
-const SPINNER_DELAY_MS = 100;
 const RESULT_DELAY_MS = 90;
 
 const SOURCES = [
     {
         name: "crtsh",
-        candidates: ["www.skynet-logistics.idx", "security.skynet-logistics.idx"],
+        description: "certificate transparency",
+        candidates: [
+            "www.skynet-logistics.idx",
+            "security.skynet-logistics.idx",
+        ],
     },
     {
         name: "rapiddns",
-        candidates: ["security.skynet-logistics.idx", "portal.skynet-logistics.idx"],
+        description: "passive DNS",
+        candidates: [
+            "security.skynet-logistics.idx",
+            "portal.skynet-logistics.idx",
+        ],
     },
     {
         name: "hackertarget",
-        candidates: ["status.skynet-logistics.idx", "www.skynet-logistics.idx"],
+        description: "host intelligence",
+        candidates: [
+            "status.skynet-logistics.idx",
+            "www.skynet-logistics.idx",
+        ],
     },
     {
         name: "alienvault",
+        description: "OTX passive DNS",
         candidates: ["status.skynet-logistics.idx"],
     },
     {
         name: "urlscan",
+        description: "indexed URLs",
         candidates: ["portal.skynet-logistics.idx"],
     },
 ] as const;
@@ -94,88 +107,14 @@ const normalizeTarget = (rawTarget: string): string | null => {
 };
 
 type Q01SubfinderTools = Parameters<Command["Run"]>[0];
-type SourceStatus = "pending" | "scanning" | "complete";
+type Source = (typeof SOURCES)[number];
 
-const getSourceStatus = (index: number, activeSource: number): SourceStatus => {
-    if (index < activeSource) {
-        return "complete";
-    }
+const getCompletedCandidates = (completedSources: Source[]): string[] =>
+    completedSources.flatMap((source) => source.candidates);
 
-    if (index === activeSource) {
-        return "scanning";
-    }
-
-    return "pending";
-};
-
-const getFoundCount = (
-    sourceIndex: number,
-    elapsedInSource: number,
-): number => {
-    const candidates = SOURCES[sourceIndex]?.candidates ?? [];
-
-    if (elapsedInSource >= SOURCE_DURATION_MS || candidates.length <= 1) {
-        return candidates.length;
-    }
-
-    if (elapsedInSource >= SOURCE_DURATION_MS / 2) {
-        return 1;
-    }
-
-    return 0;
-};
-
-const getProgress = (elapsedMs: number): number =>
-    Math.min(
-        100,
-        Math.floor(
-            (elapsedMs / (SOURCE_DURATION_MS * SOURCES.length)) * 100,
-        ),
-    );
-
-const getCandidateCount = (elapsedMs: number): number => {
-    let total = 0;
-
-    for (let index = 0; index < SOURCES.length; index += 1) {
-        const sourceStart = index * SOURCE_DURATION_MS;
-        const elapsedInSource = elapsedMs - sourceStart;
-
-        if (elapsedInSource <= 0) {
-            continue;
-        }
-
-        total += getFoundCount(
-            index,
-            Math.min(elapsedInSource, SOURCE_DURATION_MS),
-        );
-    }
-
-    return total;
-};
-
-const getUniqueCount = (elapsedMs: number): number => {
-    const discovered = new Set<string>();
-
-    for (let index = 0; index < SOURCES.length; index += 1) {
-        const sourceStart = index * SOURCE_DURATION_MS;
-        const elapsedInSource = elapsedMs - sourceStart;
-
-        if (elapsedInSource <= 0) {
-            continue;
-        }
-
-        const count = getFoundCount(
-            index,
-            Math.min(elapsedInSource, SOURCE_DURATION_MS),
-        );
-
-        for (const candidate of SOURCES[index]?.candidates.slice(0, count) ?? []) {
-            discovered.add(candidate);
-        }
-    }
-
-    return discovered.size;
-};
+const getUniqueCandidates = (completedSources: Source[]): string[] => [
+    ...new Set(getCompletedCandidates(completedSources)),
+];
 
 const formatProgressBar = (percent: number, width = 24): string => {
     const filled = Math.round((percent / 100) * width);
@@ -184,6 +123,15 @@ const formatProgressBar = (percent: number, width = 24): string => {
 
 @RegisterCommand({ default: true })
 export class Q01SubfinderCommand extends Command {
+    /**
+     * Q01 keeps terminal output append-only. CommandTools.clear() was tested
+     * but rejected for gameplay because it clears the player's existing
+     * terminal history. Each source therefore emits discrete scanning and
+     * completion events followed by cumulative progress counters.
+     *
+     * The candidates are deterministic Q01 fixtures; no external enumeration
+     * or network dependency is used at runtime.
+     */
     CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
 
@@ -201,60 +149,18 @@ export class Q01SubfinderCommand extends Command {
         }
     }
 
-    private printScanFrame(
+    private printProgress(
         tools: Q01SubfinderTools,
-        target: string,
-        elapsedMs: number,
-        spinnerFrame: string,
+        completedSources: Source[],
     ): void {
-        const activeSource = Math.min(
-            SOURCES.length - 1,
-            Math.floor(elapsedMs / SOURCE_DURATION_MS),
+        const progress = Math.round(
+            (completedSources.length / SOURCES.length) * 100,
         );
-        const elapsedInSource = elapsedMs % SOURCE_DURATION_MS;
-        const progress = getProgress(elapsedMs);
-        const candidateCount = getCandidateCount(elapsedMs);
-        const uniqueCount = getUniqueCount(elapsedMs);
+        const candidateCount = getCompletedCandidates(completedSources).length;
+        const uniqueCount = getUniqueCandidates(completedSources).length;
 
-        tools.clear();
-        this.printHeader(tools);
-        tools.println("");
-        tools.println(`[INF] Enumerating subdomains for ${target}`);
-        tools.println("");
-
-        for (let index = 0; index < SOURCES.length; index += 1) {
-            const source = SOURCES[index]!;
-            const status = getSourceStatus(index, activeSource);
-            const foundCount =
-                status === "complete"
-                    ? source.candidates.length
-                    : status === "scanning"
-                      ? getFoundCount(activeSource, elapsedInSource)
-                      : 0;
-            const marker =
-                status === "complete" ? "✓" : status === "scanning" ? ">" : " ";
-            const suffix =
-                status === "complete"
-                    ? `${foundCount} found`
-                    : status === "scanning"
-                      ? `${spinnerFrame} scanning`
-                      : "pending";
-
-            tools.println(
-                `[${marker}] ${source.name.padEnd(18, ".")} ${suffix}`,
-            );
-        }
-
-        tools.println("");
-        tools.println(
-            `Progress: ${formatProgressBar(progress)} ${progress}%`,
-        );
-        tools.println(
-            `Sources:  ${Math.min(
-                SOURCES.length,
-                Math.floor(elapsedMs / SOURCE_DURATION_MS),
-            )}/${SOURCES.length}`,
-        );
+        tools.println(`Progress: ${formatProgressBar(progress)} ${progress}%`);
+        tools.println(`Sources:  ${completedSources.length}/${SOURCES.length}`);
         tools.println(`Candidates: ${candidateCount}`);
         tools.println(`Unique:     ${uniqueCount}`);
     }
@@ -279,43 +185,31 @@ export class Q01SubfinderCommand extends Command {
             return;
         }
 
-        const animationStartedAt = Date.now();
-        let spinnerFrame = 0;
-        const animationDurationMs = SOURCE_DURATION_MS * SOURCES.length;
-
-        while (Date.now() - animationStartedAt < animationDurationMs) {
-            const elapsedMs = Math.min(
-                Date.now() - animationStartedAt,
-                animationDurationMs,
-            );
-
-            this.printScanFrame(
-                tools,
-                normalizedTarget,
-                elapsedMs,
-                SPINNER_FRAMES[spinnerFrame]!,
-            );
-            spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES.length;
-            await tools.sleep(SPINNER_DELAY_MS);
-        }
-
-        tools.clear();
         this.printHeader(tools);
         tools.println("");
         tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
-        tools.println("");
 
-        for (const source of SOURCES) {
+        const completedSources: Source[] = [];
+
+        for (let index = 0; index < SOURCES.length; index += 1) {
+            const source = SOURCES[index]!;
+            const frame = SPINNER_FRAMES[index % SPINNER_FRAMES.length]!;
+
+            tools.println("");
+            tools.println(
+                `[>] ${source.name.padEnd(18, ".")} ${frame} scanning ${source.description}`,
+            );
+
+            await tools.sleep(SOURCE_DURATION_MS);
+
+            completedSources.push(source);
+
             tools.println(
                 `[✓] ${source.name.padEnd(18, ".")} ${source.candidates.length} found`,
             );
+            this.printProgress(tools, completedSources);
         }
 
-        tools.println("");
-        tools.println(`Progress: ${formatProgressBar(100)} 100%`);
-        tools.println(`Sources:  ${SOURCES.length}/${SOURCES.length}`);
-        tools.println(`Candidates: ${getCandidateCount(animationDurationMs)}`);
-        tools.println(`Unique:     ${getUniqueCount(animationDurationMs)}`);
         tools.println("");
         tools.println("[INF] Enumeration completed");
         tools.println("");
