@@ -9,6 +9,8 @@ import {
 } from "../../../application/ops/recon-service.js";
 import { opsRuntime } from "../../../application/ops-runtime.js";
 
+type ReconTools = Parameters<Command["Run"]>[0];
+
 const DSS_RECON_BANNER = [
     "  ____  _____ ____    ____   _  _ ____ _  _ ",
     " |  _ \\| ____|  _ \\  / ___| | || / ___| || |",
@@ -17,7 +19,19 @@ const DSS_RECON_BANNER = [
     " |____/|_____|_| \\_\\ |____/    |_| |____/   |_| ",
 ] as const;
 
-const printBanner = (tools: Q01ReconTools): void => {
+const getTargetArgument = (args: string[]): string | null => {
+    const domainFlagIndex = args.findIndex(
+        (arg) => arg === "-d" || arg === "--domain",
+    );
+
+    if (domainFlagIndex >= 0) {
+        return args[domainFlagIndex + 1] ?? null;
+    }
+
+    return args[0] ?? null;
+};
+
+const printBanner = (tools: ReconTools): void => {
     for (const line of DSS_RECON_BANNER) {
         tools.println(line);
     }
@@ -27,16 +41,14 @@ const printBanner = (tools: Q01ReconTools): void => {
     tools.println("        RECONNAISSANCE MODULE");
 };
 
-type Q01ReconTools = Parameters<Command["Run"]>[0];
-
 @RegisterCommand({ default: true })
 export class ReconCommand extends Command {
     CommandName = "recon";
     Description = "Run the DEAD SIGNAL reconnaissance module.";
 
-    override async Run(tools: Q01ReconTools): Promise<void> {
+    override async Run(tools: ReconTools): Promise<void> {
         const args = tools.getArgs();
-        const rawTarget = args[0] ?? null;
+        const rawTarget = getTargetArgument(args);
 
         if (!rawTarget) {
             tools.println("Usage: recon -d <domain>");
@@ -77,7 +89,9 @@ export class ReconCommand extends Command {
                 tools.println(
                     `Progress: ${formatReconProgressBar(progressPercent)} ${progressPercent}%`,
                 );
-                tools.println(`Sources:  ${Math.round((progressPercent / 100) * totalSources)}/${totalSources}`);
+                tools.println(
+                    `Sources:  ${Math.round((progressPercent / 100) * totalSources)}/${totalSources}`,
+                );
                 tools.println(`Candidates: ${candidatesFound}`);
                 tools.println(`Unique:     ${uniqueHostsFound}`);
             },
