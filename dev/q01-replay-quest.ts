@@ -21,6 +21,7 @@ import {
     Q01_TARGET_IP,
     Q01_WEB_AUDIT_HOST,
     Q01_WEB_HOST,
+    Q01_WEB_HOME_HOST,
     Q01_WEB_HOME_URL,
     Q01_WEB_SUBDOMAINS,
 } from "../src/content/q01.js";
@@ -69,6 +70,15 @@ const Q01_LYNX_RESULT: Q01LynxResult = {
         "Canonical public web host discovered from the target IP.",
     ],
 };
+
+const Q01_SUBFINDER_INPUT_VARIANTS = [
+    Q01_SUBFINDER_INPUT,
+    `-d ${Q01_WEB_HOME_HOST}`,
+    `-d https://${Q01_WEB_HOST}`,
+    `-d https://${Q01_WEB_HOME_HOST}`,
+    `-d https://${Q01_WEB_HOST}/`,
+    `-d ${Q01_WEB_HOME_URL}`,
+] as const;
 
 const Q01_INCOMING_MAIL_CONTENT = [
     "DEV REPLAY — Q01 TEST CONTRACT",
@@ -202,7 +212,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
         Shell.addCommandData("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT);
         Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
-        Shell.addCommandData("subfinder", Q01_SUBFINDER_INPUT, Q01_SUBFINDER_RESULT);
+        Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
+            Shell.addCommandData("subfinder", input, Q01_SUBFINDER_RESULT);
+        });
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data as TerminalCommandData);
@@ -235,7 +247,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         Shell.removeCommandData("nmap", "");
         Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
         Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
-        Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
+        Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
+            Shell.removeCommandData("subfinder", input);
+        });
         Network.removeDomain(Q01_WEB_HOST);
         Q01_WEB_SUBDOMAINS.forEach((hostname) => {
             Network.removeDomain(hostname);
@@ -248,7 +262,9 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         Shell.removeCommandData("nmap", "");
         Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
         Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
-        Shell.removeCommandData("subfinder", Q01_SUBFINDER_INPUT);
+        Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
+            Shell.removeCommandData("subfinder", input);
+        });
         Network.removeDomain(Q01_WEB_HOST);
         Q01_WEB_SUBDOMAINS.forEach((hostname) => {
             Network.removeDomain(hostname);
@@ -305,7 +321,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
 
         if (data.command === "subfinder") {
-            if (input !== Q01_SUBFINDER_INPUT) {
+            if (!Q01_SUBFINDER_INPUT_VARIANTS.includes(input as typeof Q01_SUBFINDER_INPUT_VARIANTS[number])) {
                 return;
             }
 
