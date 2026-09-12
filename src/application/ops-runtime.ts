@@ -1,21 +1,5 @@
-import {
-    ReconService,
-} from "./ops/recon-service.js";
-
-export interface OpsRuntimeServices {
-    readonly recon: ReconService;
-}
-
-export class OpsRuntime {
-    readonly recon: ReconService;
-
-    constructor(services?: OpsRuntimeServices) {
-        const runtimeServices = services ?? {
-            recon: new ReconService(),
-        };
-
-        this.recon = runtimeServices.recon;
-    }
-}
-
-export const opsRuntime = new OpsRuntime();
+/**
+ * @deprecated Import OpsRuntime from `./ops/runtime.js` instead.
+ * Kept as a compatibility facade while the DSS application boundary settles.
+ */
+export * from "./ops/runtime.js";
