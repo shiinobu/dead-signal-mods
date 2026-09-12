@@ -12,6 +12,7 @@ import {
     Q01_FINAL_STATE_FLAG,
     Q01_OBJECTIVE_IDS,
     Q01_REPORT_BODY,
+    Q01_REPORT_BODY_TEMPLATE,
     Q01_REPORT_RECIPIENT,
     Q01_REPORT_SUBJECT,
     Q01_REWARDS,
@@ -47,13 +48,13 @@ interface BrowserMetaData {
 
 interface Q01NmapPort {
     readonly port: number;
-    readonly status: "OPEN" | "CLOSED";
+    readonly status: "OPEN" | "CLOSE";
     readonly service: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
-    { port: 22, status: "CLOSED", service: "ssh" },
-    { port: 80, status: "CLOSED", service: "http" },
+    { port: 22, status: "CLOSE", service: "ssh" },
+    { port: 80, status: "CLOSE", service: "http" },
     { port: 443, status: "OPEN", service: "https" },
 ];
 
@@ -79,18 +80,17 @@ const Q01_INCOMING_MAIL_CONTENT = [
     "Basic vulnerability checks",
     "",
     "Web audit surface:",
-    `HTTPS: ${Q01_WEB_HTTPS_URL}`,
+    Q01_WEB_HTTPS_URL,
     "",
     "Not Authorized:",
     "Data extraction",
     "Internal access",
     "Credential attacks",
     "",
-    "For the final submission, reply to this address using the subject below and the provided report text:",
-    `To: ${Q01_REPORT_RECIPIENT}`,
+    "Format report audit:",
     `Subject: ${Q01_REPORT_SUBJECT}`,
     "",
-    Q01_REPORT_BODY,
+    Q01_REPORT_BODY_TEMPLATE,
     "",
     "— Adrian",
 ].join("\n");
@@ -166,7 +166,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Submit audit report",
-            hint: `Reply to ${Q01_REPORT_RECIPIENT} with subject \"${Q01_REPORT_SUBJECT}\". The report text is provided in Adrian's audit email.`,
+            hint: `Reply to ${Q01_REPORT_RECIPIENT} with subject \"${Q01_REPORT_SUBJECT}\". Fill in the company and open-port values you discovered during the audit.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
         },
     ];
@@ -376,7 +376,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 "status" in value &&
                 "service" in value &&
                 typeof value.port === "number" &&
-                (value.status === "OPEN" || value.status === "CLOSED") &&
+                (value.status === "OPEN" || value.status === "CLOSE") &&
                 typeof value.service === "string",
             ) &&
             Q01_NMAP_RESULT.every((expected) =>
