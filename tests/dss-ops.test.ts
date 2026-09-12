@@ -96,13 +96,14 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /opsRuntime\.tools\.getAll\(\)/);
         assert.match(appSource, /opsRuntime\.session\.getSnapshot\(\)/);
         assert.match(appSource, /OpsCommandRouter\(opsRuntime\)/);
-        assert.match(appSource, /executeCommand\(commandLine/);
+        assert.match(appSource, /executeDssCommand\(commandLine/);
         assert.match(appSource, /getCommandCatalog/);
         assert.match(appSource, /DSS_RECON_EVENTS\.started/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceStarted/);
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceCompleted/);
         assert.match(appSource, /DSS_RECON_EVENTS\.hostDiscovered/);
         assert.match(appSource, /DSS_RECON_EVENTS\.completed/);
+        assert.match(appSource, /DSS_COMMAND_EVENTS\.request/);
     });
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
@@ -289,13 +290,11 @@ describe("DSS operations application foundation", () => {
         assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.completed/);
     });
 
-    it("locks the app HTML compatibility patch to the safe navigation wrapper", () => {
-        assert.match(appSource, /const DSS_NAVIGATION_PATCH\s*=\s*`/);
-        assert.match(appSource, /const showDssView\s*=\s*\(id\)\s*=>/);
-        assert.match(appSource, /const activeView = Object\.prototype\.hasOwnProperty\.call\(views, id\)/);
-        assert.match(appSource, /view\.classList\.toggle\("active", key === activeView\)/);
-        assert.match(appSource, /const dssHTML = `\$\{appHTML\}\$\{DSS_NAVIGATION_PATCH\}`;/);
-        assert.match(appSource, /HTML\s*=\s*dssHTML/);
+    it("routes desktop commands through the shared HackHub event bridge", () => {
+        assert.match(appSource, /DSS_COMMAND_EVENTS/);
+        assert.match(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
+        assert.match(appSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
+        assert.match(appSource, /executeDssCommand\(commandLine\)/);
         assert.doesNotMatch(appSource, /throw new Error\(/);
     });
 });
