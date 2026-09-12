@@ -1,6 +1,6 @@
 export type OpsEventHandler<T> = (event: T) => void;
 
-export class OpsEventBus<Events extends Record<string, unknown>> {
+export class OpsEventBus<Events extends object> {
     private readonly handlers = new Map<string, Set<OpsEventHandler<unknown>>>();
 
     on<K extends keyof Events & string>(
