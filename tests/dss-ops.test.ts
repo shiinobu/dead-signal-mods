@@ -83,9 +83,10 @@ const replayQuestSource = readFileSync(
 describe("DSS operations application foundation", () => {
     it("registers DSS as the canonical desktop application", () => {
         assert.match(appSource, /@RegisterApp/);
+        assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/dead-signal\.html";/);
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
-        assert.match(appSource, /HTML\s*=\s*"dead-signal\.html"/);
+        assert.match(appSource, /HTML\s*=\s*appHTML/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1100,\s*height:\s*720\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
