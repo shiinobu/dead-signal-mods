@@ -1,97 +1,68 @@
 # DEAD SIGNAL — Repository Cleanup Audit
 
-Date: 2026-09-11
+Date: 2026-09-12
+Status: **CLEANUP EXECUTED — Q01 REVISED PATH ONLY**
 
-## Scope
-
-Audit the repository for source files that are no longer part of the production execution path, with particular attention to Phase 12 smoke/diagnostic harnesses, deferred Phase 13 Q14 implementation artifacts, and empty placeholder files.
-
-## Production entrypoint
-
-The production build uses:
+## Production Entry Point
 
 ```text
 src/index.ts
 ```
 
-as the esbuild entry point. The current bootstrap loads the shared runtime bridge only; no downstream quest is registered before the sequential campaign reaches it.
+The production bootstrap registers the Q01 quest and Q01 Skynet Logistics website, then initializes the canonical runtime persistence boundary.
 
-## Removed obsolete production-tree artifacts
-
-The following historical Phase 12 diagnostic files were removed from `src/infrastructure/hackhub/` because they are not production dependencies:
+## Active Production HackHub Sources
 
 ```text
-src/infrastructure/hackhub/dead-signal-smoke-quest.ts
-src/infrastructure/hackhub/dead-signal-nmap-smoke-quest.ts
-src/infrastructure/hackhub/ending-smoke-test.ts
-src/infrastructure/hackhub/phase12-runtime-regression.ts
-src/infrastructure/hackhub/runtime-services-smoke-test.ts
-src/infrastructure/hackhub/save-storage-smoke-test.ts
+src/infrastructure/hackhub/runtime.ts
+src/infrastructure/hackhub/save-storage-adapter.ts
+src/infrastructure/hackhub/q01-quest.ts
+src/infrastructure/hackhub/websites/q01-skynet-portal.ts
+src/infrastructure/hackhub/websites/q01-home.html
+src/infrastructure/hackhub/websites/q01-security.html
 ```
 
-These files remain recoverable through Git history and Phase 12 audit documentation.
+## Retained Development Tooling
 
-## Deferred Q14 implementation cleanup
-
-Q14 had previously been implemented early during Phase 13 exploration. After locking the sequential Q01 → Q16 execution strategy, those premature production artifacts were removed from the active source tree:
+The Q01 replay remains intentionally retained:
 
 ```text
-src/infrastructure/hackhub/q14-quest.ts
-src/content/q14.ts
-src/content/index.ts
-tests/phase13-step13.3-q14-source-backed-slice.test.ts
-```
-
-Reason:
-
-```text
-Q01–Q13 are not yet production-validated
-        ↓
-Q14 must not be registered/executed early
-        ↓
-remove deferred implementation from active source tree
-        ↓
-recover from Git history when Q14 becomes the active quest
-```
-
-This is an execution-order cleanup, not a loss of project history.
-
-## Current production HackHub source
-
-The active `src/infrastructure/hackhub/` tree now contains only:
-
-```text
-runtime.ts
-save-storage-adapter.ts
-```
-
-Quest-specific HackHub adapters are added only when their sequential quest gate is reached.
-
-## Current production permissions
-
-Because the deferred Q14 filesystem integration is no longer active, the current manifest uses the minimal permissions required by the shared production runtime:
-
-```json
-"permissions": ["events", "shell"]
-```
-
-Filesystem permission must be reintroduced only when a later active quest actually requires it and the requirement is source-backed.
-
-## Development tooling — keep
-
-```text
+dev/q01-replay-entry.ts
+dev/q01-replay-quest.ts
+scripts/build-q01-replay.ts
 scripts/dev-watch.ts
+docs/development-q01-replay.md
 ```
 
-The package `dev` script explicitly executes this watcher.
+The replay is the repeatable Q01 live-validation fixture and remains isolated from production story state.
 
-## Tests — keep
+## Removed Obsolete SSH Diagnostics
 
-The repository's automated test suite remains under `tests/`. Generic domain/application/integration tests remain part of the regression barrier for sequential quest implementation.
+The following are removed from the active repository because Q01 no longer uses native SSH as an acceptance mechanism:
 
-## Placeholder `.gitkeep` files
+```text
+dev/ssh-full-scaffold-smoke-entry.ts
+dev/ssh-full-scaffold-smoke-id.generated.ts
+dev/ssh-full-scaffold-smoke-quest.ts
+dev/ssh-native-random-smoke-id.generated.ts
+dev/ssh-native-random-smoke-test-entry.ts
+dev/ssh-native-random-smoke-test-quest.ts
+dev/ssh-native-smoke-config.generated.ts
+dev/ssh-native-smoke-id.generated.ts
+dev/ssh-native-smoke-test-entry.ts
+dev/ssh-native-smoke-test-quest.ts
+scripts/build-ssh-full-scaffold-smoke.ts
+scripts/build-ssh-native-random-smoke.ts
+scripts/build-ssh-native-smoke.ts
+docs/phase13-ssh-full-scaffold-smoke.md
+docs/phase13-ssh-native-smoke-test.md
+```
 
-The following are functionally redundant because their directories contain tracked source files:
+Their history remains recoverable through Git history; they are not part of the active implementation.
+
+## Placeholder Cleanup
+
+Redundant `.gitkeep` files are removed from directories that already contain tracked source:
 
 ```text
 src/application/.gitkeep
@@ -102,30 +73,51 @@ src/state/.gitkeep
 tests/.gitkeep
 ```
 
-They may be removed during a later housekeeping pass.
+The empty placeholder-only directories `src/debug/` and `src/presentation/` are also removed by deleting their `.gitkeep` entries. They will not exist in the Git tree until real source is added.
 
-The following remain as optional empty-directory placeholders:
+## Package Scripts
+
+The package retains:
 
 ```text
-src/debug/.gitkeep
-src/presentation/.gitkeep
+build
+build:replay:q01
+dev
+typecheck
+test
 ```
 
-## Historical distinction
+SSH-only smoke build scripts are removed.
 
-Removed source files are not equivalent to deleted history. Their implementations remain available in Git history and can be recovered when justified by the sequential implementation roadmap.
+## Client Rename
 
-Production source should contain only the currently active implementation path.
-
-## Audit conclusion
+All active Q01 implementation/replay/report validation references use:
 
 ```text
-Phase 12 smoke/regression harnesses removed from active source tree   ✅
-Deferred Q14 production artifacts removed from active source tree    ✅
-Current HackHub production tree contains only active adapters        ✅
-Production bootstrap no longer registers Q14                        ✅
-Current manifest permissions reduced to active requirements           ✅
-Development watcher retained                                         ✅
-Generic automated tests retained                                     ✅
-Redundant .gitkeep cleanup                                            🟡 OPTIONAL
+Skynet Logistics
+```
+
+`Meridian Logistics` is retained only where historical source documents need to describe the pre-change state. Active gameplay source and current Q01 validation documentation use the revised client name.
+
+## Production Permissions
+
+The manifest remains:
+
+```json
+"permissions": ["events", "mail", "network", "shell"]
+```
+
+These cover the active Q01 integration and existing runtime boundaries.
+
+## Cleanup Conclusion
+
+```text
+Obsolete SSH smoke tooling removed             ✅
+SSH build scripts removed                      ✅
+Q01 replay retained                            ✅
+Q01 Website adapter retained                   ✅
+Redundant .gitkeep placeholders removed        ✅
+Q01 active client renamed to Skynet Logistics  ✅
+Production Q01 remains isolated from replay    ✅
+No downstream Q02–Q16 activation               ✅
 ```

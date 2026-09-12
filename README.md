@@ -4,8 +4,6 @@ A story-driven HackHub mod built with the official `@hotbunny/hackhub-content-sd
 
 ## HackHub structure
 
-This repository follows the official HackHub Content SDK project structure while keeping the locked DEAD SIGNAL Phase 10 architecture inside `src/`.
-
 ```text
 .
 ├── src/
@@ -14,73 +12,124 @@ This repository follows the official HackHub Content SDK project structure while
 │   ├── domain/           # Canonical DEAD SIGNAL domain model and rules
 │   ├── state/            # Canonical runtime state ownership
 │   ├── application/      # Use cases and orchestration
-│   ├── infrastructure/   # Persistence and external adapters
-│   ├── presentation/     # Game/UI-facing adapters
-│   └── debug/            # Development and diagnostic tooling
+│   ├── infrastructure/   # Persistence, HackHub, and website adapters
+│   ├── presentation/     # Reserved UI/presentation boundary
+│   └── debug/            # Reserved development boundary
+├── dev/                  # Development-only replay fixtures
 ├── tests/                # Automated tests
-├── dist/                 # Generated HackHub mod package
+├── public/               # Static mod assets
 ├── manifest.json         # HackHub mod metadata
 ├── esbuild.config.ts     # HackHub SDK build configuration
 ├── package.json
 └── tsconfig.json
 ```
 
-The HackHub runtime entry point is `src/index.ts`. It uses the required `Bootstrap` + `@RegisterModPackage` contract. DEAD SIGNAL runtime state remains owned by the internal architecture rather than by the entry point.
+The production runtime entry point is `src/index.ts`. DEAD SIGNAL canonical state remains owned by the internal architecture rather than by the HackHub entry point.
 
 ## Requirements
 
 - Node.js 18+
-- npm (or another supported package manager)
+- npm
 - HackHub - Ultimate Hacker Simulator on Steam
 
 ## Development
 
-Install dependencies:
-
 ```bash
 npm install
-```
-
-Type-check the mod:
-
-```bash
 npm run typecheck
-```
-
-Run the automated test suite:
-
-```bash
 npm test
-```
-
-Build the distributable HackHub package:
-
-```bash
 npm run build
 ```
 
-The HackHub SDK build produces `dist/mod.js` and copies the manifest and supported assets into `dist/`.
+The HackHub SDK build produces the distributable `dist/` package.
 
-## Permissions
+## Q01 — THE CONTRACT
 
-The production manifest currently requests only the SDK permissions exercised by the production-facing integration: `events` and `shell`. Diagnostic Phase 12 harnesses may use additional SDK APIs such as `ui`, but those harnesses are not imported by the production bootstrap.
+Q01 is the first mission in the locked sequential campaign and keeps its five player-facing objectives:
 
-## Phase 12 integration audit
+```text
+Review audit scope
+Scan 203.0.113.42
+Identify exposed services
+Perform basic vulnerability checks
+Submit audit report
+```
 
-Phase 12 was validated in-game across quest/objective triggering, Terminal.Ping, Nmap command routing, SaveStorage, access grants, rewards, economy, ending resolution, and a full canonical-state regression. The diagnostic harnesses remain in `src/infrastructure/hackhub/` for repeatable testing but are intentionally excluded from the production bootstrap after Phase 12 lock.
+The current Q01 client is **Skynet Logistics**. The target remains `203.0.113.42`, the chapter is Jakarta, Adrian Cole is the primary contact, the completion flag is `dead_signal.q01.completed`, the cash reward is `$200`, and the maximum XP is `80`.
 
-Nmap integration uses the SDK's `Terminal.Command` quest trigger together with typed `Shell.addCommandData("nmap", ...)` response data. The `Terminal.NmapScan` event path is not part of the production contract because its runtime/type behavior was not reliable during Phase 12 validation.
+Expected service enumeration:
+
+```text
+22/tcp  OPEN  ssh
+80/tcp  OPEN  http
+443/tcp OPEN  https
+```
+
+Objective 04 no longer depends on native SSH. The revised gameplay uses the registered Skynet Logistics website:
+
+```text
+http://skynet-logistics.test/security
+https://skynet-logistics.test/security
+```
+
+Opening `/security` over HTTP or HTTPS after service identification produces the `Browser.Meta` interaction that completes the basic-vulnerability-assessment objective. The assessment remains non-exploitative.
+
+## Q01 Replay
+
+Use the maintained development replay for repeatable live testing:
+
+```bash
+npm run build:replay:q01
+```
+
+Install the complete `dist-replay/` package into `HackHub/mods/dead-signal-dev/` and restart HackHub. Each build receives a fresh development quest identity.
+
+Replay is isolated from production completion state and production rewards.
+
+Detailed validation instructions are in:
+
+```text
+docs/development-q01-replay.md
+docs/phase13-q01-live-validation.md
+docs/phase13-q01-final-lock.md
+```
+
+## Phase 13 Campaign
+
+The implementation campaign remains strictly sequential:
+
+```text
+Q01 → Q02 → Q03 → Q04 → Q05 → Q06 → Q07 → Q08
+→ Q09 → Q10 → Q11 → Q12 → Q13 → Q14 → Q15 → Q16
+```
+
+No downstream quest is activated before the preceding quest passes its live validation gate.
 
 ## Architecture contract
 
-The implementation continues to follow the locked Phase 10 decisions, including:
+The locked Phase 9–12 boundaries remain in force:
 
-- `StateStore` as the canonical root state owner
-- `FlagStore` as a typed facade over `StateStore.flags`
-- `ConditionNode` as the canonical condition representation
-- `EndingState` as the canonical ending state
-- `AccessService` as the capability/access-grant owner
-- `GameRuntime` owning `NarrativeStateService`, `EndingService`, `AccessService`, and `RewardService`
-- save/load without event replay
+- `StateStore` is the canonical root state owner.
+- `FlagStore` is the typed facade over `StateStore.flags`.
+- `ConditionNode` is the canonical condition representation.
+- `QuestService` owns quest lifecycle/orchestration.
+- `NarrativeStateService` owns narrative state.
+- `AccessService` owns capability/access grants.
+- `RewardService` owns XP rewards.
+- `EconomyService` owns cash/mission rewards.
+- `EndingService` owns ending state.
+- HackHub APIs remain infrastructure adapters and do not become canonical state owners.
 
-HackHub-specific APIs are adapters around this domain architecture; they do not replace its ownership boundaries.
+## Permissions
+
+The production manifest requests:
+
+```json
+"permissions": ["events", "mail", "network", "shell"]
+```
+
+Only permissions exercised by the active production integration are requested.
+
+## Cleanup Policy
+
+Development smoke tests that were created only to diagnose native SSH are not part of the active source tree. The maintained Q01 replay remains the supported repeatable validation tool.

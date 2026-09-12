@@ -1,32 +1,26 @@
 # DEAD SIGNAL — Development Q01 Replay
 
-Purpose: provide a repeatable in-game Q01 test loop without changing production quest state or production quest registration.
+Purpose: provide a repeatable in-game Q01 test loop without changing production quest state or production campaign progression.
 
 ## Production vs Development
 
-Production remains built with:
+Production is built with:
 
-```text
+```powershell
 npm run build
 ```
 
 The replay fixture is built separately with:
 
-```text
+```powershell
 npm run build:replay:q01
 ```
 
-The replay build is emitted to `dist-replay/` and its manifest is rewritten to the development mod id:
+The replay build is emitted to `dist-replay/` and uses the development mod id `dead-signal-dev`.
 
-```text
-dead-signal-dev
-```
-
-The production mod is not modified at runtime by the replay fixture.
+Replay remains intentionally isolated from the canonical `dead_signal.q01` completion flag and production rewards.
 
 ## Replay Package Layout
-
-A successful replay build must produce a complete HackHub mod package:
 
 ```text
 dist-replay/
@@ -36,64 +30,19 @@ dist-replay/
     └── adrian-cole.png
 ```
 
-The replay build script copies the source manifest and the static assets into the package and verifies that these required files exist before reporting success.
+## Fresh Replay Rule
 
-## Why the replay id changes
+Each replay build generates a fresh native quest identity so previously completed or partially completed replay state does not interfere with another test run.
 
-HackHub persists native quest progress by quest identity. A completed or partially completed Q01 cannot safely be reset by clearing only DEAD SIGNAL's own `SaveStorage`, because that would not guarantee that the native quest/objective state is reset.
-
-Each replay build therefore generates a unique quest identity:
-
-```text
-dead_signal.dev.q01.r<run>-<timestamp>
-```
-
-This guarantees a fresh native quest instance for every replay build while keeping the production quest id unchanged:
+The production quest id remains:
 
 ```text
 dead_signal.q01
 ```
 
-## Workflow
+## Revised Q01 Gameplay
 
-1. Pull the latest repository and install dependencies:
-
-```powershell
-git pull
-npm install
-```
-
-2. Build a fresh replay package:
-
-```powershell
-npm run build:replay:q01
-```
-
-3. Confirm the command reports the package contents:
-
-```text
-- mod.js
-- manifest.json
-- assets/adrian-cole.png
-```
-
-4. Remove/replace the local development mod folder:
-
-```text
-HackHub/mods/dead-signal-dev/
-```
-
-Copy the **complete contents** of `dist-replay/` into that folder.
-
-5. Restart HackHub.
-
-6. Open the development Q01 post:
-
-```text
-THE CONTRACT — DEV REPLAY
-```
-
-7. Run the Q01 sequence:
+The replay now follows the revised HTTP/HTTPS audit flow. Native SSH is no longer part of Q01.
 
 ```text
 Apply
@@ -102,25 +51,108 @@ Review audit scope
   ↓
 nmap 203.0.113.42
   ↓
-Confirm 22 / 80 / 443
+Confirm 22 / ssh, 80 / http, 443 / https
   ↓
-nmap 203.0.113.42 -sV
+Open the Skynet Logistics security review page
+  ↓
+Perform basic vulnerability checks
   ↓
 Submit the audit report
 ```
 
-`nmap -sV` is the currently validated in-game service/version scan used for the basic-assessment stage. The replay does not use `openssl`, `Open`, or the previously attempted custom `certcheck` command.
+## Workflow
 
-## Important
+1. Pull the latest repository and install dependencies.
 
-The replay fixture intentionally does not grant production XP/money and does not set:
-
-```text
-dead_signal.q01.completed
+```powershell
+git pull
+npm install
 ```
 
-This keeps development repetition isolated from the canonical campaign state.
+2. Build a fresh replay package.
 
-## Live Validation Goal
+```powershell
+npm run build:replay:q01
+```
 
-Use the replay fixture whenever Q01 needs another full in-game test after a code change. A replay build does not replace the final production Q01 validation; it only makes repeated validation cheap and deterministic.
+3. Remove/replace the local development mod folder:
+
+```text
+HackHub/mods/dead-signal-dev/
+```
+
+Copy the complete contents of `dist-replay/` into that folder.
+
+4. Restart HackHub.
+
+5. Open `THE CONTRACT — DEV REPLAY` and accept it.
+
+6. Review Adrian's audit mail and complete the objectives in order.
+
+### Objective 02
+
+Run:
+
+```bash
+nmap 203.0.113.42
+```
+
+Expected:
+
+```text
+22/tcp  OPEN  ssh
+80/tcp  OPEN  http
+443/tcp OPEN  https
+```
+
+### Objective 03
+
+Identify the three exposed services. Re-running Nmap must not complete Objective 04.
+
+### Objective 04
+
+Open either:
+
+```text
+http://skynet-logistics.test/security
+```
+
+or:
+
+```text
+https://skynet-logistics.test/security
+```
+
+The security review page displays the basic external-assessment findings. The quest completes Objective 04 from the matching `Browser.Meta` interaction only after Objective 03 is complete.
+
+### Objective 05
+
+Send the audit report containing:
+
+```text
+Target: Skynet Logistics
+Open Ports: 22, 80, 443
+
+No critical vulnerabilities identified.
+Further internal assessment is recommended.
+```
+
+## Development Isolation
+
+The replay fixture:
+
+- grants no production XP;
+- grants no production money;
+- does not set `dead_signal.q01.completed`;
+- does not register Q02–Q16;
+- does not import historical SSH smoke-test fixtures.
+
+## Current Replay Tooling
+
+The maintained replay tool is:
+
+```text
+scripts/build-q01-replay.ts
+```
+
+The old SSH-only diagnostic builders are intentionally removed after the Q01 methodology revision.
