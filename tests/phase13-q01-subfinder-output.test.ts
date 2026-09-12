@@ -38,15 +38,15 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         );
         assert.match(
             subfinderCommandSource,
-            /\[INF\] Enumerating subdomains for \$\{normalizedTarget\}/,
+            /\[INF\] Enumerating subdomains for \$\{target\}/,
         );
     });
 
-    it("probes native CommandTools.clear() instead of emitting unsupported ANSI control sequences", () => {
+    it("uses native CommandTools.clear() without emitting ANSI control sequences", () => {
         assert.match(subfinderCommandSource, /tools\.clear\(\);/);
         assert.match(
             subfinderCommandSource,
-            /tools\.sleep\(SPINNER_DELAY_MS\)/,
+            /await tools\.sleep\(SPINNER_DELAY_MS\)/,
         );
         assert.doesNotMatch(subfinderCommandSource, /\\u001B\[/);
         assert.doesNotMatch(subfinderCommandSource, /ANSI_CURSOR_UP/);
@@ -54,7 +54,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.doesNotMatch(subfinderCommandSource, /ANSI_CARRIAGE_RETURN/);
     });
 
-    it("uses the reference braille frame sequence and a slightly extended duration", () => {
+    it("uses the reference braille sequence and source-by-source progress timing", () => {
         assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
         assert.match(subfinderCommandSource, /"⠋"/);
         assert.match(subfinderCommandSource, /"⠙"/);
@@ -66,14 +66,50 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.match(subfinderCommandSource, /"⠧"/);
         assert.match(subfinderCommandSource, /"⠇"/);
         assert.match(subfinderCommandSource, /"⠏"/);
+        assert.match(subfinderCommandSource, /SOURCE_DURATION_MS = 1000/);
         assert.match(subfinderCommandSource, /SPINNER_DELAY_MS = 100/);
-        assert.match(subfinderCommandSource, /SPINNER_DURATION_MS = 5000/);
+        assert.match(
+            subfinderCommandSource,
+            /Sources:.*SOURCES\.length/,
+        );
     });
 
-    it("streams the deterministic Q01 result after the clear-based animation", () => {
+    it("defines deterministic simulated discovery sources with duplicate candidates", () => {
+        assert.match(subfinderCommandSource, /const SOURCES = \[/);
+        assert.match(subfinderCommandSource, /name: "crtsh"/);
+        assert.match(subfinderCommandSource, /name: "rapiddns"/);
+        assert.match(subfinderCommandSource, /name: "hackertarget"/);
+        assert.match(subfinderCommandSource, /name: "alienvault"/);
+        assert.match(subfinderCommandSource, /name: "urlscan"/);
+        assert.match(
+            subfinderCommandSource,
+            /Candidates: \$\{candidateCount\}/,
+        );
+        assert.match(subfinderCommandSource, /Unique:\s+\$\{uniqueCount\}/);
+    });
+
+    it("renders a live progress bar and active-source spinner", () => {
+        assert.match(subfinderCommandSource, /const formatProgressBar =/);
+        assert.match(subfinderCommandSource, /█/);
+        assert.match(subfinderCommandSource, /░/);
+        assert.match(
+            subfinderCommandSource,
+            /\[\$\{marker\}\] \$\{source\.name\.padEnd\(18, "\."\)\} \$\{suffix\}/,
+        );
+        assert.match(
+            subfinderCommandSource,
+            /Progress: \$\{formatProgressBar\(progress\)\} \$\{progress\}%/,
+        );
+    });
+
+    it("streams the canonical deterministic Q01 result after enumeration completes", () => {
         assert.match(
             subfinderCommandSource,
             /Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)/,
+        );
+        assert.match(
+            subfinderCommandSource,
+            /\[INF\] Enumeration completed/,
         );
         assert.match(
             subfinderCommandSource,
@@ -81,7 +117,7 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         );
         assert.match(
             subfinderCommandSource,
-            /\[INF\] Found \$\{subdomains\.length\} subdomains for \$\{normalizedTarget\} in \$\{elapsedMs\} milliseconds/,
+            /\[INF\] Found \$\{subdomains\.length\} unique subdomains for \$\{normalizedTarget\}/,
         );
     });
 
