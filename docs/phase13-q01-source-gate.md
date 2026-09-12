@@ -5,7 +5,7 @@ Status: **REVISED IMPLEMENTATION LOCK — LIVE VALIDATION PENDING**
 
 ## Source Authority
 
-Q01 remains `dead_signal.q01` and keeps the locked five-objective structure and Phase 8 reward allocation. The explicit project revision for this implementation changes the client name from `Meridian Logistics` to `Skynet Logistics` and replaces the unreliable SSH gameplay dependency with an HTTP/HTTPS web-surface inspection.
+Q01 remains `dead_signal.q01` and keeps the locked five-objective structure and Phase 8 reward allocation. The explicit project revision for this implementation changes the client name from `Meridian Logistics` to `Skynet Logistics`, replaces the unreliable SSH gameplay dependency with HTTPS web-surface inspection, and narrows the live service scope to HTTPS on port 443.
 
 The client-name change is an explicit change-control decision recorded by the project owner. It does not add a new character, flag, dependency, reward, or objective.
 
@@ -26,7 +26,7 @@ The client-name change is an explicit change-control decision recorded by the pr
 ## Locked Player Objectives
 
 1. `Review audit scope`
-2. `Scan 203.0.113.42`
+2. `Scan the ip target`
 3. `Identify exposed services`
 4. `Perform basic vulnerability checks`
 5. `Submit audit report`
@@ -41,37 +41,48 @@ q01.objective.04
 q01.objective.05
 ```
 
-## Expected Service Enumeration
+Objective 02 presents only the terminal command `nmap`; the target IP is supplied by the audit material rather than displayed in the objective command text.
+
+Objective 03 intentionally has no hint.
+
+## Revised Service Enumeration
 
 ```text
-22/tcp  OPEN  ssh
-80/tcp  OPEN  http
-443/tcp OPEN  https
+22/tcp  CLOSED  ssh
+80/tcp  CLOSED  http
+443/tcp OPEN    https
 ```
 
-The SSH service remains an observed exposed service and remains part of the report facts. It is no longer the required completion mechanism for Objective 04.
+Port 443/HTTPS is the only exposed gameplay service used by the revised Q01 flow. SSH and HTTP remain scan evidence as closed ports but are not interaction requirements.
 
 ## Revised Objective 04 Method
 
-Objective 04 is now satisfied by inspecting the authorized Skynet Logistics web audit surface:
+Objective 04 is satisfied by inspecting the authorized Skynet Logistics HTTPS audit surface:
 
 ```text
 Host:   skynet-logistics.test
 Path:   /security
-HTTP:   http://skynet-logistics.test/security
-HTTPS:  https://skynet-logistics.test/security
+URL:    https://skynet-logistics.test/security
 ```
 
-The HackHub adapter registers the web surface with `@RegisterWebsite` and listens to the documented `Browser.Meta` event. The objective completes only when the player opens the exact security-review path over HTTP or HTTPS after Objective 03 is complete.
+Player-facing hint:
+
+```text
+Inspect web service and review the security findings.
+```
+
+The HackHub adapter registers the web surface with `@RegisterWebsite` and listens to the documented `Browser.Meta` event. The objective completes only when the player opens the exact security-review path over HTTPS after Objective 03 is complete.
 
 No SSH command, SSH user, password, `Shell.addCommandData("ssh", ...)`, child SSH device, or `Terminal.SSH.Connected` event is required by Q01.
 
 ## Security-Assessment Semantics
 
-The web page is an evidence surface for a basic, non-exploitative external assessment. It records the already-locked facts:
+The web page is an evidence surface for a basic, non-exploitative external assessment. It records the revised facts:
 
 - target is `203.0.113.42`;
-- exposed services are 22/80/443;
+- 22/tcp is closed;
+- 80/tcp is closed;
+- 443/tcp is open and provides HTTPS;
 - no critical vulnerabilities were identified during the basic assessment;
 - further internal assessment is recommended.
 
@@ -79,14 +90,22 @@ Q01 still does not require exploitation, credential attacks, data extraction, or
 
 ## Report Contract
 
-The report is valid only when it contains:
+The report is valid only when the sent subject and plain-text body match:
 
 ```text
+Subject: Security Audit — Jakarta
+
 Target: Skynet Logistics
-Open Ports: 22, 80, 443
+Open Ports: 443
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
+```
+
+Canonical recipient:
+
+```text
+adrian.cole@deadsignal.lock
 ```
 
 ## XP Authority
@@ -112,4 +131,4 @@ Web interaction state is transient quest data owned by the HackHub quest instanc
 
 ## Production Lock Boundary
 
-This document locks the revised implementation method and client-name revision. **Production Q01 is not declared live-PASS or production-locked until the revised five-step scenario succeeds in a clean HackHub run and the result is recorded.**
+This document locks the revised implementation method, client-name revision, service scope, and email submission contract. **Production Q01 is not declared live-PASS until the revised five-step scenario succeeds in a clean HackHub run and the result is recorded.**
