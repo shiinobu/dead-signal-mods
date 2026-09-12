@@ -26,14 +26,14 @@ import type {
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
-    Title = "DEAD-SIGNAL";
+    Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = "./dead-signal.html";
+    HTML = "dead-signal.html";
     DefaultSize = { width: 1100, height: 720 };
     override Unlocked = true;
 
     override Store = {
-        title: "DEAD-SIGNAL",
+        title: "DSS",
         ratings: 0,
         description: "DSS // Dead Signal System — integrated investigation workspace.",
     };
