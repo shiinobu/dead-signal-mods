@@ -42,22 +42,22 @@ dead_signal.q01
 
 ## Revised Q01 Gameplay
 
-The replay now follows the revised HTTP/HTTPS audit flow. Native SSH is no longer part of Q01.
+The replay follows the revised HTTPS audit flow. Native SSH is no longer part of Q01.
 
 ```text
 Apply
   ↓
 Review audit scope
   ↓
-nmap 203.0.113.42
+nmap
   ↓
-Confirm 22 / ssh, 80 / http, 443 / https
+Identify exposed services
   ↓
-Open the Skynet Logistics security review page
+Open https://skynet-logistics.test/security
   ↓
 Perform basic vulnerability checks
   ↓
-Submit the audit report
+Submit the canonical audit report
 ```
 
 ## Workflow
@@ -91,33 +91,29 @@ Copy the complete contents of `dist-replay/` into that folder.
 
 ### Objective 02
 
-Run:
+Run the displayed terminal action:
 
 ```bash
-nmap 203.0.113.42
+nmap
 ```
 
-Expected:
+The target IP is provided in Adrian's audit material rather than in the objective text. The replay also accepts `nmap 203.0.113.42` for compatibility with the current terminal runtime.
+
+Expected service state:
 
 ```text
-22/tcp  OPEN  ssh
-80/tcp  OPEN  http
-443/tcp OPEN  https
+22/tcp  CLOSED  ssh
+80/tcp  CLOSED  http
+443/tcp OPEN    https
 ```
 
 ### Objective 03
 
-Identify the three exposed services. Re-running Nmap must not complete Objective 04.
+Identify the exposed HTTPS service on port 443. There is intentionally no objective hint.
 
 ### Objective 04
 
-Open either:
-
-```text
-http://skynet-logistics.test/security
-```
-
-or:
+Open:
 
 ```text
 https://skynet-logistics.test/security
@@ -125,17 +121,24 @@ https://skynet-logistics.test/security
 
 The security review page displays the basic external-assessment findings. The quest completes Objective 04 from the matching `Browser.Meta` interaction only after Objective 03 is complete.
 
+HTTP is not accepted for Objective 04.
+
 ### Objective 05
 
-Send the audit report containing:
+Send the canonical audit report:
 
 ```text
+To: adrian.cole@deadsignal.lock
+Subject: Security Audit — Jakarta
+
 Target: Skynet Logistics
-Open Ports: 22, 80, 443
+Open Ports: 443
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
+
+Objective 05 completes when the sent subject and plain-text body match the canonical report contract.
 
 ## Development Isolation
 
