@@ -61,6 +61,7 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
         const securityWebsite = new Q01SkynetLogisticsSecurityWebsite();
         const securityPage = securityWebsite.Pages[0];
 
+        assert.ok(securityPage);
         assert.match(securityPage.html, /SECURITY REVIEW/);
         assert.match(securityPage.html, /Skynet Logistics/);
         assert.equal(securityWebsite.Host, Q01_WEB_AUDIT_HOST);
@@ -79,6 +80,8 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
 
         for (const website of forbiddenWebsites) {
             const page = website.Pages[0];
+
+            assert.ok(page);
             assert.match(page.html, /403/);
             assert.match(page.html, /FORBIDDEN/);
             assert.doesNotMatch(page.html, /SECURITY REVIEW/);
@@ -89,6 +92,7 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
         const website = new Q01SkynetLogisticsWebsite();
         const homePage = website.Pages[0];
 
+        assert.ok(homePage);
         assert.doesNotMatch(homePage.html, /security\.skynet-logistics\.idx/);
         assert.doesNotMatch(homePage.html, /href=["']\/security["']/);
         assert.match(homePage.html, /Skynet Logistics/);
