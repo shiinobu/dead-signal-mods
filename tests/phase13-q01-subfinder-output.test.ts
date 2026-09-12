@@ -17,34 +17,37 @@ const subfinderCommandSource = readFileSync(
 );
 
 describe("Phase 13 Q01 — subfinder presentation", () => {
-    it("keeps the command visually aligned with ProjectDiscovery subfinder output", () => {
+    it("uses the current ProjectDiscovery banner and attribution", () => {
+        assert.match(subfinderCommandSource, /SUBFINDER_BANNER = \[/);
+        assert.match(subfinderCommandSource, /__    _____           __/);
+        assert.match(subfinderCommandSource, /projectdiscovery\.io/);
+        assert.match(subfinderCommandSource, /SUBFINDER_VERSION = \"v2\.16\.0\"/);
+    });
+
+    it("matches the upstream enumeration logging sequence", () => {
         assert.match(
             subfinderCommandSource,
-            /tools\.println\(\"                   __    _____           __/, 
-        );
-        assert.match(
-            subfinderCommandSource,
-            /tools\.println\(\"\\tprojectdiscovery\.io\"\)/,
-        );
-        assert.match(
-            subfinderCommandSource,
-            /Current subfinder version v2\.15\.0/,
+            /\[INF\] Current subfinder version \$\{SUBFINDER_VERSION\}/,
         );
         assert.match(
             subfinderCommandSource,
             /\[INF\] Enumerating subdomains for \$\{normalizedTarget\}/,
         );
+        assert.match(
+            subfinderCommandSource,
+            /\[INF\] Found \$\{Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)\.length\} subdomains for \$\{normalizedTarget\} in \$\{elapsedMs\} milliseconds/,
+        );
     });
 
-    it("keeps the Q01 result deterministic after the presentation banner", () => {
-        const resultIndex = subfinderCommandSource.indexOf(
-            'Q01_SUBFINDER_RESULT.split("\\n")',
+    it("streams the deterministic Q01 result instead of using an external enumerator", () => {
+        assert.match(subfinderCommandSource, /RESULT_DELAY_MS = 90/);
+        assert.match(
+            subfinderCommandSource,
+            /await sleep\(RESULT_DELAY_MS\);[\s\S]*tools\.println\(subdomain\)/,
         );
-
-        assert.notEqual(resultIndex, -1);
-        assert.ok(
-            subfinderCommandSource.indexOf("tools.println(subdomain)", resultIndex) >
-                resultIndex,
+        assert.match(
+            subfinderCommandSource,
+            /Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)/,
         );
     });
 
