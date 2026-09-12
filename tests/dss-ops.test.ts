@@ -36,7 +36,7 @@ const appHtml = readFileSync(
     resolve(
         fileURLToPath(
             new URL(
-                "../src/infrastructure/hackhub/apps/dead-signal.html",
+                "../public/dead-signal.html",
                 import.meta.url,
             ),
         ),
