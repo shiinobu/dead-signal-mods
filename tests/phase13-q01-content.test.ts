@@ -5,19 +5,26 @@ import {
     Q01_ADRIAN_EMAIL,
     Q01_CLIENT_NAME,
     Q01_FINAL_STATE_FLAG,
+    Q01_LYNX_INPUT_IP,
+    Q01_LYNX_INPUT_URL,
     Q01_OBJECTIVE_IDS,
     Q01_REPORT_BODY,
     Q01_REPORT_BODY_TEMPLATE,
     Q01_REPORT_RECIPIENT,
     Q01_REPORT_SUBJECT,
     Q01_REWARDS,
+    Q01_SUBFINDER_INPUT,
+    Q01_SUBFINDER_RESULT,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
-    Q01_WEB_AUDIT_PATH,
+    Q01_WEB_AUDIT_HOST,
     Q01_WEB_AUDIT_URL,
+    Q01_WEB_FORBIDDEN_HOSTS,
     Q01_WEB_HOST,
+    Q01_WEB_HOME_HOST,
     Q01_WEB_HOME_URL,
     Q01_WEB_HTTPS_URL,
+    Q01_WEB_SUBDOMAINS,
 } from "../src/content/index.js";
 
 import { ConditionEvaluator } from "../src/domain/shared/index.js";
@@ -32,7 +39,7 @@ import {
 import { QuestService } from "../src/application/index.js";
 
 describe("Phase 13 Q01 — THE CONTRACT", () => {
-    it("matches the revised quest identity, client, target, and domain", () => {
+    it("matches the revised quest identity, client, target, and apex domain", () => {
         assert.equal(Q01_THE_CONTRACT.id, "dead_signal.q01");
         assert.equal(Q01_THE_CONTRACT.title, "THE CONTRACT");
         assert.equal(Q01_CLIENT_NAME, "Skynet Logistics");
@@ -40,13 +47,35 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_WEB_HOST, "skynet-logistics.idx");
     });
 
-    it("defines the public HTTPS home and security-review surface", () => {
-        assert.equal(Q01_WEB_HOME_URL, "https://skynet-logistics.idx/");
+    it("defines the canonical public and audit subdomains", () => {
+        assert.equal(Q01_WEB_HOME_HOST, "www.skynet-logistics.idx");
+        assert.equal(Q01_WEB_AUDIT_HOST, "security.skynet-logistics.idx");
+        assert.deepEqual(Q01_WEB_FORBIDDEN_HOSTS, [
+            "portal.skynet-logistics.idx",
+            "status.skynet-logistics.idx",
+        ]);
+        assert.deepEqual(Q01_WEB_SUBDOMAINS, [
+            "www.skynet-logistics.idx",
+            "portal.skynet-logistics.idx",
+            "status.skynet-logistics.idx",
+            "security.skynet-logistics.idx",
+        ]);
+        assert.equal(Q01_WEB_SUBDOMAINS.length, 4);
+        assert.equal(Q01_WEB_HOME_URL, "https://www.skynet-logistics.idx/");
         assert.equal(Q01_WEB_HTTPS_URL, Q01_WEB_HOME_URL);
-        assert.equal(Q01_WEB_AUDIT_PATH, "/security");
+        assert.equal(Q01_WEB_AUDIT_URL, "https://security.skynet-logistics.idx/");
+    });
+
+    it("defines the deterministic lynx and subfinder reconnaissance contract", () => {
+        assert.equal(Q01_LYNX_INPUT_IP, "203.0.113.42");
         assert.equal(
-            Q01_WEB_AUDIT_URL,
-            "https://skynet-logistics.idx/security",
+            Q01_LYNX_INPUT_URL,
+            "https://203.0.113.42/",
+        );
+        assert.equal(Q01_SUBFINDER_INPUT, "-d skynet-logistics.idx");
+        assert.equal(
+            Q01_SUBFINDER_RESULT,
+            "portal.skynet-logistics.idx\nsecurity.skynet-logistics.idx\nstatus.skynet-logistics.idx\nwww.skynet-logistics.idx",
         );
     });
 
