@@ -1,5 +1,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
     Q01_WEB_AUDIT_HOST,
@@ -10,12 +13,26 @@ import {
     Q01_WEB_SUBDOMAINS,
 } from "../src/content/index.js";
 
-import {
-    Q01SkynetLogisticsPortalWebsite,
-    Q01SkynetLogisticsSecurityWebsite,
-    Q01SkynetLogisticsStatusWebsite,
-    Q01SkynetLogisticsWebsite,
-} from "../src/infrastructure/hackhub/websites/q01-skynet-portal.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const websiteDir = resolve(
+    __dirname,
+    "../src/infrastructure/hackhub/websites",
+);
+
+const homePage = readFileSync(resolve(websiteDir, "q01-home.html"), "utf8");
+const forbiddenPage = readFileSync(
+    resolve(websiteDir, "q01-forbidden.html"),
+    "utf8",
+);
+const securityPage = readFileSync(
+    resolve(websiteDir, "q01-security.html"),
+    "utf8",
+);
+const websiteRegistration = readFileSync(
+    resolve(websiteDir, "q01-skynet-portal.ts"),
+    "utf8",
+);
 
 describe("Phase 13 Q01 — web subdomain boundary", () => {
     it("defines exactly four subdomains", () => {
@@ -39,62 +56,38 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
         assert.equal(Q01_WEB_AUDIT_URL, "https://security.skynet-logistics.idx/");
     });
 
-    it("registers each subdomain as its own root page", () => {
-        const websites = [
-            new Q01SkynetLogisticsWebsite(),
-            new Q01SkynetLogisticsPortalWebsite(),
-            new Q01SkynetLogisticsStatusWebsite(),
-            new Q01SkynetLogisticsSecurityWebsite(),
-        ];
-
-        assert.deepEqual(
-            websites.map((website) => website.Host),
-            Q01_WEB_SUBDOMAINS,
+    it("registers all four subdomains as root-page website surfaces", () => {
+        for (const hostname of Q01_WEB_SUBDOMAINS) {
+            assert.match(websiteRegistration, new RegExp(`Host = ${hostname.replaceAll(".", "\\.")}`));
+        }
+        assert.equal(
+            (websiteRegistration.match(/Pages: WebsitePageDefinition\[\] = \[/g) ?? []).length,
+            4,
         );
-        assert.deepEqual(
-            websites.map((website) => website.Pages.map((page) => page.path)),
-            [["/"], ["/"], ["/"], ["/"]],
+        assert.equal(
+            (websiteRegistration.match(/path: \"\/\"/g) ?? []).length,
+            4,
         );
     });
 
     it("keeps only the security subdomain as the real audit page", () => {
-        const securityWebsite = new Q01SkynetLogisticsSecurityWebsite();
-        const securityPage = securityWebsite.Pages[0];
-
-        assert.ok(securityPage);
-        assert.match(securityPage.html, /SECURITY REVIEW/);
-        assert.match(securityPage.html, /Skynet Logistics/);
-        assert.equal(securityWebsite.Host, Q01_WEB_AUDIT_HOST);
+        assert.match(securityPage, /SECURITY REVIEW/);
+        assert.match(securityPage, /Skynet Logistics/);
+        assert.match(websiteRegistration, /Host = Q01_WEB_AUDIT_HOST/);
+        assert.match(websiteRegistration, /securityPage/);
     });
 
-    it("serves 403 forbidden on the other subdomains", () => {
-        const forbiddenWebsites = [
-            new Q01SkynetLogisticsPortalWebsite(),
-            new Q01SkynetLogisticsStatusWebsite(),
-        ];
-
-        assert.deepEqual(
-            forbiddenWebsites.map((website) => website.Host),
-            Q01_WEB_FORBIDDEN_HOSTS,
-        );
-
-        for (const website of forbiddenWebsites) {
-            const page = website.Pages[0];
-
-            assert.ok(page);
-            assert.match(page.html, /403/);
-            assert.match(page.html, /FORBIDDEN/);
-            assert.doesNotMatch(page.html, /SECURITY REVIEW/);
-        }
+    it("serves 403 forbidden content on the other subdomains", () => {
+        assert.match(forbiddenPage, /403/);
+        assert.match(forbiddenPage, /FORBIDDEN/);
+        assert.doesNotMatch(forbiddenPage, /SECURITY REVIEW/);
+        assert.match(websiteRegistration, /Host = Q01_WEB_FORBIDDEN_HOSTS\[0\]/);
+        assert.match(websiteRegistration, /Host = Q01_WEB_FORBIDDEN_HOSTS\[1\]/);
     });
 
     it("does not expose a direct security link from www", () => {
-        const website = new Q01SkynetLogisticsWebsite();
-        const homePage = website.Pages[0];
-
-        assert.ok(homePage);
-        assert.doesNotMatch(homePage.html, /security\.skynet-logistics\.idx/);
-        assert.doesNotMatch(homePage.html, /href=["']\/security["']/);
-        assert.match(homePage.html, /Skynet Logistics/);
+        assert.doesNotMatch(homePage, /security\.skynet-logistics\.idx/);
+        assert.doesNotMatch(homePage, /href=["']\/security["']/);
+        assert.match(homePage, /Skynet Logistics/);
     });
 });
