@@ -122,11 +122,8 @@ const DSS_DIRECT_INTERACTION_PATCH = `
 
   const installReconScroller=()=>{
     const view=$('view-recon');
-    if(!view||view.querySelector(':scope > .dss-recon-scroll'))return;
-    const scroller=document.createElement('div');
-    scroller.className='dss-recon-scroll';
-    while(view.firstChild)scroller.appendChild(view.firstChild);
-    view.appendChild(scroller);
+    if(!view)return;
+    view.dataset.dssReconScrollReady='true';
   };
 
   let reconProjectionTimer=setInterval(projectReconSession,100);
@@ -239,27 +236,33 @@ const DSS_DIRECT_INTERACTION_PATCH = `
 
 const DSS_RECON_SCROLL_STYLE = `
 <style>
+.content{
+  position:relative;
+}
 .view-recon.active{
   display:block;
-  overflow:hidden;
-  padding-right:0;
-  padding-bottom:0;
-}
-.view-recon.active > .dss-recon-scroll{
-  width:100%;
-  height:100%;
+  position:absolute;
+  top:26px;
+  right:26px;
+  bottom:16px;
+  left:26px;
+  width:auto;
+  height:auto;
   min-height:0;
+  max-height:none;
   overflow-y:scroll;
   overflow-x:hidden;
+  padding:0 10px 24px 0;
   box-sizing:border-box;
-  padding-right:10px;
-  padding-bottom:24px;
   scrollbar-gutter:stable;
 }
-.view-recon.active > .dss-recon-scroll::-webkit-scrollbar{width:10px}
-.view-recon.active > .dss-recon-scroll::-webkit-scrollbar-track{background:#061015}
-.view-recon.active > .dss-recon-scroll::-webkit-scrollbar-thumb{background:#18343d;border-radius:8px}
-.view-recon.active > .dss-recon-scroll{scrollbar-width:thin;scrollbar-color:#18343d #061015}
+.view-recon.active > .dss-recon-scroll{
+  display:contents;
+}
+.view-recon.active::-webkit-scrollbar{width:10px}
+.view-recon.active::-webkit-scrollbar-track{background:#061015}
+.view-recon.active::-webkit-scrollbar-thumb{background:#18343d;border-radius:8px}
+.view-recon.active{scrollbar-width:thin;scrollbar-color:#18343d #061015}
 </style>`;
 
 const dssHTML = appHTML.includes('</body>')
