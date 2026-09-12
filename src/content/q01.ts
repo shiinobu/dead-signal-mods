@@ -5,13 +5,29 @@ import { ADRIAN_COLE } from "./characters.js";
 
 export const Q01_CLIENT_NAME = "Skynet Logistics";
 export const Q01_TARGET_IP = "203.0.113.42";
-export const Q01_WEB_HOST = "skynet-logistics.test";
+export const Q01_WEB_HOST = "skynet-logistics.idx";
 export const Q01_WEB_AUDIT_PATH = "/security";
-export const Q01_WEB_HTTPS_URL = `https://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
+export const Q01_WEB_HOME_URL = `https://${Q01_WEB_HOST}/`;
+export const Q01_WEB_AUDIT_URL = `https://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
+
+// Kept as the player-facing HTTPS surface constant for backwards-compatible imports.
+export const Q01_WEB_HTTPS_URL = Q01_WEB_HOME_URL;
 
 export const Q01_ADRIAN_EMAIL = ADRIAN_COLE.email;
 export const Q01_REPORT_RECIPIENT = Q01_ADRIAN_EMAIL;
 export const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
+
+// This is the template shown to the player. Quest validation uses the resolved
+// canonical values separately so the player must discover and fill them in.
+export const Q01_REPORT_BODY_TEMPLATE = [
+    "Target: <COMPANY>",
+    "Open Ports: <PORTS>",
+    "",
+    "No critical vulnerabilities identified.",
+    "Further internal assessment is recommended.",
+].join("\n");
+
+// Canonical resolved submission body used only by the quest validator.
 export const Q01_REPORT_BODY = [
     `Target: ${Q01_CLIENT_NAME}`,
     "Open Ports: 443",
