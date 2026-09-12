@@ -86,7 +86,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/dead-signal\.html";/);
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
-        assert.match(appSource, /HTML\s*=\s*appHTML/);
+        assert.match(appSource, /HTML\s*=\s*(?:appHTML|dssHTML)/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1220,\s*height:\s*800\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
         assert.match(appSource, /override\s+Exports\s*=/);
@@ -287,5 +287,13 @@ describe("DSS operations application foundation", () => {
         assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.sourceCompleted/);
         assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.hostDiscovered/);
         assert.match(commandSource, /Events\.emit\(DSS_RECON_EVENTS\.completed/);
+    });
+
+    it("locks the app HTML compatibility patch to the known navigation defect", () => {
+        assert.match(appSource, /const brokenShowImplementation\s*=\s*"const show=id=>/);
+        assert.match(appSource, /const fixedShowImplementation\s*=\s*"const show=id=>/);
+        assert.match(appSource, /appHTML\.includes\(brokenShowImplementation\)/);
+        assert.match(appSource, /const dssHTML = appHTML\.replace\(/);
+        assert.match(appSource, /HTML\s*=\s*dssHTML/);
     });
 });
