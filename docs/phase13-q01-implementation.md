@@ -1,7 +1,7 @@
 # DEAD SIGNAL — Q01 Revised Implementation
 
 Date: 2026-09-12
-Status: **IMPLEMENTED — REVISED METHOD, LIVE VALIDATION PENDING**
+Status: **IMPLEMENTED — LIVE VALIDATION PENDING**
 
 ## Identity
 
@@ -30,11 +30,11 @@ Accept THE CONTRACT
         ↓
 Review audit scope
         ↓
-Run nmap 203.0.113.42
+Scan the ip target
         ↓
-Confirm 22/ssh, 80/http, 443/https
+Identify exposed services
         ↓
-Inspect Skynet Logistics web security surface
+Open Skynet Logistics web security surface over HTTPS
         ↓
 Perform basic vulnerability checks
         ↓
@@ -49,53 +49,89 @@ Q02 is the next campaign target
 
 ## Objectives
 
-The five locked player-facing names remain exactly:
+The five locked player-facing objectives remain:
 
 ```text
 01 Review audit scope
-02 Scan 203.0.113.42
+02 Scan the ip target
 03 Identify exposed services
 04 Perform basic vulnerability checks
 05 Submit audit report
 ```
 
+Objective 02 presents only the terminal action `nmap`; the target IP is not embedded in the objective text.
+
+Objective 03 has no hint.
+
+Objective 04 uses the text:
+
+```text
+Inspect web service and review the security findings.
+```
+
+## Service Scope
+
+Q01 now focuses on the HTTPS service only:
+
+```text
+22/tcp  CLOSED  ssh
+80/tcp  CLOSED  http
+443/tcp OPEN    https
+```
+
+The closed SSH and HTTP ports remain part of the scan evidence but are not gameplay requirements.
+
 ## Objective 04 — Revised Gameplay
 
-The former SSH verification step is removed from the critical path because live native SSH testing did not provide a reliable completion path in the current HackHub environment.
+The former SSH verification step is removed from the critical path.
 
-The replacement uses the documented Website + Browser.Meta surface:
+The canonical implementation method is:
+
+```text
+Identify exposed services
+        ↓
+Open Skynet Logistics security surface
+        ↓
+HTTPS Browser.Meta interaction
+        ↓
+Basic vulnerability assessment complete
+```
+
+Required web surface:
 
 ```text
 Host:   skynet-logistics.test
 Path:   /security
-HTTP:   http://skynet-logistics.test/security
-HTTPS:  https://skynet-logistics.test/security
+URL:    https://skynet-logistics.test/security
 ```
 
-The web page displays the external assessment findings without requiring exploitation:
+Objective 04 completes only after Objective 03 is complete and `Browser.Meta` reports:
 
 ```text
-22/tcp — SSH
-80/tcp — HTTP
-443/tcp — HTTPS
-
-No critical vulnerabilities identified.
-Further internal assessment is recommended.
+protocol = https:
+hostname = skynet-logistics.test
+pathname = /security
 ```
-
-Objective 04 completes only after Objective 03 is complete and the player opens `/security` for the Skynet Logistics host over HTTP or HTTPS.
 
 ## Technical Interaction
 
 ### Nmap
 
-Q01 keeps the validated Phase 12 terminal path:
+The objective exposes only:
 
-```bash
-nmap 203.0.113.42
+```text
+nmap
 ```
 
-The quest registers deterministic Nmap response data with `Shell.addCommandData("nmap", ...)` and listens for `Terminal.Command`. Repeating the scan never completes Objective 04.
+The player must discover the target from the audit material and run the scan against the authorized target. The replay supports both the bare `nmap` interaction and the explicit target form for compatibility with the current terminal runtime.
+
+The expected scan evidence is:
+
+```text
+22/tcp  CLOSED  ssh
+80/tcp  CLOSED  http
+443/tcp OPEN    https
+```
 
 ### Network
 
@@ -103,10 +139,10 @@ At quest start the adapter provisions one router target:
 
 ```text
 203.0.113.42
-├── 22 / ssh
-├── 80 / http
-└── 443 / https
-    domain: skynet-logistics.test
+├── 22 / ssh   CLOSED
+├── 80 / http  CLOSED
+└── 443 / https OPEN
+domain: skynet-logistics.test
 ```
 
 No child device, SSH account, SSH response data, or `Network.openPort()` call is required by the revised Q01 method.
@@ -120,10 +156,10 @@ SiteName: Skynet Logistics
 Host:     skynet-logistics.test
 Pages:
   /          operations portal
-  /security  external security review
+  /security  external HTTPS security review
 ```
 
-The website implementation is an infrastructure adapter and does not own canonical DEAD SIGNAL state.
+The security page reports the closed SSH/HTTP services, the open HTTPS service, and the basic assessment finding.
 
 ### Browser Event
 
@@ -136,24 +172,29 @@ Browser.Meta
 and accepts only:
 
 ```text
-protocol = http: OR https:
+protocol = https:
 hostname = skynet-logistics.test
 pathname = /security
 ```
 
-This makes the gameplay deterministic without relying on the unreliable native SSH transport.
+This keeps Objective 04 deterministic without relying on the unreliable native SSH transport.
 
-## Report
+## Report Submission
 
-The final report must contain:
+The final report contract is canonical and non-random:
 
 ```text
+To:      adrian.cole@deadsignal.lock
+Subject: Security Audit — Jakarta
+
 Target: Skynet Logistics
-Open Ports: 22, 80, 443
+Open Ports: 443
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
+
+Objective 05 completes only when the sent email subject and plain-text body match this canonical report contract. The player should use the report text supplied in Adrian's email rather than retyping or inventing the content.
 
 ## Rewards
 
@@ -199,15 +240,19 @@ Clean Q01 run
         ↓
 Accept contract
         ↓
-Nmap once
+Review email and target IP
         ↓
-Verify services
+Run nmap
         ↓
-Open /security over HTTP or HTTPS
+Verify 22/ssh CLOSED, 80/http CLOSED, 443/https OPEN
+        ↓
+Open https://skynet-logistics.test/security
         ↓
 Verify Objective 04 completes
         ↓
-Submit correct Skynet Logistics report
+Send exact Security Audit — Jakarta subject/body
+        ↓
+Verify Objective 05 completes
         ↓
 Verify completion flag + $200 + 80 XP
         ↓
