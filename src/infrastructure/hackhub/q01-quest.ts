@@ -59,8 +59,8 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-// Keep the declared shape compatible with the HackHub SDK while accounting for
-// the observed in-game Lynx renderer, which renders address as a scalar value.
+// HackHub's LynxData exposes array-valued address/ips fields. Keep the actual
+// runtime value as an array so Lynx renders the URL as one address entry.
 interface Q01LynxResult {
     readonly ips: string[];
     readonly address: string[];
@@ -74,10 +74,7 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
 
 const Q01_LYNX_RESULT: Q01LynxResult = {
     ips: [Q01_TARGET_IP],
-    // HackHub 0.21.0 declares address as string[], but the observed Lynx
-    // renderer treats it as a scalar string. Preserve the SDK type contract
-    // at compile time while supplying the runtime shape that renders correctly.
-    address: Q01_WEB_HOME_URL as unknown as string[],
+    address: [Q01_WEB_HOME_URL],
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -463,21 +460,11 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return false;
         }
 
-        if (!("address" in result)) {
+        if (!("address" in result) || !Array.isArray(result.address)) {
             return false;
         }
 
-        const address: unknown = result.address;
-
-        if (address === Q01_WEB_HOME_URL) {
-            if (!("ips" in result) || !Array.isArray(result.ips)) {
-                return false;
-            }
-
-            return result.ips.includes(Q01_TARGET_IP);
-        }
-
-        if (!Array.isArray(address) || !address.includes(Q01_WEB_HOME_URL)) {
+        if (!result.address.includes(Q01_WEB_HOME_URL)) {
             return false;
         }
 
