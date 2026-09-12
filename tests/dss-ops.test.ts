@@ -102,7 +102,9 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /DSS_RECON_EVENTS\.sourceCompleted/);
         assert.match(appSource, /DSS_RECON_EVENTS\.hostDiscovered/);
         assert.match(appSource, /DSS_RECON_EVENTS\.completed/);
-        assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*executeCommand/);
+        assert.match(appSource, /Events\.emit\(DSS_COMMAND_EVENTS\.result/);
+        assert.match(appSource, /startRecon:\s*\(target: string\)/);
+        assert.match(appSource, /executeCommand:\s*\(commandLine: string\)/);
     });
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
@@ -310,8 +312,8 @@ describe("DSS operations application foundation", () => {
     it("uses the DSS exported command entrypoint for desktop command execution", () => {
         assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*startRecon/);
         assert.match(appSource, /override\s+Exports\s*=\s*\{[\s\S]*executeCommand/);
-        assert.match(appSource, /startRecon:\s*\(target: string\).*executeDssCommand/);
-        assert.match(appSource, /executeCommand:\s*\(commandLine: string\).*executeDssCommand/);
+        assert.match(appSource, /startRecon:\s*\(target: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand\(\`recon -d \$\{target\}\`\)/);
+        assert.match(appSource, /executeCommand:\s*\(commandLine: string\)\s*:\s*Promise<boolean>\s*=>\s*executeDssCommand\(commandLine\)/);
         assert.doesNotMatch(appSource, /Events\.on\(\s*DSS_COMMAND_EVENTS\.request/);
         assert.doesNotMatch(appSource, /throw new Error\(/);
     });
