@@ -74,6 +74,15 @@ const replayEntrySource = readFileSync(
     "utf8",
 );
 
+const replayQuestSource = readFileSync(
+    resolve(
+        fileURLToPath(
+            new URL("../dev/q01-replay-quest.ts", import.meta.url),
+        ),
+    ),
+    "utf8",
+);
+
 describe("DSS operations application foundation", () => {
     it("registers DSS as the canonical desktop application", () => {
         assert.match(appSource, /@RegisterApp/);
@@ -118,6 +127,13 @@ describe("DSS operations application foundation", () => {
             replayEntrySource,
             /import "\.\.\/src\/infrastructure\/hackhub\/apps\/dead-signal\.js";/,
         );
+    });
+
+    it("keeps the Q01 replay wired to the shared recon command", () => {
+        assert.match(replayQuestSource, /data\.command === "recon"/);
+        assert.doesNotMatch(replayQuestSource, /data\.command === "subfinder"/);
+        assert.match(replayQuestSource, /normalizeReconTarget/);
+        assert.match(replayQuestSource, /getReconTarget/);
     });
 
     it("defines stable DSS recon event names", () => {
