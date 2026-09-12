@@ -4,9 +4,7 @@ import { dirname, resolve } from "node:path";
 
 const outfile = resolve("dist/mod.js");
 const distDir = dirname(outfile);
-const dssAppSource = resolve(
-    "src/infrastructure/hackhub/apps/dead-signal.html",
-);
+const dssAppSource = resolve("src/dead-signal.html");
 const dssAppOutput = resolve(distDir, "dead-signal.html");
 
 await buildMod({
