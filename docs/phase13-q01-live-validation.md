@@ -10,7 +10,7 @@ Use the development replay package for repeatable Q01 testing:
 npm run build:replay:q01
 ```
 
-Install `dist-replay/` into `HackHub/mods/dead-signal-dev/` and restart HackHub.
+Install the complete `dist-replay/` contents into `HackHub/mods/dead-signal-dev/` and restart HackHub.
 
 Use a fresh replay build after each code change. Each replay build receives a new quest identity.
 
@@ -84,20 +84,27 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Runtime Interaction Detail
 
-Q01 Nmap is deterministic through quest-scoped `Shell.addCommandData()`. SSH is different: it is an engine-owned terminal interaction and therefore must use a real Q01 virtual network target.
+Q01 Nmap is deterministic through quest-scoped `Shell.addCommandData()`. SSH is engine-owned and therefore uses a real Q01 virtual network target.
 
-The replay creates this target when the quest starts:
+The target topology is:
 
 ```text
 203.0.113.42
 └── Router
-    ├── 22 / ssh
-    ├── 80 / http
-    ├── 443 / https
-    └── audit user
+    ├── 22 / ssh  ────────────────┐
+    ├── 80 / http                  │
+    └── 443 / https               │
+                                  ↓
+                            10.0.0.2
+                            └── Device
+                                ├── ssh: true
+                                ├── 22 / ssh
+                                └── audit user
 ```
 
-The production adapter uses the same canonical Router + user topology. Q01 does not register a synthetic SSH response through `Shell.addCommandData()`.
+The public Router exposes the reconnaissance ports. The child Device owns the actual SSH service and the authorized `audit` account. Both the public SSH port and child SSH port are explicitly opened at quest start.
+
+The production adapter and development replay use the same SSH topology. Q01 does not register a synthetic SSH response through `Shell.addCommandData()`.
 
 ## Expected Canonical State (production only)
 
