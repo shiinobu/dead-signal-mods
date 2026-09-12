@@ -44,7 +44,7 @@ export class Q01SubfinderCommand extends Command {
     CommandName = "subfinder";
     Description = "Enumerate subdomains for a target domain.";
 
-    async Run(tools) {
+    override async Run(tools) {
         const args = tools.getArgs();
         const rawTarget = getDomainArgument(args);
         const normalizedTarget = rawTarget
