@@ -43,8 +43,9 @@ describe("DSS desktop HTML bridge", () => {
 
     it("uses the documented HackhubSDK global for DSS events and commands", () => {
         assert.match(appHtml, /globalThis\.HackhubSDK/);
-        assert.match(appHtml, /HackhubSDK.*Events\.on/);
-        assert.match(appHtml, /Events\.emit\('DSS\.Command\.Request'/);
+        assert.match(appHtml, /\.Events\.on\(/);
+        assert.match(appHtml, /\.Events\.emit\('DSS\.Command\.Request'/);
+        assert.match(appHtml, /\.Events\.on\('DSS\.Command\.Result'/);
         assert.doesNotMatch(appHtml, /window\.HackhubSDK/);
     });
 
