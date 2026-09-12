@@ -18,8 +18,6 @@ import {
     Q01_REPORT_RECIPIENT,
     Q01_REPORT_SUBJECT,
     Q01_REWARDS,
-    Q01_SUBFINDER_INPUT,
-    Q01_SUBFINDER_RESULT,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
     Q01_WEB_AUDIT_HOST,
@@ -76,23 +74,11 @@ const Q01_LYNX_RESULT: Q01LynxResult = {
     address: [Q01_WEB_HOME_URL],
 };
 
-const Q01_SUBFINDER_INPUT_VARIANTS = [
-    Q01_SUBFINDER_INPUT,
-    `-d ${Q01_WEB_HOME_HOST}`,
-    `-d https://${Q01_WEB_HOST}`,
-    `-d https://${Q01_WEB_HOME_HOST}`,
-    `-d https://${Q01_WEB_HOST}/`,
-    `-d ${Q01_WEB_HOME_URL}`,
-] as const;
-
 const resetQ01ShellFixtures = (): void => {
     Shell.removeCommandData("nmap", Q01_TARGET_IP);
     Shell.removeCommandData("nmap", "");
     Shell.removeCommandData("lynx", Q01_LYNX_INPUT_IP);
     Shell.removeCommandData("lynx", Q01_LYNX_INPUT_URL);
-    Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
-        Shell.removeCommandData("subfinder", input);
-    });
 };
 
 const registerQ01ShellFixtures = (): void => {
@@ -101,9 +87,46 @@ const registerQ01ShellFixtures = (): void => {
     Shell.addCommandData("nmap", "", Q01_NMAP_RESULT);
     Shell.addCommandData("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT);
     Shell.addCommandData("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT);
-    Q01_SUBFINDER_INPUT_VARIANTS.forEach((input) => {
-        Shell.addCommandData("subfinder", input, Q01_SUBFINDER_RESULT);
-    });
+};
+
+const normalizeSubfinderTarget = (rawTarget: string): string | null => {
+    const value = rawTarget.trim().replace(/^['"]|['"]$/g, "");
+
+    if (!value) {
+        return null;
+    }
+
+    try {
+        const url = value.includes("://")
+            ? new URL(value)
+            : new URL(`https://${value}`);
+
+        return url.hostname.toLowerCase().replace(/\.$/, "");
+    } catch {
+        return null;
+    }
+};
+
+const getSubfinderTarget = (args: string[]): string | null => {
+    const domainFlagIndex = args.findIndex(
+        (arg) => arg === "-d" || arg === "--domain",
+    );
+
+    return domainFlagIndex >= 0
+        ? args[domainFlagIndex + 1] ?? null
+        : args[0] ?? null;
+};
+
+const isExpectedSubfinderTarget = (args: string[]): boolean => {
+    const rawTarget = getSubfinderTarget(args);
+    const normalizedTarget = rawTarget
+        ? normalizeSubfinderTarget(rawTarget)
+        : null;
+
+    return (
+        normalizedTarget === Q01_WEB_HOST ||
+        normalizedTarget === Q01_WEB_HOME_HOST
+    );
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -404,13 +427,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
 
         if (data.command === "subfinder") {
-            if (!Q01_SUBFINDER_INPUT_VARIANTS.includes(input as typeof Q01_SUBFINDER_INPUT_VARIANTS[number])) {
-                return;
-            }
-
-            const result = Shell.getCommandData("subfinder", input);
-
-            if (result !== Q01_SUBFINDER_RESULT) {
+            if (!isExpectedSubfinderTarget(data.args)) {
                 return;
             }
 
