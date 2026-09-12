@@ -212,13 +212,24 @@ const DSS_DIRECT_INTERACTION_PATCH = `
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});
   else bind();
-  projectReconSession();
 })();
 </script>`;
 
+const DSS_RECON_SCROLL_STYLE = `
+<style>
+.view-recon.active{
+  display:block;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-gutter:stable;
+  padding-right:8px;
+  padding-bottom:24px;
+}
+</style>`;
+
 const dssHTML = appHTML.includes('</body>')
-    ? appHTML.replace('</body>', `${DSS_DIRECT_INTERACTION_PATCH}</body>`)
-    : appHTML;
+    ? appHTML.replace('</body>', `${DSS_DIRECT_INTERACTION_PATCH}${DSS_RECON_SCROLL_STYLE}</body>`)
+    : `${appHTML}${DSS_DIRECT_INTERACTION_PATCH}${DSS_RECON_SCROLL_STYLE}`;
 
 @RegisterApp
 export class DeadSignalApp extends App {
