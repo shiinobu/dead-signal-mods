@@ -59,12 +59,12 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
+// Keep the response shape compatible with HackHub SDK's LynxData.
+// In particular, SDK array fields are mutable string[] rather than readonly arrays.
 interface Q01LynxResult {
-    readonly socialMedia?: readonly string[];
-    readonly ips?: readonly string[];
-    readonly address?: string;
+    readonly ips: string[];
+    readonly address: string;
     readonly additional?: string;
-    readonly contact?: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
