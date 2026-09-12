@@ -4,6 +4,7 @@ import {
     RegisterApp,
     Shell,
 } from "@hotbunny/hackhub-content-sdk";
+import appHTML from "../../../dead-signal.html";
 
 import {
     OpsCommandRouter,
@@ -64,9 +65,9 @@ const formatNmapResult = (result: unknown, target: string): string => {
     ];
 
     if (!Array.isArray(result)) {
-        lines.push("22/tcp   filtered ssh");
-        lines.push("80/tcp   closed   http");
-        lines.push("443/tcp  closed   https");
+        lines.push("22/tcp   filtered  ssh");
+        lines.push("80/tcp   closed    http");
+        lines.push("443/tcp  closed    https");
         return lines.join("\n");
     }
 
@@ -210,6 +211,7 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
                 "  recon -d <domain>",
                 "  nmap [ip]",
                 "  lynx <ip-or-url>",
+                "  clear",
             ].join("\n");
 
             Events.emit(DSS_COMMAND_EVENTS.result, {
@@ -289,12 +291,27 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
     }
 };
 
+Events.on(
+    DSS_COMMAND_EVENTS.request,
+    (event: { commandLine?: string } | string) => {
+        const commandLine = typeof event === "string"
+            ? event
+            : event?.commandLine;
+
+        if (!commandLine?.trim()) {
+            return;
+        }
+
+        void executeDssCommand(commandLine);
+    },
+);
+
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = "dead-signal.html";
+    HTML = appHTML;
     DefaultSize = { width: 1220, height: 800 };
     override MinSize = { width: 1200, height: 780 };
     override Unlocked = true;
