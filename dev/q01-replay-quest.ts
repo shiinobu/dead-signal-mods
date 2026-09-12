@@ -1,4 +1,5 @@
 import {
+    Mail,
     Network,
     Quest as HackHubQuest,
     RegisterQuest,
@@ -6,12 +7,16 @@ import {
 } from "@hotbunny/hackhub-content-sdk";
 
 import {
+    Q01_ADRIAN_EMAIL,
     Q01_CLIENT_NAME,
     Q01_OBJECTIVE_IDS,
+    Q01_REPORT_BODY,
+    Q01_REPORT_RECIPIENT,
+    Q01_REPORT_SUBJECT,
     Q01_TARGET_IP,
-    Q01_WEB_AUDIT_HTTP_URL,
+    Q01_WEB_HTTP_URL,
     Q01_WEB_AUDIT_PATH,
-    Q01_WEB_AUDIT_HTTPS_URL,
+    Q01_WEB_HTTPS_URL,
     Q01_WEB_HOST,
 } from "../src/content/q01.js";
 
@@ -36,19 +41,11 @@ interface BrowserMetaData {
     readonly pathname: string;
 }
 
-interface Q01NmapPort {
-    readonly port: number;
-    readonly status: "OPEN";
-    readonly service: string;
-}
-
-const Q01_NMAP_RESULT: Q01NmapPort[] = [
+const Q01_NMAP_RESULT = [
     { port: 22, status: "OPEN", service: "ssh" },
     { port: 80, status: "OPEN", service: "http" },
     { port: 443, status: "OPEN", service: "https" },
-];
-
-const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
+] as const;
 
 const Q01_REPORT_REQUIRED_CONTENT = [
     Q01_CLIENT_NAME,
@@ -59,6 +56,50 @@ const Q01_REPORT_REQUIRED_CONTENT = [
     "No critical vulnerabilities identified.",
     "Further internal assessment is recommended.",
 ];
+
+const Q01_INCOMING_MAIL_CONTENT = [
+    "DEV REPLAY — Q01 TEST CONTRACT",
+    "",
+    "CLIENT",
+    `Company: ${Q01_CLIENT_NAME}`,
+    "Location: Jakarta",
+    `Target: ${Q01_TARGET_IP}`,
+    "",
+    "Scope:",
+    "External infrastructure only.",
+    "",
+    "Authorized:",
+    "Network discovery",
+    "Service enumeration",
+    "Basic vulnerability checks",
+    "",
+    "Web audit surface:",
+    `HTTP: ${Q01_WEB_HTTP_URL}`,
+    `HTTPS: ${Q01_WEB_HTTPS_URL}`,
+    "",
+    "Not Authorized:",
+    "Data extraction",
+    "Internal access",
+    "Credential attacks",
+    "",
+    `Reply to ${Q01_REPORT_RECIPIENT} using the subject below and the provided report text:`,
+    `Subject: ${Q01_REPORT_SUBJECT}`,
+    "",
+    Q01_REPORT_BODY,
+    "",
+    "This mail belongs to the development replay fixture.",
+    "— Adrian",
+].join("\n");
+
+const Q01_COMPLETION_MAIL_CONTENT = [
+    "Looks clean.",
+    "",
+    "Client should be happy.",
+    "",
+    "DEV replay complete.",
+    "",
+    "— Adrian",
+].join("\n");
 
 @RegisterQuest
 export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
@@ -99,53 +140,14 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: `Inspect ${Q01_WEB_AUDIT_HTTP_URL} or ${Q01_WEB_AUDIT_HTTPS_URL} and review the security findings.`,
+            hint: `Inspect ${Q01_WEB_HTTP_URL} or ${Q01_WEB_HTTPS_URL} and review the security findings.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
             name: Q01_OBJECTIVE_IDS.submitAudit,
             description: "Submit audit report",
-            hint: "Send your findings to Adrian.",
+            hint: `Reply to ${Q01_REPORT_RECIPIENT} with subject \"${Q01_REPORT_SUBJECT}\". The exact report text is included in Adrian's audit email.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.basicVulnerabilityChecks],
-        },
-    ];
-
-    override Mails = [
-        {
-            title: Q01_REPORT_SUBJECT,
-            content: [
-                "DEV REPLAY — Q01 TEST CONTRACT",
-                "",
-                "CLIENT",
-                `Company: ${Q01_CLIENT_NAME}`,
-                "Location: Jakarta",
-                `Target: ${Q01_TARGET_IP}`,
-                "",
-                "Scope:",
-                "External infrastructure only.",
-                "",
-                "Authorized:",
-                "Network discovery",
-                "Service enumeration",
-                "Basic vulnerability checks",
-                "",
-                "Web audit surface:",
-                `HTTP: ${Q01_WEB_AUDIT_HTTP_URL}`,
-                `HTTPS: ${Q01_WEB_AUDIT_HTTPS_URL}`,
-                "",
-                "Not Authorized:",
-                "Data extraction",
-                "Internal access",
-                "Credential attacks",
-                "",
-                "This mail belongs to the development replay fixture.",
-                "— Adrian",
-            ].join("\n"),
-        },
-        {
-            title: "Re: Security Audit — Jakarta [DEV REPLAY]",
-            content:
-                "Looks clean.\n\nClient should be happy.\n\nDEV replay complete.\n\n— Adrian",
         },
     ];
 
@@ -177,7 +179,12 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
         Network.registerDomain(Q01_WEB_HOST, this.Data.targetIp);
 
-        this.sendMail(0);
+        Mail.send({
+            from: Q01_ADRIAN_EMAIL,
+            subject: Q01_REPORT_SUBJECT,
+            content: Q01_INCOMING_MAIL_CONTENT,
+        });
+
         this.completeObjective(Q01_OBJECTIVE_IDS.reviewScope);
     }
 
@@ -208,7 +215,12 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     }
 
     override OnComplete() {
-        this.sendMail(1);
+        Mail.send({
+            from: Q01_ADRIAN_EMAIL,
+            subject: `Re: ${Q01_REPORT_SUBJECT}`,
+            content: Q01_COMPLETION_MAIL_CONTENT,
+        });
+
         Shell.removeCommandData("nmap", this.Data.targetIp);
         Network.removeDomain(Q01_WEB_HOST);
         Network.destroyNetwork(this.Data.targetIp);
@@ -273,7 +285,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
     private isExpectedNmapResult(
         result: unknown,
-    ): result is readonly Q01NmapPort[] {
+    ): result is readonly typeof Q01_NMAP_RESULT[number][] {
         if (
             !Array.isArray(result) ||
             result.length !== Q01_NMAP_RESULT.length
@@ -282,7 +294,7 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
 
         return (
-            result.every((value): value is Q01NmapPort =>
+            result.every((value): value is typeof Q01_NMAP_RESULT[number] =>
                 typeof value === "object" &&
                 value !== null &&
                 "port" in value &&
