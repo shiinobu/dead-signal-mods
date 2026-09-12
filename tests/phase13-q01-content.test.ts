@@ -87,18 +87,22 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         );
     });
 
-    it("keeps the canonical Lynx URL in the deterministic additional metadata", () => {
+    it("keeps the Lynx address as one runtime list entry and resets stale fixtures before registration", () => {
         assert.match(
-            questSource,
-            /additional:\s*\[`Canonical web host:\s*\$\{Q01_WEB_HOME_URL\}`\],/,
-        );
-        assert.doesNotMatch(
             questSource,
             /address:\s*\[Q01_WEB_HOME_URL\],/,
         );
         assert.doesNotMatch(
             questSource,
             /Q01_WEB_HOME_URL\s+as unknown as string\[\]/,
+        );
+        assert.match(
+            questSource,
+            /Shell\.removeCommandData\("lynx", Q01_LYNX_INPUT_IP\);[\s\S]*Shell\.addCommandData\("lynx", Q01_LYNX_INPUT_IP, Q01_LYNX_RESULT\);/,
+        );
+        assert.match(
+            questSource,
+            /Shell\.removeCommandData\("lynx", Q01_LYNX_INPUT_URL\);[\s\S]*Shell\.addCommandData\("lynx", Q01_LYNX_INPUT_URL, Q01_LYNX_RESULT\);/,
         );
     });
 
