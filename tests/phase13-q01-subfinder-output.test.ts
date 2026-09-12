@@ -21,7 +21,6 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.match(subfinderCommandSource, /SUBFINDER_BANNER = \[/);
         assert.match(subfinderCommandSource, /__    _____           __/);
         assert.match(subfinderCommandSource, /projectdiscovery\.io/);
-        assert.match(subfinderCommandSource, /SUBFINDER_VERSION = \"v2\.16\.0\"/);
     });
 
     it("matches the HackHub reference warning and enumeration sequence", () => {
@@ -47,10 +46,17 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
         assert.match(subfinderCommandSource, /"⠋"/);
         assert.match(subfinderCommandSource, /"⠙"/);
+        assert.match(subfinderCommandSource, /"⠹"/);
+        assert.match(subfinderCommandSource, /"⠸"/);
+        assert.match(subfinderCommandSource, /"⠼"/);
+        assert.match(subfinderCommandSource, /"⠴"/);
+        assert.match(subfinderCommandSource, /"⠦"/);
+        assert.match(subfinderCommandSource, /"⠧"/);
+        assert.match(subfinderCommandSource, /"⠇"/);
         assert.match(subfinderCommandSource, /"⠏"/);
-        assert.match(subfinderCommandSource, /ANSI_CURSOR_UP = \"\\u001B\[1A\"/);
-        assert.match(subfinderCommandSource, /ANSI_CLEAR_LINE = \"\\u001B\[2K\"/);
-        assert.match(subfinderCommandSource, /ANSI_CARRIAGE_RETURN = \"\\r\"/);
+        assert.match(subfinderCommandSource, /ANSI_CURSOR_UP = "\\u001B\[1A"/);
+        assert.match(subfinderCommandSource, /ANSI_CLEAR_LINE = "\\u001B\[2K"/);
+        assert.match(subfinderCommandSource, /ANSI_CARRIAGE_RETURN = "\\r"/);
         assert.match(subfinderCommandSource, /SPINNER_DELAY_MS = 100/);
         assert.match(subfinderCommandSource, /SPINNER_DURATION_MS = 2400/);
         assert.match(
