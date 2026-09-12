@@ -2,6 +2,12 @@ import {
     OpsCommandRegistry,
 } from "./command-registry.js";
 import {
+    OpsEventBus,
+} from "./event-bus.js";
+import type {
+    OpsEventMap,
+} from "./event-types.js";
+import {
     ReconService,
     type ReconObserver,
     type ReconProgress,
@@ -16,6 +22,7 @@ import {
 
 export interface OpsRuntimeServices {
     readonly commands: OpsCommandRegistry;
+    readonly events: OpsEventBus<OpsEventMap>;
     readonly recon: ReconService;
     readonly session: OpsSessionStore;
     readonly tools: OpsToolRegistry;
@@ -23,12 +30,14 @@ export interface OpsRuntimeServices {
 
 export class OpsRuntime {
     readonly commands: OpsCommandRegistry;
+    readonly events: OpsEventBus<OpsEventMap>;
     readonly recon: ReconService;
     readonly session: OpsSessionStore;
     readonly tools: OpsToolRegistry;
 
     constructor(services?: Partial<OpsRuntimeServices>) {
         this.commands = services?.commands ?? new OpsCommandRegistry();
+        this.events = services?.events ?? new OpsEventBus<OpsEventMap>();
         this.recon = services?.recon ?? new ReconService();
         this.session = services?.session ?? new OpsSessionStore();
         this.tools = services?.tools ?? new OpsToolRegistry();
@@ -46,22 +55,27 @@ export class OpsRuntime {
                     event.target,
                     event.totalSources,
                 );
+                this.events.emit("reconStarted", event);
                 observer.onStarted(event);
             },
             onSourceStarted: (event: ReconProgress) => {
                 this.session.applySourceProgress(event, false);
+                this.events.emit("reconSourceStarted", event);
                 observer.onSourceStarted(event);
             },
             onSourceCompleted: (event: ReconProgress) => {
                 this.session.applySourceProgress(event, true);
+                this.events.emit("reconSourceCompleted", event);
                 observer.onSourceCompleted(event);
             },
             onHostDiscovered: (host: string) => {
                 this.session.addHost(host);
+                this.events.emit("reconHostDiscovered", { host });
                 observer.onHostDiscovered(host);
             },
             onCompleted: (result: ReconResult) => {
                 this.session.completeRecon(result);
+                this.events.emit("reconCompleted", result);
                 observer.onCompleted(result);
             },
         });
