@@ -20,6 +20,7 @@ const replayManifestPath = resolve(
     replayOutputDir,
     "manifest.json",
 );
+const replayModPath = resolve(replayOutputDir, "mod.js");
 const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
 const replayAssetsDir = resolve(replayOutputDir, "assets");
@@ -44,8 +45,23 @@ await rm(replayOutputDir, { recursive: true, force: true });
 
 await buildMod({
     entryPoint: "dev/q01-replay-entry.ts",
-    outfile: "dist-replay/mod.js",
+    outfile: replayModPath,
 });
+
+const replayBundle = await readFile(replayModPath, "utf8");
+const requiredBundleMarkers = [
+    "portal.skynet-logistics.idx",
+    "security.skynet-logistics.idx",
+    "https://www.skynet-logistics.idx/",
+];
+
+for (const marker of requiredBundleMarkers) {
+    if (!replayBundle.includes(marker)) {
+        throw new Error(
+            `Q01 replay bundle is stale or incomplete: missing fixture marker ${marker}`,
+        );
+    }
+}
 
 const sourceManifest = JSON.parse(
     await readFile(sourceManifestPath, "utf8"),
@@ -73,7 +89,7 @@ await cp(sourceAssetsDir, replayAssetsDir, {
 });
 
 const requiredFiles = [
-    resolve(replayOutputDir, "mod.js"),
+    replayModPath,
     replayManifestPath,
     replayAvatarPath,
 ];
@@ -90,6 +106,10 @@ for (const requiredFile of requiredFiles) {
 
 console.log(`Q01 replay build created: ${replayId}`);
 console.log(`Output: ${replayOutputDir}`);
+console.log("Verified bundle markers:");
+for (const marker of requiredBundleMarkers) {
+    console.log(`  - ${marker}`);
+}
 console.log("Package contents:");
 console.log("  - mod.js");
 console.log("  - manifest.json");
