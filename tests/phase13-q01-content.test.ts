@@ -8,8 +8,8 @@ import {
     Q01_REWARDS,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
-    Q01_WEB_AUDIT_HTTP_URL,
-    Q01_WEB_AUDIT_HTTPS_URL,
+    Q01_WEB_HTTP_URL,
+    Q01_WEB_HTTPS_URL,
     Q01_WEB_AUDIT_PATH,
     Q01_WEB_HOST,
 } from "../src/content/index.js";
@@ -37,11 +37,11 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_WEB_HOST, "skynet-logistics.test");
         assert.equal(Q01_WEB_AUDIT_PATH, "/security");
         assert.equal(
-            Q01_WEB_AUDIT_HTTP_URL,
+            Q01_WEB_HTTP_URL,
             "http://skynet-logistics.test/security",
         );
         assert.equal(
-            Q01_WEB_AUDIT_HTTPS_URL,
+            Q01_WEB_HTTPS_URL,
             "https://skynet-logistics.test/security",
         );
     });
