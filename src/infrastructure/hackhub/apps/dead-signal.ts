@@ -50,9 +50,7 @@ export class DeadSignalApp extends App {
             return false;
         }
 
-        const target = opsRuntime.recon.resolveProfile(rawTarget);
-
-        if (!target) {
+        if (!opsRuntime.recon.resolveProfile(rawTarget)) {
             Events.emit(DSS_RECON_EVENTS.failed, {
                 target: rawTarget,
                 reason: "No registered reconnaissance profile matched the target.",
@@ -63,29 +61,20 @@ export class DeadSignalApp extends App {
         this.reconRunning = true;
 
         try {
-            const result = await opsRuntime.recon.run(rawTarget, {
+            const result = await opsRuntime.runRecon(rawTarget, {
                 onStarted: (event) => {
-                    opsRuntime.session.startRecon(
-                        event.profileId,
-                        event.target,
-                        event.totalSources,
-                    );
                     Events.emit(DSS_RECON_EVENTS.started, event);
                 },
                 onSourceStarted: (event) => {
-                    opsRuntime.session.applySourceProgress(event, false);
                     Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
                 },
                 onSourceCompleted: (event) => {
-                    opsRuntime.session.applySourceProgress(event, true);
                     Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
                 },
                 onHostDiscovered: (host) => {
-                    opsRuntime.session.addHost(host);
                     Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
                 },
                 onCompleted: (reconResult) => {
-                    opsRuntime.session.completeRecon(reconResult);
                     Events.emit(DSS_RECON_EVENTS.completed, reconResult);
                 },
                 sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
