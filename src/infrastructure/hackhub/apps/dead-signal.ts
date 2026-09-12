@@ -9,6 +9,7 @@ import {
     OpsCommandRouter,
 } from "../../../application/ops/command-router.js";
 import {
+    DSS_COMMAND_EVENTS,
     DSS_RECON_EVENTS,
 } from "../../../application/ops/events.js";
 import {
@@ -93,6 +94,96 @@ const DSS_NAVIGATION_PATCH = `
 
 const dssHTML = `${appHTML}${DSS_NAVIGATION_PATCH}`;
 
+const commandRouter = new OpsCommandRouter(opsRuntime);
+let commandRunning = false;
+
+const executeDssCommand = async (commandLine: string): Promise<boolean> => {
+    if (commandRunning) {
+        Events.emit(DSS_COMMAND_EVENTS.result, {
+            commandLine,
+            ok: false,
+            message: "Another DSS command is already running.",
+        });
+        return false;
+    }
+
+    commandRunning = true;
+
+    try {
+        const result = await commandRouter.execute(commandLine, {
+            observer: {
+                onStarted: (event) => {
+                    Events.emit(DSS_RECON_EVENTS.started, event);
+                },
+                onSourceStarted: (event) => {
+                    Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
+                },
+                onSourceCompleted: (event) => {
+                    Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
+                },
+                onHostDiscovered: (host) => {
+                    Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
+                },
+                onCompleted: (reconResult) => {
+                    Events.emit(DSS_RECON_EVENTS.completed, reconResult);
+                },
+                sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+            },
+        });
+
+        if (!result.ok) {
+            const message = result.message ?? "Command execution failed.";
+            Events.emit(DSS_RECON_EVENTS.failed, {
+                target: commandLine,
+                reason: message,
+            });
+            Events.emit(DSS_COMMAND_EVENTS.result, {
+                commandLine,
+                ok: false,
+                message,
+            });
+            return false;
+        }
+
+        Events.emit(DSS_COMMAND_EVENTS.result, {
+            commandLine,
+            ok: true,
+        });
+        return true;
+    } catch (error) {
+        opsRuntime.session.fail();
+        const message = error instanceof Error
+            ? error.message
+            : "Unknown command execution error.";
+        Events.emit(DSS_RECON_EVENTS.failed, {
+            target: commandLine,
+            reason: message,
+        });
+        Events.emit(DSS_COMMAND_EVENTS.result, {
+            commandLine,
+            ok: false,
+            message,
+        });
+        return false;
+    } finally {
+        commandRunning = false;
+    }
+};
+
+Events.on(
+    DSS_COMMAND_EVENTS.request,
+    (event: { commandLine?: string } | string) => {
+        const commandLine = typeof event === "string"
+            ? event
+            : event?.commandLine;
+        if (!commandLine?.trim()) {
+            return;
+        }
+
+        void executeDssCommand(commandLine);
+    },
+);
+
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
@@ -117,60 +208,8 @@ export class DeadSignalApp extends App {
         getSession: (): OpsSessionSnapshot =>
             opsRuntime.session.getSnapshot(),
         startRecon: (target: string): Promise<boolean> =>
-            this.executeCommand(`recon -d ${target}`),
+            executeDssCommand(`recon -d ${target}`),
         executeCommand: (commandLine: string): Promise<boolean> =>
-            this.executeCommand(commandLine),
+            executeDssCommand(commandLine),
     };
-
-    private readonly commandRouter = new OpsCommandRouter(opsRuntime);
-    private commandRunning = false;
-
-    private async executeCommand(commandLine: string): Promise<boolean> {
-        if (this.commandRunning) {
-            return false;
-        }
-
-        this.commandRunning = true;
-
-        try {
-            const result = await this.commandRouter.execute(commandLine, {
-                observer: {
-                    onStarted: (event) => {
-                        Events.emit(DSS_RECON_EVENTS.started, event);
-                    },
-                    onSourceStarted: (event) => {
-                        Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
-                    },
-                    onSourceCompleted: (event) => {
-                        Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
-                    },
-                    onHostDiscovered: (host) => {
-                        Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
-                    },
-                    onCompleted: (reconResult) => {
-                        Events.emit(DSS_RECON_EVENTS.completed, reconResult);
-                    },
-                    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
-                },
-            });
-
-            if (!result.ok) {
-                Events.emit(DSS_RECON_EVENTS.failed, {
-                    target: commandLine,
-                    reason: result.message ?? "Command execution failed.",
-                });
-            }
-
-            return result.ok;
-        } catch (error) {
-            opsRuntime.session.fail();
-            Events.emit(DSS_RECON_EVENTS.failed, {
-                target: commandLine,
-                reason: error instanceof Error ? error.message : "Unknown command execution error.",
-            });
-            return false;
-        } finally {
-            this.commandRunning = false;
-        }
-    }
 }
