@@ -7,17 +7,20 @@ Status: **IMPLEMENTED — FOUNDATION; LIVE DESKTOP VALIDATION PENDING**
 
 This document records the first implementation slice of the locked DEAD-SIGNAL / DSS desktop architecture.
 
-The implementation establishes:
+The implemented foundation establishes:
 
 ```text
 DEAD-SIGNAL Desktop App
     ↓
 OpsRuntime
+    ├── OpsCommandRegistry
+    ├── OpsCommandRouter
+    ├── OpsEventBus
     ├── ReconService
     ├── OpsSessionStore
     └── OpsToolRegistry
           ↓
-    HackHub Event boundary
+    HackHub adapters / UI
 ```
 
 ## Desktop Application
@@ -40,7 +43,19 @@ Recon       READY
 Wireshark+  FOUNDATION
 ```
 
-`Terminal+` and `Wireshark+` are intentionally not represented as complete implementations yet. Their entries establish the canonical workspace boundary without pretending that native HackHub application embedding is available.
+`DEAD-SIGNAL` does not embed or replace native HackHub applications.
+
+## Command Architecture
+
+`OpsCommandRegistry` is the canonical metadata registry for DSS-native commands.
+
+`OpsCommandRouter` is the application-level execution boundary. The first executable command is:
+
+```text
+recon -d <domain>
+```
+
+The native HackHub `recon` command and the DSS Terminal+ command console both route through the same `OpsRuntime.runRecon()` path.
 
 ## Recon Integration
 
@@ -50,11 +65,13 @@ The DSS Desktop App exposes:
 
 ```text
 getToolCatalog()
+getCommandCatalog()
 getSession()
 startRecon(target)
+executeCommand(commandLine)
 ```
 
-Recon execution emits structured DSS events:
+Recon execution emits both internal typed Ops events and HackHub custom events for the HTML surface:
 
 ```text
 DSS.Recon.Started
@@ -65,7 +82,7 @@ DSS.Recon.Completed
 DSS.Recon.Failed
 ```
 
-The started event includes the complete source catalog so the UI does not duplicate Q01 source definitions.
+The started event includes the complete source catalog so UI surfaces do not duplicate Q01 source definitions.
 
 ## Investigation Session
 
@@ -89,7 +106,15 @@ Persistent save ownership is not introduced in this foundation slice. The sessio
 
 ## Tool Registry
 
-`OpsToolRegistry` is the central initial tool catalog. New DSS tools should be added here before they are exposed through the desktop workspace.
+`OpsToolRegistry` is the central initial tool catalog. New DSS tools are added here before exposure through the desktop workspace.
+
+Initial tools:
+
+```text
+Terminal+   FOUNDATION
+Recon       READY
+Wireshark+  FOUNDATION
+```
 
 Each tool definition contains:
 
@@ -101,13 +126,35 @@ status
 capability (optional)
 ```
 
+## Terminal+
+
+`Terminal+` is now a functional DSS command workbench. It has:
+
+```text
+command input
+command history/output
+command catalog
+shared recon execution
+shared DSS recon event stream
+```
+
+It does not attempt to embed or clone the native HackHub terminal.
+
+## Wireshark+
+
+`Wireshark+` remains a foundation surface only. Its packet model, capture service, filters, packet detail renderer, and HackHub network/event adapters are not yet implemented.
+
+The native HackHub Wireshark application remains independent.
+
 ## UI Boundary
 
 `src/infrastructure/hackhub/apps/dead-signal.html` is presentation-only.
 
 It consumes DSS exports and events and does not directly mutate GameRuntime, quests, flags, rewards, or narrative state.
 
-Recon progress animations are UI-local and are driven by service events. The persistent HackHub terminal is not cleared, and no ANSI cursor-control sequence is required by the DSS workspace.
+Recon animations and progress transitions run in the HTML workspace, while the deterministic scan behavior remains in `ReconService`.
+
+The persistent HackHub terminal is not cleared, and no ANSI cursor-control sequence is used by DSS.
 
 ## Validation Requirements
 
@@ -117,8 +164,6 @@ Before promoting this foundation beyond development:
 npm run typecheck
 npm test
 npm run build
-        ↓
-Install production package
         ↓
 Open DEAD-SIGNAL from HackHub desktop
         ↓
@@ -130,9 +175,13 @@ Verify source-by-source progress
         ↓
 Verify four Q01 hosts
         ↓
+Run recon from Terminal+
+        ↓
+Verify identical shared results
+        ↓
 Verify native terminal history remains unaffected
 ```
 
 ## Next Slice
 
-The next implementation slice is `Terminal+` as a real DSS command workbench built on the already locked command/service boundary. It must not attempt to embed or clone the native HackHub terminal.
+The next implementation slice is `Wireshark+` as a real DSS forensic workspace, beginning with a framework-agnostic packet domain contract and deterministic packet-capture service before adding filters and detailed rendering.
