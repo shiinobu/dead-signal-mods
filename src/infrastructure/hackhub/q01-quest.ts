@@ -12,9 +12,9 @@ import {
     Q01_REWARDS,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
-    Q01_WEB_AUDIT_HTTP_URL,
+    Q01_WEB_HTTP_URL,
     Q01_WEB_AUDIT_PATH,
-    Q01_WEB_AUDIT_HTTPS_URL,
+    Q01_WEB_HTTPS_URL,
     Q01_WEB_HOST,
 } from "../../content/index.js";
 
@@ -111,7 +111,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         {
             name: Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             description: "Perform basic vulnerability checks",
-            hint: `Inspect ${Q01_WEB_AUDIT_HTTP_URL} or ${Q01_WEB_AUDIT_HTTPS_URL} and review the security findings.`,
+            hint: `Inspect ${Q01_WEB_HTTP_URL} or ${Q01_WEB_HTTPS_URL} and review the security findings.`,
             unlocksAfter: [Q01_OBJECTIVE_IDS.identifyServices],
         },
         {
@@ -147,8 +147,8 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 "Basic vulnerability checks",
                 "",
                 "Web audit surface:",
-                `HTTP: ${Q01_WEB_AUDIT_HTTP_URL}`,
-                `HTTPS: ${Q01_WEB_AUDIT_HTTPS_URL}`,
+                `HTTP: ${Q01_WEB_HTTP_URL}`,
+                `HTTPS: ${Q01_WEB_HTTPS_URL}`,
                 "",
                 "Not Authorized:",
                 "Data extraction",
