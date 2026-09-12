@@ -9,6 +9,17 @@ import {
     Q01_WEB_HOME_HOST,
 } from "../../../content/q01.js";
 
+const SUBFINDER_VERSION = "v2.16.0";
+const RESULT_DELAY_MS = 90;
+
+const SUBFINDER_BANNER = [
+    "                   __    _____           __         ",
+    "       _______  __/ /_  / __(_)___  ____/ /__  _____",
+    "      / ___/ / / / __ \\/ /_/ / __ \\/ __  / _ \\/ ___/",
+    "     (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /    ",
+    "    /____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/",
+] as const;
+
 const normalizeTarget = (rawTarget: string): string | null => {
     const value = rawTarget.trim().replace(/^[\'"]|[\'"]$/g, "");
 
@@ -39,6 +50,9 @@ const getDomainArgument = (args: string[]): string | null => {
     return args[0] ?? null;
 };
 
+const sleep = (milliseconds: number): Promise<void> =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds));
+
 type Q01SubfinderTools = Parameters<Command["Run"]>[0];
 
 @RegisterCommand({ default: true })
@@ -46,6 +60,10 @@ export class Q01SubfinderCommand extends Command {
     /**
      * Q01 intentionally uses the plural command name so it does not collide
      * with HackHub's native `subfinder` executable.
+     *
+     * Terminal presentation is adapted from ProjectDiscovery/subfinder's
+     * banner and enumeration logging conventions. The Q01 result itself
+     * remains deterministic and offline.
      */
     CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
@@ -62,16 +80,13 @@ export class Q01SubfinderCommand extends Command {
             return;
         }
 
+        for (const line of SUBFINDER_BANNER) {
+            tools.println(line);
+        }
         tools.println("");
-        tools.println("                   __    _____           __         ");
-        tools.println("      _______  __/ /_  / __(_)___  ____/ /__  _____");
-        tools.println("     / ___/ / / / __ \\/ /_/ / __ \\/ __  / _ \\/ ___/");
-        tools.println("    (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /    ");
-        tools.println("   /____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/     ");
+        tools.println("\t\tprojectdiscovery.io");
         tools.println("");
-        tools.println("\tprojectdiscovery.io");
-        tools.println("");
-        tools.println("[INF] Current subfinder version v2.15.0");
+        tools.println(`[INF] Current subfinder version ${SUBFINDER_VERSION}`);
         tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
 
         if (
@@ -82,8 +97,16 @@ export class Q01SubfinderCommand extends Command {
             return;
         }
 
+        const startedAt = Date.now();
+
         for (const subdomain of Q01_SUBFINDER_RESULT.split("\n")) {
+            await sleep(RESULT_DELAY_MS);
             tools.println(subdomain);
         }
+
+        const elapsedMs = Date.now() - startedAt;
+        tools.println(
+            `[INF] Found ${Q01_SUBFINDER_RESULT.split("\n").length} subdomains for ${normalizedTarget} in ${elapsedMs} milliseconds`,
+        );
     }
 }
