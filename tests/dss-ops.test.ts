@@ -232,7 +232,7 @@ describe("DSS operations application foundation", () => {
         runtime.recon.registerProfile(Q01_RECON_PROFILE);
         const router = new OpsCommandRouter(runtime);
 
-        const result = await router.execute(Q01_RECON_INPUT, {
+        const result = await router.execute(`recon ${Q01_RECON_INPUT}`, {
             observer: {
                 onStarted: () => undefined,
                 onSourceStarted: () => undefined,
