@@ -2,29 +2,220 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Skynet Logistics — Security Review</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #030603;
+            --panel: #071007;
+            --line: #173617;
+            --green: #39ff88;
+            --green-dim: #82c99b;
+            --text: #d8f5df;
+            --muted: #6da37a;
+            --warn: #caffd7;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 20% 0%, rgba(57, 255, 136, 0.10), transparent 28%),
+                radial-gradient(circle at 90% 90%, rgba(57, 255, 136, 0.06), transparent 24%),
+                var(--bg);
+        }
+
+        .terminal {
+            width: min(1000px, 92vw);
+            margin: 46px auto;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(3, 6, 3, 0.94);
+            box-shadow: 0 0 50px rgba(57, 255, 136, 0.08);
+        }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            background: #0a120a;
+            color: var(--green-dim);
+            font-size: 12px;
+        }
+
+        .dots { display: flex; gap: 6px; }
+        .dots span {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #173617;
+        }
+
+        main { padding: 34px; }
+
+        .prompt {
+            color: var(--green);
+            margin-bottom: 26px;
+            font-size: 13px;
+        }
+
+        .prompt::before { content: "> "; }
+
+        h1 {
+            margin: 0;
+            color: var(--green);
+            font-size: clamp(30px, 5vw, 54px);
+            letter-spacing: -0.05em;
+            text-shadow: 0 0 18px rgba(57, 255, 136, 0.18);
+        }
+
+        .subtitle {
+            margin: 8px 0 30px;
+            color: var(--green-dim);
+            font-size: 14px;
+        }
+
+        .section {
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(8, 16, 8, 0.92), rgba(4, 10, 4, 0.92));
+        }
+
+        .section h2 {
+            margin: 0 0 14px;
+            font-size: 13px;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 11px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(23, 54, 23, 0.72);
+        }
+
+        th { color: var(--muted); font-weight: 600; }
+        td { color: var(--text); }
+        .open { color: var(--green); font-weight: 800; }
+        .closed { color: #7b9c82; }
+
+        ul {
+            margin: 0;
+            padding-left: 20px;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .finding {
+            margin-top: 18px;
+            padding: 16px;
+            border-left: 3px solid var(--green);
+            background: rgba(57, 255, 136, 0.05);
+            color: var(--warn);
+            line-height: 1.7;
+        }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .meta div {
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .meta span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        footer {
+            margin-top: 26px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 700px) {
+            main { padding: 24px; }
+            .meta { grid-template-columns: 1fr; }
+            table { font-size: 12px; }
+        }
+    </style>
 </head>
 <body>
-    <main>
-        <h1>External Security Review</h1>
-        <h2>Skynet Logistics</h2>
-        <p>Authorized assessment target: 203.0.113.42</p>
+    <div class="terminal">
+        <header class="bar">
+            <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div>security-review@skynet-logistics</div>
+        </header>
 
-        <h3>Observed external services</h3>
-        <ul>
-            <li>22/tcp — CLOSED</li>
-            <li>80/tcp — CLOSED</li>
-            <li>443/tcp — HTTPS</li>
-        </ul>
+        <main>
+            <div class="prompt">authorized external assessment surface</div>
+            <h1>SECURITY REVIEW</h1>
+            <p class="subtitle">Skynet Logistics · Jakarta</p>
 
-        <h3>Basic assessment</h3>
-        <ul>
-            <li>HTTPS service responds normally.</li>
-            <li>TLS-protected web endpoint is available.</li>
-            <li>No critical vulnerabilities identified.</li>
-        </ul>
+            <section class="section">
+                <h2>Target metadata</h2>
+                <div class="meta">
+                    <div><span>COMPANY</span>Skynet Logistics</div>
+                    <div><span>TARGET</span>203.0.113.42</div>
+                    <div><span>TRANSPORT</span>HTTPS / TLS</div>
+                </div>
+            </section>
 
-        <p>Further internal assessment is recommended.</p>
-    </main>
+            <section class="section">
+                <h2>Observed external services</h2>
+                <table>
+                    <thead>
+                        <tr><th>Port</th><th>Status</th><th>Service</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>22/tcp</td><td class="closed">CLOSED</td><td>ssh</td><td>No external SSH service</td></tr>
+                        <tr><td>80/tcp</td><td class="closed">CLOSED</td><td>http</td><td>No plain HTTP service</td></tr>
+                        <tr><td>443/tcp</td><td class="open">OPEN</td><td>https</td><td>TLS-protected web service</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>Basic assessment</h2>
+                <ul>
+                    <li>HTTPS service responds normally.</li>
+                    <li>TLS-protected web endpoint is available.</li>
+                    <li>No critical vulnerabilities identified.</li>
+                </ul>
+                <div class="finding">
+                    Further internal assessment is recommended.
+                </div>
+            </section>
+
+            <footer>
+                Review scope: external infrastructure only. Data extraction, internal access, and credential attacks are outside this assessment boundary.
+            </footer>
+        </main>
+    </div>
 </body>
 </html>
