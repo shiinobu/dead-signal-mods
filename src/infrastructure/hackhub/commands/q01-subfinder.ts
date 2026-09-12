@@ -106,7 +106,7 @@ const normalizeTarget = (rawTarget: string): string | null => {
     }
 };
 
-type Q01SubfinderTools = Parameters<Command["Run"]>[0];
+type Q01ReconTools = Parameters<Command["Run"]>[0];
 type Source = (typeof SOURCES)[number];
 
 const getCompletedCandidates = (completedSources: Source[]): string[] =>
@@ -122,7 +122,7 @@ const formatProgressBar = (percent: number, width = 24): string => {
 };
 
 @RegisterCommand({ default: true })
-export class Q01SubfinderCommand extends Command {
+export class Q01ReconCommand extends Command {
     /**
      * Q01 keeps terminal output append-only. CommandTools.clear() was tested
      * but rejected for gameplay because it clears the player's existing
@@ -132,10 +132,10 @@ export class Q01SubfinderCommand extends Command {
      * The candidates are deterministic Q01 fixtures; no external enumeration
      * or network dependency is used at runtime.
      */
-    CommandName = "subfinders";
-    Description = "Enumerate subdomains for a target domain.";
+    CommandName = "recon";
+    Description = "Perform reconnaissance for a target domain.";
 
-    private printHeader(tools: Q01SubfinderTools): void {
+    private printHeader(tools: Q01ReconTools): void {
         for (const line of SUBFINDER_BANNER) {
             tools.println(line);
         }
@@ -150,7 +150,7 @@ export class Q01SubfinderCommand extends Command {
     }
 
     private printProgress(
-        tools: Q01SubfinderTools,
+        tools: Q01ReconTools,
         completedSources: Source[],
     ): void {
         const progress = Math.round(
@@ -165,13 +165,13 @@ export class Q01SubfinderCommand extends Command {
         tools.println(`Unique:     ${uniqueCount}`);
     }
 
-    override async Run(tools: Q01SubfinderTools) {
+    override async Run(tools: Q01ReconTools) {
         const args = tools.getArgs();
         const rawTarget = getDomainArgument(args);
         const normalizedTarget = rawTarget ? normalizeTarget(rawTarget) : null;
 
         if (!normalizedTarget) {
-            tools.println("Usage: subfinders -d <domain>");
+            tools.println("Usage: recon -d <domain>");
             return;
         }
 
@@ -181,13 +181,13 @@ export class Q01SubfinderCommand extends Command {
         ) {
             this.printHeader(tools);
             tools.println("");
-            tools.println(`[WRN] No subdomains found for ${normalizedTarget}`);
+            tools.println(`[WRN] No reconnaissance data found for ${normalizedTarget}`);
             return;
         }
 
         this.printHeader(tools);
         tools.println("");
-        tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
+        tools.println(`[INF] Reconnaissance started for ${normalizedTarget}`);
 
         const completedSources: Source[] = [];
 
@@ -211,7 +211,7 @@ export class Q01SubfinderCommand extends Command {
         }
 
         tools.println("");
-        tools.println("[INF] Enumeration completed");
+        tools.println("[INF] Reconnaissance completed");
         tools.println("");
 
         const subdomains = Q01_SUBFINDER_RESULT.split("\n");
@@ -222,7 +222,7 @@ export class Q01SubfinderCommand extends Command {
 
         tools.println("");
         tools.println(
-            `[INF] Found ${subdomains.length} unique subdomains for ${normalizedTarget}`,
+            `[INF] Found ${subdomains.length} unique hosts for ${normalizedTarget}`,
         );
     }
 }
