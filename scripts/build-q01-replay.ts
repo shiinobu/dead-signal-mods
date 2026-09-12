@@ -57,7 +57,7 @@ await buildMod({
 const replayBundle = await readFile(replayModPath, "utf8");
 const requiredBundleMarkers = [
     "DeadSignalApp",
-    "DEAD-SIGNAL",
+    "dss",
     "ReconCommand",
     "Q01_RECON_PROFILE",
     "portal.skynet-logistics.idx",
