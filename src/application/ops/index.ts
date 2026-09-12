@@ -1,3 +1,4 @@
+export * from "./command-registry.js";
 export * from "./events.js";
 export * from "./recon-service.js";
 export * from "./runtime.js";
