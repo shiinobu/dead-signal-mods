@@ -2,8 +2,8 @@ import {
     App,
     Events,
     RegisterApp,
+    Shell,
 } from "@hotbunny/hackhub-content-sdk";
-import appHTML from "../../../dead-signal.html";
 
 import {
     OpsCommandRouter,
@@ -25,79 +25,151 @@ import type {
     OpsToolDefinition,
 } from "../../../application/ops/tool-registry.js";
 
-const DSS_NAVIGATION_PATCH = `
-<script>
-(() => {
-    const views = {
-        terminal: "view-terminal",
-        recon: "view-recon",
-        wireshark: "view-wireshark",
-    };
-
-    const showDssView = (id) => {
-        const activeView = Object.prototype.hasOwnProperty.call(views, id)
-            ? id
-            : "recon";
-
-        for (const key of Object.keys(views)) {
-            const view = document.getElementById(views[key]);
-            if (view) {
-                view.classList.toggle("active", key === activeView);
-            }
-        }
-
-        document.querySelectorAll("#nav button").forEach((button) => {
-            button.classList.toggle("active", button.dataset.view === activeView);
-        });
-
-        const crumb = document.getElementById("crumb");
-        if (crumb) {
-            crumb.textContent = activeView === "wireshark"
-                ? "Wireshark+"
-                : activeView === "terminal"
-                    ? "Terminal+"
-                    : "Recon";
-        }
-
-        if (activeView === "terminal") {
-            setTimeout(() => document.getElementById("cmd-input")?.focus(), 0);
-        }
-    };
-
-    const bindNavigation = () => {
-        const nav = document.getElementById("nav");
-        if (!nav) {
-            return;
-        }
-
-        nav.querySelectorAll("button").forEach((button) => {
-            if (button.dataset.dssNavigationBound === "true") {
-                return;
-            }
-
-            button.dataset.dssNavigationBound = "true";
-            button.addEventListener("click", () => {
-                showDssView(button.dataset.view || "recon");
-            });
-        });
-
-        showDssView("recon");
-    };
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bindNavigation, { once: true });
-    } else {
-        bindNavigation();
-    }
-})();
-</script>`;
-
-const dssHTML = `${appHTML}${DSS_NAVIGATION_PATCH}`;
+interface NativeTerminalCommandResult {
+    readonly ok: boolean;
+    readonly message?: string;
+}
 
 const commandRouter = new OpsCommandRouter(opsRuntime);
 let commandRunning = false;
 
+const parseCommandLine = (commandLine: string): {
+    command: string;
+    args: string[];
+} => {
+    const parts = commandLine.trim().split(/\s+/).filter(Boolean);
+    return {
+        command: parts[0]?.toLowerCase() ?? "",
+        args: parts.slice(1),
+    };
+};
+
+const emitNativeTerminalCommand = (
+    command: string,
+    args: readonly string[],
+): void => {
+    Events.emit("Terminal.Command", {
+        command,
+        args: [...args],
+    });
+};
+
+const formatNmapResult = (result: unknown): string => {
+    if (!Array.isArray(result)) {
+        return "nmap: no response data.";
+    }
+
+    const lines = [
+        "Starting Nmap — DSS terminal simulation",
+        "Host is up.",
+        "",
+        "PORT     STATE   SERVICE",
+    ];
+
+    for (const entry of result) {
+        if (
+            typeof entry !== "object" ||
+            entry === null ||
+            !("port" in entry) ||
+            !("status" in entry) ||
+            !("service" in entry)
+        ) {
+            continue;
+        }
+
+        const port = String(entry.port).padEnd(8, " ");
+        const status = String(entry.status).padEnd(8, " ").toLowerCase();
+        const service = String(entry.service);
+        lines.push(`${port}${status}${service}`);
+    }
+
+    return lines.join("\n");
+};
+
+const formatLynxResult = (result: unknown): string => {
+    if (typeof result !== "object" || result === null) {
+        return "lynx: no response data.";
+    }
+
+    const lines = ["Lynx — DSS terminal simulation"];
+
+    if ("ips" in result && Array.isArray(result.ips)) {
+        for (const ip of result.ips) {
+            lines.push(`IP: ${String(ip)}`);
+        }
+    }
+
+    if ("address" in result && Array.isArray(result.address)) {
+        for (const address of result.address) {
+            lines.push(`Address: ${String(address)}`);
+        }
+    }
+
+    return lines.join("\n");
+};
+
+const executeNativeTerminalCommand = async (
+    commandLine: string,
+): Promise<NativeTerminalCommandResult | null> => {
+    const { command, args } = parseCommandLine(commandLine);
+
+    if (command !== "nmap" && command !== "lynx") {
+        return null;
+    }
+
+    const input = command === "nmap"
+        ? args[0] ?? ""
+        : args.join(" ").trim();
+
+    if (command === "nmap" && args.length > 1) {
+        return {
+            ok: false,
+            message: "Usage: nmap [ip]",
+        };
+    }
+
+    if (!input && command === "lynx") {
+        return {
+            ok: false,
+            message: "Usage: lynx <ip-or-url>",
+        };
+    }
+
+    const result = Shell.getCommandData(command, input);
+
+    if (typeof result === "undefined") {
+        return {
+            ok: false,
+            message: `${command}: no fixture available for '${input || "default"}'.`,
+        };
+    }
+
+    emitNativeTerminalCommand(command, command === "nmap" ? args : [input]);
+
+    if (command === "nmap" && input) {
+        Events.emit("Terminal.NmapScan", { ip: input });
+    }
+
+    return {
+        ok: true,
+        message: command === "nmap"
+            ? formatNmapResult(result)
+            : formatLynxResult(result),
+    };
+};
+
 const executeDssCommand = async (commandLine: string): Promise<boolean> => {
+    const trimmed = commandLine.trim();
+
+    if (!trimmed) {
+        Events.emit(DSS_COMMAND_EVENTS.result, {
+            commandLine,
+            ok: false,
+            message: "Command cannot be empty.",
+        });
+        return false;
+    }
+
     if (commandRunning) {
         Events.emit(DSS_COMMAND_EVENTS.result, {
             commandLine,
@@ -110,7 +182,52 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
     commandRunning = true;
 
     try {
-        const result = await commandRouter.execute(commandLine, {
+        const nativeResult = await executeNativeTerminalCommand(trimmed);
+
+        if (nativeResult) {
+            if (!nativeResult.ok) {
+                Events.emit(DSS_COMMAND_EVENTS.result, {
+                    commandLine: trimmed,
+                    ok: false,
+                    message: nativeResult.message,
+                });
+                return false;
+            }
+
+            Events.emit(DSS_COMMAND_EVENTS.result, {
+                commandLine: trimmed,
+                ok: true,
+                message: nativeResult.message,
+            });
+            return true;
+        }
+
+        if (trimmed.toLowerCase() === "help") {
+            const message = [
+                "Available DSS commands:",
+                "  recon -d <domain>",
+                "  nmap [ip]",
+                "  lynx <ip-or-url>",
+            ].join("\n");
+
+            Events.emit(DSS_COMMAND_EVENTS.result, {
+                commandLine: trimmed,
+                ok: true,
+                message,
+            });
+            return true;
+        }
+
+        if (trimmed.toLowerCase() === "clear") {
+            Events.emit(DSS_COMMAND_EVENTS.result, {
+                commandLine: trimmed,
+                ok: true,
+                message: "__DSS_CLEAR__",
+            });
+            return true;
+        }
+
+        const result = await commandRouter.execute(trimmed, {
             observer: {
                 onStarted: (event) => {
                     Events.emit(DSS_RECON_EVENTS.started, event);
@@ -134,11 +251,11 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
         if (!result.ok) {
             const message = result.message ?? "Command execution failed.";
             Events.emit(DSS_RECON_EVENTS.failed, {
-                target: commandLine,
+                target: trimmed,
                 reason: message,
             });
             Events.emit(DSS_COMMAND_EVENTS.result, {
-                commandLine,
+                commandLine: trimmed,
                 ok: false,
                 message,
             });
@@ -146,7 +263,7 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
         }
 
         Events.emit(DSS_COMMAND_EVENTS.result, {
-            commandLine,
+            commandLine: trimmed,
             ok: true,
         });
         return true;
@@ -156,11 +273,11 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
             ? error.message
             : "Unknown command execution error.";
         Events.emit(DSS_RECON_EVENTS.failed, {
-            target: commandLine,
+            target: trimmed,
             reason: message,
         });
         Events.emit(DSS_COMMAND_EVENTS.result, {
-            commandLine,
+            commandLine: trimmed,
             ok: false,
             message,
         });
@@ -170,26 +287,12 @@ const executeDssCommand = async (commandLine: string): Promise<boolean> => {
     }
 };
 
-Events.on(
-    DSS_COMMAND_EVENTS.request,
-    (event: { commandLine?: string } | string) => {
-        const commandLine = typeof event === "string"
-            ? event
-            : event?.commandLine;
-        if (!commandLine?.trim()) {
-            return;
-        }
-
-        void executeDssCommand(commandLine);
-    },
-);
-
 @RegisterApp
 export class DeadSignalApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
-    HTML = dssHTML;
+    HTML = "dead-signal.html";
     DefaultSize = { width: 1220, height: 800 };
     override MinSize = { width: 1200, height: 780 };
     override Unlocked = true;
