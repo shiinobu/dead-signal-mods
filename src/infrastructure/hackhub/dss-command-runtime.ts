@@ -52,9 +52,9 @@ const emitSdkEvent = (eventName: string, payload?: unknown): void => {
 };
 
 const scheduleReconSdkEvent = (eventName: string, payload?: unknown): void => {
-    queueMicrotask(() => {
+    setTimeout(() => {
         emitSdkEvent(eventName, payload);
-    });
+    }, 0);
 };
 
 const emitCommandResult = (payload: {
