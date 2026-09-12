@@ -1,11 +1,11 @@
-# DEAD SIGNAL — Q01 Subfinder Command Lock
+# DEAD SIGNAL — Q01 Subfinders Command Lock
 
 Date: 2026-09-12
 Status: **LOCKED — Q01 COMMAND FINALIZED**
 
 ## Scope
 
-The Q01 `subfinder` interaction is finalized as a deterministic custom HackHub Shell command. No external subfinder binary or network enumeration is part of the Q01 runtime contract.
+The Q01 `subfinders` interaction is finalized as a deterministic custom HackHub Shell command. No external subfinder binary or network enumeration is part of the Q01 runtime contract.
 
 The command is registered as the default command owner:
 
@@ -16,18 +16,20 @@ The command is registered as the default command owner:
 and is named:
 
 ```text
-subfinder
+subfinders
 ```
+
+The plural spelling is intentional. It avoids collision with HackHub's native `subfinder` executable while preserving the ProjectDiscovery-style terminal presentation.
 
 ## Accepted Target Forms
 
 Equivalent target values remain accepted because formatting does not change the target identity:
 
 ```text
-subfinder -d skynet-logistics.idx
-subfinder -d www.skynet-logistics.idx
-subfinder -d https://skynet-logistics.idx/
-subfinder -d https://www.skynet-logistics.idx/
+subfinders -d skynet-logistics.idx
+subfinders -d www.skynet-logistics.idx
+subfinders -d https://skynet-logistics.idx/
+subfinders -d https://www.skynet-logistics.idx/
 ```
 
 The normalized target must resolve to either:
@@ -77,6 +79,10 @@ Unknown targets do not receive Q01 subdomains:
 [WRN] No subdomains found for <normalized-target>
 ```
 
+## Runtime Observation
+
+The production runtime previously rejected `subfinders` because the custom command was incorrectly registered as `subfinder`. That mismatch is corrected by this lock revision.
+
 ## Final Disposition
 
-`subfinder` is now a **finalized Q01 gameplay command**. Future changes to command ownership, target normalization, result ordering, or terminal presentation require explicit Q01 change control.
+`subfinders` is now the **finalized Q01 gameplay command**. Future changes to command ownership, target normalization, result ordering, or terminal presentation require explicit Q01 change control.
