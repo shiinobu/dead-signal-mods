@@ -1,13 +1,13 @@
 # DEAD SIGNAL — Q01 Final Lock
 
 Date: 2026-09-12
-Status: **FINAL LOCK — REVISED WEB SURFACE & REPORT DISCOVERY; LIVE VALIDATION PENDING**
+Status: **FINAL LOCK — LYNX/SUBDOMAIN RECON; LIVE VALIDATION PENDING**
 
 ## Lock Scope
 
-This document is the current implementation lock for Q01 after the project-owner revision to the public web surface, audit-page presentation, and report-submission discovery flow.
+This document is the current implementation lock for Q01 after the approved Lynx/subdomain reconnaissance amendment.
 
-The lock preserves the recovered story sequence, five objectives, canonical runtime state, rewards, and non-exploitative assessment boundary.
+The story intent, client, target, five objectives, canonical completion state, rewards, and non-exploitative assessment boundary remain unchanged. The web discovery model is now genuinely subdomain-based.
 
 ## Canonical Identity
 
@@ -46,80 +46,115 @@ q01.objective.04
 q01.objective.05
 ```
 
-Objective 02 exposes only the terminal command `nmap`; the target IP is not shown in the objective text.
+Objective 02 exposes only `nmap`; the target IP is supplied by Adrian's audit material.
 
 Objective 03 has no hint.
 
-Objective 04 uses the player-facing hint:
-
-```text
-Inspect web service and review the security findings.
-```
+Objective 04 directs the player toward discovery and inspection of the web security surface without directly naming the target host.
 
 ## Locked Service Facts
 
 ```text
-22/tcp  CLOSED  ssh
-80/tcp  CLOSED  http
-443/tcp OPEN    https
+22/tcp  CLOSE  ssh
+80/tcp  CLOSE  http
+443/tcp OPEN   https
 ```
 
-The Q01 gameplay path focuses on HTTPS over port 443.
+Only HTTPS on port 443 is exposed for the Q01 web flow. Canonical HTTPS URLs omit the explicit `:443`.
 
-## Locked Web Surface
+## Locked Web Discovery Contract
 
-Canonical public home:
+Apex domain:
 
 ```text
-https://skynet-logistics.idx/
+skynet-logistics.idx
 ```
 
-Canonical audit page:
+Exactly four subdomains exist:
 
 ```text
-https://skynet-logistics.idx/security
+www.skynet-logistics.idx
+portal.skynet-logistics.idx
+status.skynet-logistics.idx
+security.skynet-logistics.idx
 ```
 
-The Website registration intentionally contains only two pages:
+Behavior:
 
 ```text
-/          public company homepage
-/security  external security review
+www      → public operations homepage
+portal   → 403 FORBIDDEN
+status   → 403 FORBIDDEN
+security → Q01 audit target
 ```
 
-No other web paths are registered by Q01, so unlisted paths do not have Q01 pages. The project-owner wording of "sub-domain" is preserved as a gameplay-facing web-surface concept; `/security` remains an HTTP path under the requested host rather than a separate DNS hostname.
+The apex hostname is the subdomain-enumeration root and is not registered as a Website.
 
-The homepage is intentionally more polished and corporate so the player can discover the client identity naturally. The security page uses a black/green terminal-style visual treatment and exposes the assessment evidence needed to complete Q01.
+## Lynx Discovery Contract
 
-## Locked Objective 04 Method
+The canonical public web identity is discovered from the target IP using the HackHub Shell `lynx` fixture:
 
-Native SSH is outside the Q01 critical path.
+```text
+lynx 203.0.113.42
+```
+
+Compatibility input:
+
+```text
+lynx https://203.0.113.42/
+```
+
+Expected `lynx` address:
+
+```text
+https://www.skynet-logistics.idx/
+```
+
+The implementation uses the HackHub SDK's typed `lynx` response shape and `address` field. citeturn313821search0
+
+## Subfinder Contract
+
+The Q01 Shell fixture accepts:
+
+```text
+subfinder -d skynet-logistics.idx
+```
+
+and returns exactly the four locked subdomains.
+
+`subfinder` is implemented as a deterministic Q01 command fixture through `Shell.addCommandData()` rather than as an external network dependency. The HackHub SDK documents `Shell.addCommandData()` as the mechanism for injecting command response data; custom command names may use arbitrary input/data. citeturn313821search0
+
+## Objective 04 Method
 
 The canonical method is:
 
 ```text
 Identify exposed services
         ↓
-Open Skynet Logistics security web service
+lynx 203.0.113.42
         ↓
-HTTPS Browser.Meta interaction
+https://www.skynet-logistics.idx/
         ↓
-Basic vulnerability assessment complete
+subfinder -d skynet-logistics.idx
+        ↓
+security.skynet-logistics.idx
+        ↓
+HTTPS Browser inspection
 ```
 
-Objective 04 completes only when Objective 03 is complete and `Browser.Meta` reports:
+Objective 04 completes only after the discovery chain has completed and `Browser.Meta` reports:
 
 ```text
 protocol = https:
-hostname = skynet-logistics.idx
-pathname = /security
+hostname = security.skynet-logistics.idx
+pathname = /
 ```
 
-HTTP is not an accepted Objective 04 protocol.
+The actual network model exposes only 443/tcp for HTTPS, so HTTP/80 is outside the accepted audit transport.
 
 ## Security-Assessment Boundary
 
-The Q01 assessment is deliberately non-exploitative.
+The Q01 assessment remains non-exploitative.
 
 The quest does not require:
 
@@ -132,20 +167,18 @@ SQL injection
 SSH access
 ```
 
-## Locked Character Email Contract
+## Character Email Contract
 
-Adrian Cole has a canonical, non-random identity:
+Adrian Cole remains canonical:
 
 ```text
 character.adrian.cole
 adrian.cole@deadsignal.lock
 ```
 
-Future recurring character identities must be defined in the content layer and must not be randomly generated.
+The incoming email does not expose the web audit URL, company answer, or open-port answer.
 
-## Locked Q01 Report Discovery Contract
-
-Adrian's email no longer supplies the answer values directly. It supplies the format the player must complete from the audit evidence:
+## Report Submission Contract
 
 ```text
 Format report audit:
@@ -158,20 +191,7 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-The report recipient remains the canonical Adrian address and is still surfaced by the Objective 05 hint:
-
-```text
-adrian.cole@deadsignal.lock
-```
-
-The player is expected to discover:
-
-```text
-COMPANY = the audited client identity
-PORTS   = the open external port(s) observed during the audit
-```
-
-For Q01's canonical world state the resolved submission is:
+For the canonical Q01 world state, the resolved report is:
 
 ```text
 Target: Skynet Logistics
@@ -181,7 +201,7 @@ No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-Objective 05 completes only when the sent subject and plain-text body match the resolved canonical values. The placeholders are not accepted as a valid submission.
+Objective 05 accepts only the resolved canonical body, not the literal placeholders.
 
 ## Rewards
 
@@ -221,7 +241,7 @@ The maintained Q01 replay tool remains:
 scripts/build-q01-replay.ts
 ```
 
-Replay builds remain isolated from production completion state and rewards, but they now use the same revised `.idx` web host and report-discovery template.
+Replay remains isolated from production state and production rewards while using the same reconnaissance contract.
 
 ## Production Validation Status
 
@@ -238,15 +258,25 @@ accept Q01
  ↓
 complete objectives 01–03
  ↓
-verify 22/ssh CLOSED, 80/http CLOSED, 443/https OPEN
+verify 22/ssh CLOSE, 80/http CLOSE, 443/https OPEN
  ↓
-open https://skynet-logistics.idx/security
+lynx 203.0.113.42
+ ↓
+verify www.skynet-logistics.idx
+ ↓
+subfinder -d skynet-logistics.idx
+ ↓
+verify exactly four subdomains
+ ↓
+verify portal/status = 403
+ ↓
+open security.skynet-logistics.idx over HTTPS
  ↓
 complete Objective 04
  ↓
-discover COMPANY and PORTS from the audit surfaces
+discover COMPANY and PORTS
  ↓
-send Security Audit — Jakarta using the resolved report values
+send resolved Security Audit — Jakarta report
  ↓
 complete Objective 05
  ↓
@@ -261,4 +291,4 @@ Until that real-game gate is observed, Q02 must not be activated in production.
 
 **Q01 REVISED IMPLEMENTATION LOCKED.**
 
-The story sequence is preserved. The client is `Skynet Logistics`. The canonical public host is `skynet-logistics.idx`. The homepage is `/`, the only registered audit page is `/security`, and other paths are intentionally unregistered. Objective 04 remains HTTPS-only on `/security`. Adrian's report email now supplies a format with `<COMPANY>` and `<PORTS>` placeholders so the player must derive the values from the audit evidence before submission. Further changes require explicit change control after this lock.
+The Q01 target is now a genuine subdomain discovered through Lynx and Subfinder. The four required subdomains are `www`, `portal`, `status`, and `security`; only `security` is the audit target, while `portal` and `status` are forbidden surfaces. Adrian's email omits the direct web URL and report answers. Further changes require explicit change control after this lock.
