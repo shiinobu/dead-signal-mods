@@ -12,10 +12,11 @@ import { Q01_RECON_PROFILE } from "./content/q01.js";
 import { opsRuntime } from "./application/ops/runtime.js";
 import { gameRuntime } from "./infrastructure/hackhub/runtime.js";
 
+opsRuntime.recon.registerProfile(Q01_RECON_PROFILE);
+
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {
     override OnModPackageLoaded() {
-        opsRuntime.recon.registerProfile(Q01_RECON_PROFILE);
         gameRuntime.persistence.load();
         console.log("DEAD SIGNAL mod loaded!");
     }
