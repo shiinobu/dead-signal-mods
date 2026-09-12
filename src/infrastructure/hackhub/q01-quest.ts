@@ -47,13 +47,13 @@ interface BrowserMetaData {
 
 interface Q01NmapPort {
     readonly port: number;
-    readonly status: "OPEN" | "CLOSED";
+    readonly status: "OPEN" | "CLOSE";
     readonly service: string;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
-    { port: 22, status: "CLOSED", service: "ssh" },
-    { port: 80, status: "CLOSED", service: "http" },
+    { port: 22, status: "CLOSE", service: "ssh" },
+    { port: 80, status: "CLOSE", service: "http" },
     { port: 443, status: "OPEN", service: "https" },
 ];
 
@@ -376,7 +376,7 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
                 "status" in value &&
                 "service" in value &&
                 typeof value.port === "number" &&
-                (value.status === "OPEN" || value.status === "CLOSED") &&
+                (value.status === "OPEN" || value.status === "CLOSE") &&
                 typeof value.service === "string",
             ) &&
             Q01_NMAP_RESULT.every((expected) =>
