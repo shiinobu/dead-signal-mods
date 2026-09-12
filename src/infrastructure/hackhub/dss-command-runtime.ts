@@ -19,9 +19,69 @@ interface NativeTerminalCommandResult {
     readonly message?: string;
 }
 
+export interface DssCommandResultSnapshot {
+    readonly sequence: number;
+    readonly commandLine: string;
+    readonly ok: boolean;
+    readonly message: string | null;
+}
+
 const commandRouter = new OpsCommandRouter(opsRuntime);
 let commandRunning = false;
 let commandBridgeRegistered = false;
+let commandResultSequence = 0;
+let lastCommandResult: DssCommandResultSnapshot = {
+    sequence: 0,
+    commandLine: "",
+    ok: false,
+    message: null,
+};
+
+const emitSdkEvent = (eventName: string, payload?: unknown): void => {
+    try {
+        (Events.emit as unknown as (name: string, data?: unknown) => void)(
+            eventName,
+            payload,
+        );
+    } catch (error) {
+        console.warn(
+            `[DSS] SDK event emission failed for ${eventName}:`,
+            error,
+        );
+    }
+};
+
+const scheduleReconSdkEvent = (eventName: string, payload?: unknown): void => {
+    queueMicrotask(() => {
+        emitSdkEvent(eventName, payload);
+    });
+};
+
+const emitCommandResult = (payload: {
+    readonly commandLine: string;
+    readonly ok: boolean;
+    readonly message?: string;
+}): void => {
+    lastCommandResult = {
+        sequence: ++commandResultSequence,
+        commandLine: payload.commandLine,
+        ok: payload.ok,
+        message: payload.message ?? null,
+    };
+
+    try {
+        if (payload.message === undefined) {
+            Events.emit(DSS_COMMAND_EVENTS.result, {
+                commandLine: payload.commandLine,
+                ok: payload.ok,
+            });
+        } else {
+            Events.emit(DSS_COMMAND_EVENTS.result, payload);
+        }
+    } catch (error) {
+        console.warn("[DSS] SDK command result emission failed:", error);
+    }
+};
 
 const parseCommandLine = (commandLine: string): {
     command: string;
@@ -38,10 +98,22 @@ const emitNativeTerminalCommand = (
     command: string,
     args: readonly string[],
 ): void => {
-    Events.emit("Terminal.Command", {
-        command,
-        args: [...args],
-    });
+    try {
+        Events.emit("Terminal.Command", {
+            command,
+            args: [...args],
+        });
+    } catch (error) {
+        console.warn("[DSS] terminal command event emission failed:", error);
+    }
+};
+
+const emitNativeNmapScan = (ip: string): void => {
+    try {
+        Events.emit("Terminal.NmapScan", { ip });
+    } catch (error) {
+        console.warn("[DSS] terminal nmap event emission failed:", error);
+    }
 };
 
 const formatNmapResult = (result: unknown, target: string): string => {
@@ -148,7 +220,7 @@ const executeNativeTerminalCommand = async (
     emitNativeTerminalCommand(command, command === "nmap" ? args : [input]);
 
     if (command === "nmap" && input) {
-        Events.emit("Terminal.NmapScan", { ip: input });
+        emitNativeNmapScan(input);
     }
 
     return {
@@ -163,7 +235,7 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
     const trimmed = commandLine.trim();
 
     if (!trimmed) {
-        Events.emit(DSS_COMMAND_EVENTS.result, {
+        emitCommandResult({
             commandLine,
             ok: false,
             message: "Command cannot be empty.",
@@ -172,7 +244,7 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
     }
 
     if (commandRunning) {
-        Events.emit(DSS_COMMAND_EVENTS.result, {
+        emitCommandResult({
             commandLine,
             ok: false,
             message: "Another DSS command is already running.",
@@ -186,11 +258,18 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
         const nativeResult = await executeNativeTerminalCommand(trimmed);
 
         if (nativeResult) {
-            Events.emit(DSS_COMMAND_EVENTS.result, {
-                commandLine: trimmed,
-                ok: nativeResult.ok,
-                message: nativeResult.message,
-            });
+            const nativeResultPayload = nativeResult.message === undefined
+                ? {
+                    commandLine: trimmed,
+                    ok: nativeResult.ok,
+                }
+                : {
+                    commandLine: trimmed,
+                    ok: nativeResult.ok,
+                    message: nativeResult.message,
+                };
+
+            emitCommandResult(nativeResultPayload);
             return nativeResult.ok;
         }
 
@@ -203,7 +282,7 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
                 "  clear",
             ].join("\n");
 
-            Events.emit(DSS_COMMAND_EVENTS.result, {
+            emitCommandResult({
                 commandLine: trimmed,
                 ok: true,
                 message,
@@ -212,7 +291,7 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
         }
 
         if (trimmed.toLowerCase() === "clear") {
-            Events.emit(DSS_COMMAND_EVENTS.result, {
+            emitCommandResult({
                 commandLine: trimmed,
                 ok: true,
                 message: "__DSS_CLEAR__",
@@ -223,19 +302,19 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
         const result = await commandRouter.execute(trimmed, {
             observer: {
                 onStarted: (event) => {
-                    Events.emit(DSS_RECON_EVENTS.started, event);
+                    scheduleReconSdkEvent(DSS_RECON_EVENTS.started, event);
                 },
                 onSourceStarted: (event) => {
-                    Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
+                    scheduleReconSdkEvent(DSS_RECON_EVENTS.sourceStarted, event);
                 },
                 onSourceCompleted: (event) => {
-                    Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
+                    scheduleReconSdkEvent(DSS_RECON_EVENTS.sourceCompleted, event);
                 },
                 onHostDiscovered: (host) => {
-                    Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
+                    scheduleReconSdkEvent(DSS_RECON_EVENTS.hostDiscovered, { host });
                 },
                 onCompleted: (reconResult) => {
-                    Events.emit(DSS_RECON_EVENTS.completed, reconResult);
+                    scheduleReconSdkEvent(DSS_RECON_EVENTS.completed, reconResult);
                 },
                 sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
             },
@@ -243,11 +322,11 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
 
         if (!result.ok) {
             const message = result.message ?? "Command execution failed.";
-            Events.emit(DSS_RECON_EVENTS.failed, {
+            scheduleReconSdkEvent(DSS_RECON_EVENTS.failed, {
                 target: trimmed,
                 reason: message,
             });
-            Events.emit(DSS_COMMAND_EVENTS.result, {
+            emitCommandResult({
                 commandLine: trimmed,
                 ok: false,
                 message,
@@ -255,7 +334,7 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
             return false;
         }
 
-        Events.emit(DSS_COMMAND_EVENTS.result, {
+        emitCommandResult({
             commandLine: trimmed,
             ok: true,
         });
@@ -265,11 +344,15 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
         const message = error instanceof Error
             ? error.message
             : "Unknown command execution error.";
-        Events.emit(DSS_RECON_EVENTS.failed, {
+        console.error("[DSS] command execution failed", {
+            commandLine: trimmed,
+            error,
+        });
+        scheduleReconSdkEvent(DSS_RECON_EVENTS.failed, {
             target: trimmed,
             reason: message,
         });
-        Events.emit(DSS_COMMAND_EVENTS.result, {
+        emitCommandResult({
             commandLine: trimmed,
             ok: false,
             message,
@@ -278,6 +361,19 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
     } finally {
         commandRunning = false;
     }
+};
+
+export const getLastCommandResult = (): DssCommandResultSnapshot => ({
+    ...lastCommandResult,
+});
+
+export const triggerDssCommand = (commandLine: string): boolean => {
+    if (!commandLine.trim()) {
+        return false;
+    }
+
+    void executeDssCommand(commandLine);
+    return true;
 };
 
 export const registerDssCommandBridge = (): void => {
