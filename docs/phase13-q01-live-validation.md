@@ -46,14 +46,14 @@ nmap 203.0.113.42
 
 8. Confirm objectives 2–3 are satisfied by the valid Nmap result.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. Run the authorized SSH audit check using the locked Q01 command:
+10. Run the authorized SSH command using the locked Q01 syntax:
 
 ```bash
 ssh -h audit@203.0.113.42
 ```
 
-11. Confirm the `ssh` command is recognized by the Q01 replay and the scoped SSH response is returned as `203.0.113.42 / OPEN`.
-12. Confirm Objective 04 completes from the valid SSH interaction. Native `Terminal.SSH.Connected` remains supported as a secondary success path when the HackHub runtime emits it.
+11. Confirm the command reaches the Q01 virtual target's SSH service.
+12. Confirm a successful SSH connection emits `Terminal.SSH.Connected` for `203.0.113.42` and completes Objective 04.
 13. Submit the audit report using the source-defined facts, including:
 
 ```text
@@ -84,15 +84,20 @@ Hints provide short contextual help and must never expose internal mod paths.
 
 ## Runtime Interaction Detail
 
-Q01 uses quest-scoped `Shell.addCommandData()` for both deterministic Nmap and the authorized SSH command contract. The SSH registration uses the built-in command name `ssh`, with input:
+Q01 Nmap is deterministic through quest-scoped `Shell.addCommandData()`. SSH is different: it is an engine-owned terminal interaction and therefore must use a real Q01 virtual network target.
+
+The replay creates this target when the quest starts:
 
 ```text
-host: audit@203.0.113.42
-key: empty
-response: 203.0.113.42 / OPEN
+203.0.113.42
+└── Router
+    ├── 22 / ssh
+    ├── 80 / http
+    ├── 443 / https
+    └── audit user
 ```
 
-The replay also listens for `Terminal.SSH.Connected` as a secondary native success event. The quest does not require a separate `ssh-audit` command.
+The production adapter uses the same canonical Router + user topology. Q01 does not register a synthetic SSH response through `Shell.addCommandData()`.
 
 ## Expected Canonical State (production only)
 
