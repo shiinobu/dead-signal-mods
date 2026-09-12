@@ -10,6 +10,7 @@ export interface ReconStartedEvent {
     readonly profileId: string;
     readonly target: string;
     readonly totalSources: number;
+    readonly sources: readonly ReconSourceDefinition[];
 }
 
 export interface ReconObserver {
@@ -169,6 +170,7 @@ export class ReconService {
             profileId: profile.id,
             target,
             totalSources: profile.sources.length,
+            sources: profile.sources,
         });
 
         const completedSources: ReconSourceDefinition[] = [];
