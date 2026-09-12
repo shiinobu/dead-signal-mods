@@ -11,14 +11,15 @@ import {
     Q01_LYNX_INPUT_IP,
     Q01_LYNX_INPUT_URL,
     Q01_OBJECTIVE_IDS,
+    Q01_RECON_INPUT,
+    Q01_RECON_INPUT_VARIANTS,
+    Q01_RECON_PROFILE,
+    Q01_RECON_RESULT,
     Q01_REPORT_BODY,
     Q01_REPORT_BODY_TEMPLATE,
     Q01_REPORT_RECIPIENT,
     Q01_REPORT_SUBJECT,
     Q01_REWARDS,
-    Q01_SUBFINDER_INPUT,
-    Q01_SUBFINDER_INPUT_VARIANTS,
-    Q01_SUBFINDER_RESULT,
     Q01_TARGET_IP,
     Q01_THE_CONTRACT,
     Q01_WEB_AUDIT_HOST,
@@ -43,17 +44,20 @@ import {
 import { QuestService } from "../src/application/index.js";
 
 const questSource = readFileSync(
-    resolve(fileURLToPath(new URL("../src/infrastructure/hackhub/q01-quest.ts", import.meta.url))),
+    resolve(
+        fileURLToPath(
+            new URL("../src/infrastructure/hackhub/q01-quest.ts", import.meta.url),
+        ),
+    ),
     "utf8",
 );
 
-const replayQuestSource = readFileSync(
-    resolve(fileURLToPath(new URL("../dev/q01-replay-quest.ts", import.meta.url))),
-    "utf8",
-);
-
-const subfinderCommandSource = readFileSync(
-    resolve(fileURLToPath(new URL("../src/infrastructure/hackhub/commands/q01-subfinder.ts", import.meta.url))),
+const reconCommandSource = readFileSync(
+    resolve(
+        fileURLToPath(
+            new URL("../src/infrastructure/hackhub/commands/recon.ts", import.meta.url),
+        ),
+    ),
     "utf8",
 );
 
@@ -95,14 +99,11 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         assert.equal(Q01_WEB_AUDIT_URL, "https://security.skynet-logistics.idx/");
     });
 
-    it("defines the Lynx target and format-tolerant subfinders reconnaissance contract", () => {
+    it("defines the reusable recon input variants and deterministic Q01 profile", () => {
         assert.equal(Q01_LYNX_INPUT_IP, "203.0.113.42");
-        assert.equal(
-            Q01_LYNX_INPUT_URL,
-            "https://203.0.113.42/",
-        );
-        assert.equal(Q01_SUBFINDER_INPUT, "-d https://www.skynet-logistics.idx/");
-        assert.deepEqual(Q01_SUBFINDER_INPUT_VARIANTS, [
+        assert.equal(Q01_LYNX_INPUT_URL, "https://203.0.113.42/");
+        assert.equal(Q01_RECON_INPUT, "-d https://www.skynet-logistics.idx/");
+        assert.deepEqual(Q01_RECON_INPUT_VARIANTS, [
             "-d https://www.skynet-logistics.idx/",
             "-d skynet-logistics.idx",
             "-d www.skynet-logistics.idx",
@@ -117,39 +118,45 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
             "https://www.skynet-logistics.idx/",
         ]);
         assert.equal(
-            Q01_SUBFINDER_RESULT,
+            Q01_RECON_RESULT,
             "portal.skynet-logistics.idx\nsecurity.skynet-logistics.idx\nstatus.skynet-logistics.idx\nwww.skynet-logistics.idx",
+        );
+        assert.equal(Q01_RECON_PROFILE.id, "q01");
+        assert.deepEqual(Q01_RECON_PROFILE.resultHosts, [
+            "portal.skynet-logistics.idx",
+            "security.skynet-logistics.idx",
+            "status.skynet-logistics.idx",
+            "www.skynet-logistics.idx",
+        ]);
+        assert.equal(Q01_RECON_PROFILE.sources.length, 5);
+        assert.equal(
+            Q01_RECON_PROFILE.sources.reduce(
+                (total, source) => total + source.candidates.length,
+                0,
+            ),
+            8,
         );
     });
 
-    it("registers the Q01 custom subfinders command in production and replay", () => {
+    it("registers the shared recon command in production and replay", () => {
         assert.match(
-            subfinderCommandSource,
+            reconCommandSource,
             /@RegisterCommand\(\{\s*default:\s*true\s*\}\)/,
         );
-        assert.match(
-            subfinderCommandSource,
-            /CommandName\s*=\s*"subfinders"/,
-        );
-        assert.match(
-            subfinderCommandSource,
-            /async Run\(tools(?:\s*:\s*Q01SubfinderTools)?\)/,
-        );
+        assert.match(reconCommandSource, /CommandName\s*=\s*"recon"/);
+        assert.match(reconCommandSource, /opsRuntime\.recon\.run/);
         assert.match(
             productionEntrySource,
-            /import "\.\/infrastructure\/hackhub\/commands\/q01-subfinder\.js";/,
+            /import "\.\/infrastructure\/hackhub\/commands\/recon\.js";/,
         );
         assert.match(
             replayEntrySource,
-            /import "\.\.\/src\/infrastructure\/hackhub\/commands\/q01-subfinder\.js";/,
+            /import "\.\.\/src\/infrastructure\/hackhub\/commands\/recon\.js";/,
         );
     });
 
     it("keeps the Lynx address as one runtime list entry and resets stale fixtures before registration", () => {
-        assert.match(
-            questSource,
-            /address:\s*\[Q01_WEB_HOME_URL\],/,
-        );
+        assert.match(questSource, /address:\s*\[Q01_WEB_HOME_URL\],/);
         assert.doesNotMatch(
             questSource,
             /Q01_WEB_HOME_URL\s+as unknown as string\[\]/,
@@ -179,16 +186,13 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
     });
 
     it("preserves the five locked player objective ids", () => {
-        assert.deepEqual(
-            Q01_OBJECTIVE_IDS,
-            {
-                reviewScope: "q01.objective.01",
-                scanNetwork: "q01.objective.02",
-                identifyServices: "q01.objective.03",
-                basicVulnerabilityChecks: "q01.objective.04",
-                submitAudit: "q01.objective.05",
-            },
-        );
+        assert.deepEqual(Q01_OBJECTIVE_IDS, {
+            reviewScope: "q01.objective.01",
+            scanNetwork: "q01.objective.02",
+            identifyServices: "q01.objective.03",
+            basicVulnerabilityChecks: "q01.objective.04",
+            submitAudit: "q01.objective.05",
+        });
     });
 
     it("uses the canonical completion flag as its runtime completion boundary", () => {
@@ -199,36 +203,24 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
             new ConditionEvaluator(flagStore),
         );
 
-        assert.equal(
-            service.areObjectivesComplete(Q01_THE_CONTRACT),
-            false,
-        );
-
+        assert.equal(service.areObjectivesComplete(Q01_THE_CONTRACT), false);
         flagStore.set(Q01_FINAL_STATE_FLAG, true);
-
-        assert.equal(
-            service.areObjectivesComplete(Q01_THE_CONTRACT),
-            true,
-        );
+        assert.equal(service.areObjectivesComplete(Q01_THE_CONTRACT), true);
     });
 
     it("preserves the Phase 8 Q01 XP allocation and final money reward", () => {
-        assert.deepEqual(
-            Q01_REWARDS,
-            {
-                externalAudit: 35,
-                networkServiceEnumeration: 20,
-                basicVulnerabilityAssessment: 10,
-                submitCorrectReport: 15,
-                money: 200,
-            },
-        );
-
+        assert.deepEqual(Q01_REWARDS, {
+            externalAudit: 35,
+            networkServiceEnumeration: 20,
+            basicVulnerabilityAssessment: 10,
+            submitCorrectReport: 15,
+            money: 200,
+        });
         assert.equal(
             Q01_REWARDS.externalAudit +
-            Q01_REWARDS.networkServiceEnumeration +
-            Q01_REWARDS.basicVulnerabilityAssessment +
-            Q01_REWARDS.submitCorrectReport,
+                Q01_REWARDS.networkServiceEnumeration +
+                Q01_REWARDS.basicVulnerabilityAssessment +
+                Q01_REWARDS.submitCorrectReport,
             80,
         );
     });
