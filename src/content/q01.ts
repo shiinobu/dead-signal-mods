@@ -13,6 +13,19 @@ export const Q01_WEB_AUDIT_URL = `https://${Q01_WEB_HOST}${Q01_WEB_AUDIT_PATH}`;
 // Kept as the player-facing HTTPS surface constant for backwards-compatible imports.
 export const Q01_WEB_HTTPS_URL = Q01_WEB_HOME_URL;
 
+// The Q01 site exposes at most four non-root web surfaces.
+// Only /security is the intended public audit target; the others are restricted.
+export const Q01_WEB_SURFACE_PATHS = [
+    Q01_WEB_AUDIT_PATH,
+    "/admin",
+    "/portal",
+    "/api",
+] as const;
+
+export const Q01_WEB_FORBIDDEN_PATHS = Q01_WEB_SURFACE_PATHS.filter(
+    (path) => path !== Q01_WEB_AUDIT_PATH,
+);
+
 export const Q01_ADRIAN_EMAIL = ADRIAN_COLE.email;
 export const Q01_REPORT_RECIPIENT = Q01_ADRIAN_EMAIL;
 export const Q01_REPORT_SUBJECT = "Security Audit — Jakarta";
