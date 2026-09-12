@@ -1,3 +1,4 @@
+import "./infrastructure/hackhub/commands/q01-subfinder.js";
 import "./infrastructure/hackhub/websites/q01-skynet-portal.js";
 import "./infrastructure/hackhub/q01-quest.js";
 
