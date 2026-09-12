@@ -10,9 +10,11 @@ import type {
 import {
     ReconService,
     type ReconObserver,
-    type ReconProgress,
-    type ReconResult,
 } from "./recon-service.js";
+import type {
+    ReconProgress,
+    ReconResult,
+} from "../../domain/recon/index.js";
 import {
     OpsSessionStore,
 } from "./session-store.js";
