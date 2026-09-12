@@ -41,7 +41,7 @@ const getDomainArgument = (args: string[]): string | null => {
 
 type Q01SubfinderTools = Parameters<Command["Run"]>[0];
 
-@RegisterCommand
+@RegisterCommand({ default: true })
 export class Q01SubfinderCommand extends Command {
     CommandName = "subfinder";
     Description = "Enumerate subdomains for a target domain.";
