@@ -11,6 +11,8 @@ import {
 
 const SUBFINDER_VERSION = "v2.16.0";
 const RESULT_DELAY_MS = 90;
+const SPINNER_DELAY_MS = 100;
+const SPINNER_DURATION_MS = 2400;
 
 const SUBFINDER_BANNER = [
     "               __    _____           __         ",
@@ -19,6 +21,29 @@ const SUBFINDER_BANNER = [
     " (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /    ",
     "/____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/",
 ] as const;
+
+const SUBFINDER_WARNINGS = [
+    "[WRN] Use with caution. You are responsible for your actions.",
+    "[WRN] Developers assume no liability and are not responsible for any misuse or damage.",
+    "[WRN] By using subfinder, you also agree to the terms of the APIs used.",
+] as const;
+
+const SPINNER_FRAMES = [
+    "⠋",
+    "⠙",
+    "⠹",
+    "⠸",
+    "⠼",
+    "⠴",
+    "⠦",
+    "⠧",
+    "⠇",
+    "⠏",
+] as const;
+
+const ANSI_CURSOR_UP = "\u001B[1A";
+const ANSI_CLEAR_LINE = "\u001B[2K";
+const ANSI_CARRIAGE_RETURN = "\r";
 
 const normalizeTarget = (rawTarget: string): string | null => {
     const value = rawTarget.trim().replace(/^[\'"]|[\'"]$/g, "");
@@ -61,9 +86,9 @@ export class Q01SubfinderCommand extends Command {
      * Q01 intentionally uses the plural command name so it does not collide
      * with HackHub's native `subfinder` executable.
      *
-     * Terminal presentation is adapted from ProjectDiscovery/subfinder's
-     * banner and enumeration logging conventions. The Q01 result itself
-     * remains deterministic and offline.
+     * Terminal presentation is adapted from the current ProjectDiscovery
+     * subfinder CLI and the supplied HackHub reference capture. The Q01 result
+     * itself remains deterministic and offline.
      */
     CommandName = "subfinders";
     Description = "Enumerate subdomains for a target domain.";
@@ -83,19 +108,43 @@ export class Q01SubfinderCommand extends Command {
         for (const line of SUBFINDER_BANNER) {
             tools.println(line);
         }
+
         tools.println("");
         tools.println("\t\tprojectdiscovery.io");
         tools.println("");
-        tools.println(`[INF] Current subfinder version ${SUBFINDER_VERSION}`);
+
+        for (const warning of SUBFINDER_WARNINGS) {
+            tools.println(warning);
+        }
+
+        tools.println("");
         tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
+        tools.println("⠋");
 
         if (
             normalizedTarget !== Q01_WEB_HOST &&
             normalizedTarget !== Q01_WEB_HOME_HOST
         ) {
+            await sleep(SPINNER_DELAY_MS * 2);
+            tools.println("\u001B[1A\u001B[2K\r");
             tools.println(`[WRN] No subdomains found for ${normalizedTarget}`);
             return;
         }
+
+        const spinnerStartedAt = Date.now();
+        let spinnerFrame = 0;
+
+        while (Date.now() - spinnerStartedAt < SPINNER_DURATION_MS) {
+            await sleep(SPINNER_DELAY_MS);
+            spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES.length;
+            tools.println(
+                `${ANSI_CURSOR_UP}${ANSI_CLEAR_LINE}${ANSI_CARRIAGE_RETURN}${SPINNER_FRAMES[spinnerFrame]}`,
+            );
+        }
+
+        tools.println(
+            `${ANSI_CURSOR_UP}${ANSI_CLEAR_LINE}${ANSI_CARRIAGE_RETURN}`,
+        );
 
         const startedAt = Date.now();
         const subdomains = Q01_SUBFINDER_RESULT.split("\n");
