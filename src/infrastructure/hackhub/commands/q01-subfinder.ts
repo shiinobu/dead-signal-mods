@@ -59,8 +59,15 @@ export class Q01SubfinderCommand extends Command {
         }
 
         tools.println("");
-        tools.println("               SUBFINDER");
+        tools.println("                   __    _____           __         ");
+        tools.println("      _______  __/ /_  / __(_)___  ____/ /__  _____");
+        tools.println("     / ___/ / / / __ \\/ /_/ / __ \\/ __  / _ \\/ ___/");
+        tools.println("    (__  ) /_/ / /_/ / __/ / / / / /_/ /  __/ /    ");
+        tools.println("   /____/\\__,_/_.___/_/ /_/_/ /_/\\__,_/\\___/_/     ");
         tools.println("");
+        tools.println("\tprojectdiscovery.io");
+        tools.println("");
+        tools.println("[INF] Current subfinder version v2.15.0");
         tools.println(`[INF] Enumerating subdomains for ${normalizedTarget}`);
 
         if (
