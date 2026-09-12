@@ -6,11 +6,14 @@ import { fileURLToPath } from "node:url";
 
 import {
     DSS_RECON_EVENTS,
+    OpsCommandRegistry,
+    OpsEventBus,
     OpsRuntime,
     OpsSessionStore,
     OpsToolRegistry,
     ReconService,
 } from "../src/application/ops/index.js";
+import type { OpsEventMap } from "../src/application/ops/index.js";
 import {
     Q01_RECON_INPUT,
     Q01_RECON_PROFILE,
@@ -106,6 +109,34 @@ describe("DSS operations application foundation", () => {
         assert.equal(DSS_RECON_EVENTS.hostDiscovered, "DSS.Recon.HostDiscovered");
         assert.equal(DSS_RECON_EVENTS.completed, "DSS.Recon.Completed");
         assert.equal(DSS_RECON_EVENTS.failed, "DSS.Recon.Failed");
+    });
+
+    it("provides a canonical DSS command registry", () => {
+        const registry = new OpsCommandRegistry();
+        assert.deepEqual(registry.getAll(), [
+            {
+                name: "recon",
+                description: "Run the DEAD SIGNAL reconnaissance module.",
+                toolId: "recon",
+            },
+        ]);
+        assert.equal(registry.get("RECON")?.toolId, "recon");
+        assert.equal(registry.get("unknown"), null);
+    });
+
+    it("provides a framework-agnostic typed event bus", () => {
+        const bus = new OpsEventBus<OpsEventMap>();
+        const received: string[] = [];
+
+        const unsubscribe = bus.on("reconHostDiscovered", ({ host }) => {
+            received.push(host);
+        });
+
+        bus.emit("reconHostDiscovered", { host: "example.test" });
+        unsubscribe();
+        bus.emit("reconHostDiscovered", { host: "ignored.test" });
+
+        assert.deepEqual(received, ["example.test"]);
     });
 
     it("keeps the initial tool catalog centralized and extensible", () => {
