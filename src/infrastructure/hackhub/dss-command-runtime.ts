@@ -51,12 +51,6 @@ const emitSdkEvent = (eventName: string, payload?: unknown): void => {
     }
 };
 
-const scheduleReconSdkEvent = (eventName: string, payload?: unknown): void => {
-    setTimeout(() => {
-        emitSdkEvent(eventName, payload);
-    }, 0);
-};
-
 const emitCommandResult = (payload: {
     readonly commandLine: string;
     readonly ok: boolean;
@@ -302,19 +296,49 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
         const result = await commandRouter.execute(trimmed, {
             observer: {
                 onStarted: (event) => {
-                    scheduleReconSdkEvent(DSS_RECON_EVENTS.started, event);
+                    setTimeout(() => {
+                        try {
+                            Events.emit(DSS_RECON_EVENTS.started, event);
+                        } catch (error) {
+                            console.warn("[DSS] recon started event failed:", error);
+                        }
+                    }, 0);
                 },
                 onSourceStarted: (event) => {
-                    scheduleReconSdkEvent(DSS_RECON_EVENTS.sourceStarted, event);
+                    setTimeout(() => {
+                        try {
+                            Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
+                        } catch (error) {
+                            console.warn("[DSS] recon source-started event failed:", error);
+                        }
+                    }, 0);
                 },
                 onSourceCompleted: (event) => {
-                    scheduleReconSdkEvent(DSS_RECON_EVENTS.sourceCompleted, event);
+                    setTimeout(() => {
+                        try {
+                            Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
+                        } catch (error) {
+                            console.warn("[DSS] recon source-completed event failed:", error);
+                        }
+                    }, 0);
                 },
                 onHostDiscovered: (host) => {
-                    scheduleReconSdkEvent(DSS_RECON_EVENTS.hostDiscovered, { host });
+                    setTimeout(() => {
+                        try {
+                            Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
+                        } catch (error) {
+                            console.warn("[DSS] recon host event failed:", error);
+                        }
+                    }, 0);
                 },
                 onCompleted: (reconResult) => {
-                    scheduleReconSdkEvent(DSS_RECON_EVENTS.completed, reconResult);
+                    setTimeout(() => {
+                        try {
+                            Events.emit(DSS_RECON_EVENTS.completed, reconResult);
+                        } catch (error) {
+                            console.warn("[DSS] recon completed event failed:", error);
+                        }
+                    }, 0);
                 },
                 sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
             },
@@ -322,10 +346,16 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
 
         if (!result.ok) {
             const message = result.message ?? "Command execution failed.";
-            scheduleReconSdkEvent(DSS_RECON_EVENTS.failed, {
-                target: trimmed,
-                reason: message,
-            });
+            setTimeout(() => {
+                try {
+                    Events.emit(DSS_RECON_EVENTS.failed, {
+                        target: trimmed,
+                        reason: message,
+                    });
+                } catch (error) {
+                    console.warn("[DSS] recon failed event failed:", error);
+                }
+            }, 0);
             emitCommandResult({
                 commandLine: trimmed,
                 ok: false,
@@ -348,10 +378,16 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
             commandLine: trimmed,
             error,
         });
-        scheduleReconSdkEvent(DSS_RECON_EVENTS.failed, {
-            target: trimmed,
-            reason: message,
-        });
+        setTimeout(() => {
+            try {
+                Events.emit(DSS_RECON_EVENTS.failed, {
+                    target: trimmed,
+                    reason: message,
+                });
+            } catch (eventError) {
+                console.warn("[DSS] recon failed event failed:", eventError);
+            }
+        }, 0);
         emitCommandResult({
             commandLine: trimmed,
             ok: false,
