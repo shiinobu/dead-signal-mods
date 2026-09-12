@@ -1,6 +1,6 @@
 node_modules/
-dist/
-dist-replay/
+dist*/
+dev/
 coverage/
 .env
 .env.*
