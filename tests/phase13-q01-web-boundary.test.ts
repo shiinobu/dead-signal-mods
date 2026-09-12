@@ -65,8 +65,10 @@ describe("Phase 13 Q01 — web subdomain boundary", () => {
             (websiteRegistration.match(/Pages: WebsitePageDefinition\[\] = \[/g) ?? []).length,
             4,
         );
+        assert.match(websiteRegistration, /const rootPage = \(/);
+        assert.match(websiteRegistration, /path: \"\/\"/);
         assert.equal(
-            (websiteRegistration.match(/path: \"\/\"/g) ?? []).length,
+            (websiteRegistration.match(/\n\s+rootPage\(/g) ?? []).length,
             4,
         );
     });
