@@ -41,7 +41,7 @@ export const Q01_SUBFINDER_INPUT_VARIANTS = [
     Q01_WEB_HOST,
     Q01_WEB_HOME_HOST,
     `https://${Q01_WEB_HOST}`,
-    `https://${Q01_WEB_WEB_HOST}`,
+    `https://${Q01_WEB_HOME_HOST}`,
     `https://${Q01_WEB_HOST}/`,
     Q01_WEB_HOME_URL,
 ] as const;
