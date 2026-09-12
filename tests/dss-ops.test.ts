@@ -35,10 +35,7 @@ const appSource = readFileSync(
 const appHtml = readFileSync(
     resolve(
         fileURLToPath(
-            new URL(
-                "../public/dead-signal.html",
-                import.meta.url,
-            ),
+            new URL("../src/dead-signal.html", import.meta.url),
         ),
     ),
     "utf8",
