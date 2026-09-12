@@ -10,7 +10,7 @@ import {
 } from "../../../content/q01.js";
 
 const normalizeTarget = (rawTarget: string): string | null => {
-    const value = rawTarget.trim().replace(/^['"]|['"]$/g, "");
+    const value = rawTarget.trim().replace(/^[\'"]|[\'"]$/g, "");
 
     if (!value) {
         return null;
@@ -39,12 +39,14 @@ const getDomainArgument = (args: string[]): string | null => {
     return args[0] ?? null;
 };
 
+type Q01SubfinderTools = Parameters<Command["Run"]>[0];
+
 @RegisterCommand
 export class Q01SubfinderCommand extends Command {
     CommandName = "subfinder";
     Description = "Enumerate subdomains for a target domain.";
 
-    override async Run(tools) {
+    override async Run(tools: Q01SubfinderTools) {
         const args = tools.getArgs();
         const rawTarget = getDomainArgument(args);
         const normalizedTarget = rawTarget
