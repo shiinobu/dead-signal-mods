@@ -133,7 +133,7 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
         );
         assert.match(
             subfinderCommandSource,
-            /async Run\(tools\)/,
+            /async Run\(tools(?:\s*:\s*Q01SubfinderTools)?\)/,
         );
         assert.match(
             productionEntrySource,
