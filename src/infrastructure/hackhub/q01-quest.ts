@@ -59,12 +59,11 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-// Keep the response shape compatible with the HackHub SDK's LynxData.
-// SDK array fields are mutable string arrays and additional is a mixed array.
+// Keep the declared shape compatible with the HackHub SDK while accounting for
+// the observed in-game Lynx renderer, which renders address as a scalar value.
 interface Q01LynxResult {
     readonly ips: string[];
     readonly address: string[];
-    readonly additional?: Array<string | Record<string, unknown>>;
 }
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -75,12 +74,10 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
 
 const Q01_LYNX_RESULT: Q01LynxResult = {
     ips: [Q01_TARGET_IP],
-    address: [Q01_WEB_HOME_URL],
-    additional: [
-        "Skynet Logistics",
-        "Jakarta Operations",
-        "Canonical public host discovered from the target IP.",
-    ],
+    // HackHub 0.21.0 declares address as string[], but the observed Lynx
+    // renderer treats it as a scalar string. Preserve the SDK type contract
+    // at compile time while supplying the runtime shape that renders correctly.
+    address: Q01_WEB_HOME_URL as unknown as string[],
 };
 
 const Q01_INCOMING_MAIL_CONTENT = [
@@ -466,11 +463,21 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return false;
         }
 
-        if (!("address" in result) || !Array.isArray(result.address)) {
+        if (!("address" in result)) {
             return false;
         }
 
-        if (!result.address.includes(Q01_WEB_HOME_URL)) {
+        const address: unknown = result.address;
+
+        if (address === Q01_WEB_HOME_URL) {
+            if (!("ips" in result) || !Array.isArray(result.ips)) {
+                return false;
+            }
+
+            return result.ips.includes(Q01_TARGET_IP);
+        }
+
+        if (!Array.isArray(address) || !address.includes(Q01_WEB_HOME_URL)) {
             return false;
         }
 
