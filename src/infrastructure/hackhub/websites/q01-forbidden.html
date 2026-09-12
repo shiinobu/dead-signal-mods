@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>403 Forbidden — Skynet Logistics</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #050805;
+            --panel: #0b120b;
+            --line: #1f3a22;
+            --green: #39ff88;
+            --text: #d8f5df;
+            --muted: #79a988;
+            --danger: #ff6b6b;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(57, 255, 136, 0.08), transparent 35%),
+                var(--bg);
+        }
+
+        .terminal {
+            width: min(760px, 94vw);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(5, 8, 5, 0.96);
+            box-shadow: 0 0 46px rgba(57, 255, 136, 0.07);
+        }
+
+        .bar {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            background: #0a100a;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        main { padding: 42px; }
+
+        .prompt {
+            color: var(--green);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .prompt::before { content: "> "; }
+
+        .code {
+            margin: 0;
+            color: var(--danger);
+            font-size: clamp(46px, 9vw, 86px);
+            line-height: 0.95;
+            letter-spacing: -0.06em;
+        }
+
+        h1 {
+            margin: 12px 0;
+            color: var(--green);
+            font-size: clamp(22px, 4vw, 34px);
+        }
+
+        p {
+            max-width: 58ch;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .rule {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        code { color: var(--green); }
+
+        @media (max-width: 620px) {
+            main { padding: 30px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <header class="bar">edge-gateway@skynet-logistics.idx</header>
+        <main>
+            <div class="prompt">request rejected by access policy</div>
+            <p class="code">403</p>
+            <h1>FORBIDDEN</h1>
+            <p>
+                This endpoint is not exposed on the public operations network.
+                The requested resource is restricted to an explicitly authorized audit surface.
+            </p>
+            <div class="rule">
+                Access policy: only <code>/security</code> is exposed for the external security review.
+            </div>
+        </main>
+    </div>
+</body>
+</html>
