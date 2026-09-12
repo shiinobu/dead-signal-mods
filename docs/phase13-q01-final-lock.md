@@ -1,13 +1,13 @@
 # DEAD SIGNAL — Q01 Final Lock
 
-Date: 2026-09-12
-Status: **FINAL LOCK — LYNX/SUBDOMAIN RECON; LIVE VALIDATION PENDING**
+Date: 2026-09-13
+Status: **FINAL LOCK — LYNX/DSS RECON; LIVE VALIDATION PENDING**
 
 ## Lock Scope
 
-This document is the current implementation lock for Q01 after the approved Lynx/subdomain reconnaissance amendment.
+This document is the current implementation lock for Q01 after the approved Lynx/subdomain reconnaissance amendment and subsequent promotion of reconnaissance into the shared DEAD SIGNAL System (DSS) tool architecture.
 
-The story intent, client, target, five objectives, canonical completion state, rewards, and non-exploitative assessment boundary remain unchanged. The web discovery model is now genuinely subdomain-based.
+The story intent, client, target, five objectives, canonical completion state, rewards, and non-exploitative assessment boundary remain unchanged. The web discovery model is now genuinely subdomain-based and is executed through the reusable DSS `ReconService`.
 
 ## Canonical Identity
 
@@ -88,7 +88,7 @@ status   → 403 FORBIDDEN
 security → Q01 audit target
 ```
 
-The apex hostname is the subdomain-enumeration root and is not registered as a Website.
+The apex hostname is the reconnaissance root and is not registered as a Website.
 
 ## Lynx Discovery Contract
 
@@ -110,19 +110,38 @@ Expected `lynx` address:
 https://www.skynet-logistics.idx/
 ```
 
-The implementation uses the HackHub SDK's typed `lynx` response shape and `address` field. citeturn313821search0
+The implementation uses the HackHub SDK's typed `lynx` response shape and `address` field.
 
-## Subfinder Contract
+## DSS Recon Contract
 
-The Q01 Shell fixture accepts:
+The Q01 reconnaissance capability is no longer Q01-owned command code. It is the shared DSS `ReconService`, registered under the `OpsRuntime` boundary.
+
+Canonical player command:
 
 ```text
-subfinder -d skynet-logistics.idx
+recon -d skynet-logistics.idx
 ```
 
-and returns exactly the four locked subdomains.
+Equivalent target formatting remains accepted, including:
 
-`subfinder` is implemented as a deterministic Q01 command fixture through `Shell.addCommandData()` rather than as an external network dependency. The HackHub SDK documents `Shell.addCommandData()` as the mechanism for injecting command response data; custom command names may use arbitrary input/data. citeturn313821search0
+```text
+recon -d www.skynet-logistics.idx
+recon -d https://skynet-logistics.idx/
+recon -d https://www.skynet-logistics.idx/
+```
+
+Q01 registers profile `q01`, which returns exactly:
+
+```text
+portal.skynet-logistics.idx
+security.skynet-logistics.idx
+status.skynet-logistics.idx
+www.skynet-logistics.idx
+```
+
+The shared service owns target normalization, source sequencing, progress calculations, candidate/unique counters, animation timing, spinner frames, and result streaming. The HackHub command is only an adapter that renders service events.
+
+The command uses original DEAD SIGNAL branding. ProjectDiscovery/Subfinder branding is not part of the player-facing Q01 command vocabulary.
 
 ## Objective 04 Method
 
@@ -135,7 +154,7 @@ lynx 203.0.113.42
         ↓
 https://www.skynet-logistics.idx/
         ↓
-subfinder -d skynet-logistics.idx
+recon -d skynet-logistics.idx
         ↓
 security.skynet-logistics.idx
         ↓
@@ -231,6 +250,8 @@ RewardService         XP
 EconomyService        cash
 EndingService         endings
 HackHub adapters      SDK/game integration only
+OpsRuntime            DSS tool runtime boundary
+ReconService          shared reconnaissance behavior
 ```
 
 ## Replay Tooling
@@ -241,7 +262,7 @@ The maintained Q01 replay tool remains:
 scripts/build-q01-replay.ts
 ```
 
-Replay remains isolated from production state and production rewards while using the same reconnaissance contract.
+Replay remains isolated from production state and production rewards while using the same DSS reconnaissance profile.
 
 ## Production Validation Status
 
@@ -264,7 +285,7 @@ lynx 203.0.113.42
  ↓
 verify www.skynet-logistics.idx
  ↓
-subfinder -d skynet-logistics.idx
+recon -d skynet-logistics.idx
  ↓
 verify exactly four subdomains
  ↓
@@ -291,4 +312,4 @@ Until that real-game gate is observed, Q02 must not be activated in production.
 
 **Q01 REVISED IMPLEMENTATION LOCKED.**
 
-The Q01 target is now a genuine subdomain discovered through Lynx and Subfinder. The four required subdomains are `www`, `portal`, `status`, and `security`; only `security` is the audit target, while `portal` and `status` are forbidden surfaces. Adrian's email omits the direct web URL and report answers. Further changes require explicit change control after this lock.
+The Q01 target is now a genuine subdomain discovery flow driven by the reusable DSS `ReconService`. The four required subdomains are `www`, `portal`, `status`, and `security`; only `security` is the audit target, while `portal` and `status` are forbidden surfaces. Adrian's email omits the direct web URL and report answers. Further changes require explicit change control after this lock.
