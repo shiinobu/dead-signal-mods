@@ -28,42 +28,38 @@ adrian.cole@deadsignal.lock
 
 ```text
 Review audit scope
-Scan 203.0.113.42
+Scan the ip target
 Identify exposed services
 Perform basic vulnerability checks
 Submit audit report
 ```
 
-5. Confirm the client is **Skynet Logistics** and the target is `203.0.113.42`.
-6. Open Terminal and run exactly once:
+5. Confirm the client is **Skynet Logistics** and the target is `203.0.113.42` in the audit mail.
+6. Open Terminal and run the scan command from Objective 02:
 
 ```bash
-nmap 203.0.113.42
+nmap
 ```
+
+The implementation also accepts `nmap 203.0.113.42` for compatibility with the terminal runtime.
 
 7. Confirm the result contains:
 
 ```text
-22/tcp  OPEN  ssh
-80/tcp  OPEN  http
-443/tcp OPEN  https
+22/tcp  CLOSED  ssh
+80/tcp  CLOSED  http
+443/tcp OPEN    https
 ```
 
 8. Confirm Objectives 02 and 03 are satisfied.
 9. Run the same Nmap command again. **Objective 04 must remain incomplete.**
-10. Open the Skynet Logistics security surface in the FirebearBrowser using either:
-
-```text
-http://skynet-logistics.test/security
-```
-
-or:
+10. Open the Skynet Logistics security surface in the FirebearBrowser using:
 
 ```text
 https://skynet-logistics.test/security
 ```
 
-11. Confirm the page shows the Q01 audit findings, including the three exposed services and `No critical vulnerabilities identified.`
+11. Confirm the page shows the Q01 audit findings, including the two closed services, the exposed HTTPS service, and `No critical vulnerabilities identified.`
 12. Confirm Objective 04 completes from the `Browser.Meta` interaction.
 13. Submit the audit report using the canonical mail contract:
 
@@ -72,15 +68,15 @@ To: adrian.cole@deadsignal.lock
 Subject: Security Audit — Jakarta
 
 Target: Skynet Logistics
-Open Ports: 22, 80, 443
+Open Ports: 443
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
 
-The exact report text is included in Adrian's contract mail. The interim implementation intentionally does not require a custom keyboard or mail-composer API that is not exposed by the SDK; the player uses the normal in-game mail compose/reply flow.
+The exact report text is included in Adrian's contract mail. The player uses the normal in-game mail compose/reply flow.
 
-14. Confirm Objective 05 completes and the development quest finishes.
+14. Confirm Objective 05 completes when the sent subject and plain-text body match the canonical report contract, then confirm the development quest finishes.
 15. Confirm the replay build does not grant production XP/money and does not set:
 
 ```text
@@ -91,11 +87,11 @@ dead_signal.q01.completed
 
 ## Objective 04 Boundary
 
-Objective 04 must be satisfied only by the browser security-review interaction after service identification:
+Objective 04 must be satisfied only by the HTTPS security-review interaction after service identification:
 
 ```text
 Browser.Meta
-  protocol: http: | https:
+  protocol: https:
   hostname: skynet-logistics.test
   pathname: /security
 ```
@@ -119,7 +115,7 @@ subject   = Security Audit — Jakarta
 body      = Q01_REPORT_BODY
 ```
 
-Until a supported native draft/prefill mechanism is verified, do not introduce a custom mail UI contract solely to simulate prefilled drafts. The current implementation provides the exact values in the briefing and validates the sent message against them.
+Objective 05 is not completed from arbitrary content: the sent subject and plain-text body must match the canonical contract.
 
 ## Production Gate
 
