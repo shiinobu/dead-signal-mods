@@ -36,6 +36,16 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
+interface Q01SshCommandInput {
+    readonly host: string;
+    readonly key: string;
+}
+
+interface Q01SshCommandData {
+    readonly ip: string;
+    readonly status: "OPEN" | "CLOSE";
+}
+
 const Q01_SSH_INTERNAL_IP = "10.0.0.2";
 
 const Q01_NMAP_RESULT: Q01NmapPort[] = [
@@ -55,6 +65,16 @@ const Q01_REPORT_REQUIRED_CONTENT = [
     "No critical vulnerabilities identified.",
     "Further internal assessment is recommended.",
 ];
+
+const Q01_SSH_COMMAND_INPUT: Q01SshCommandInput = {
+    host: `${Q01_SSH_USERNAME}@${Q01_TARGET_IP}`,
+    key: "",
+};
+
+const Q01_SSH_COMMAND_RESULT: Q01SshCommandData = {
+    ip: Q01_TARGET_IP,
+    status: "OPEN",
+};
 
 @RegisterQuest
 export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
@@ -218,6 +238,11 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
 
     override OnObjectivesStart() {
         Shell.addCommandData("nmap", this.Data.targetIp, Q01_NMAP_RESULT);
+        Shell.addCommandData(
+            "ssh",
+            Q01_SSH_COMMAND_INPUT,
+            Q01_SSH_COMMAND_RESULT,
+        );
 
         this.Events.on("Terminal.Command", (data) => {
             this.handleTerminalCommand(data as TerminalCommandData);
@@ -245,15 +270,22 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
     override OnComplete() {
         this.sendMail(1);
         Shell.removeCommandData("nmap", this.Data.targetIp);
+        Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
         Network.destroyNetwork(this.Data.targetIp);
     }
 
     override OnAbandon() {
         Shell.removeCommandData("nmap", this.Data.targetIp);
+        Shell.removeCommandData("ssh", Q01_SSH_COMMAND_INPUT);
         Network.destroyNetwork(this.Data.targetIp);
     }
 
     private handleTerminalCommand(data: TerminalCommandData): void {
+        if (data.command === "ssh") {
+            this.handleSshCommand(data.args);
+            return;
+        }
+
         if (
             data.command !== "nmap" ||
             data.args[0] !== this.Data.targetIp
@@ -283,6 +315,40 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
         }
     }
 
+    private handleSshCommand(args: readonly string[]): void {
+        if (
+            args.length !== 2 ||
+            args[0] !== "-h" ||
+            args[1] !== Q01_SSH_COMMAND_INPUT.host ||
+            !this.Data.servicesIdentified
+        ) {
+            return;
+        }
+
+        const result = Shell.getCommandData(
+            "ssh",
+            Q01_SSH_COMMAND_INPUT,
+        );
+
+        if (!this.isExpectedSshCommandResult(result)) {
+            return;
+        }
+
+        if (
+            result.ip !== this.Data.targetIp ||
+            result.status !== "OPEN"
+        ) {
+            return;
+        }
+
+        if (!this.Data.sshConnected) {
+            this.SetData("sshConnected", true);
+            this.completeObjective(
+                Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
+            );
+        }
+    }
+
     private handleSshConnection(ip: string): void {
         if (
             ip !== this.Data.targetIp ||
@@ -297,6 +363,19 @@ export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
                 Q01_OBJECTIVE_IDS.basicVulnerabilityChecks,
             );
         }
+    }
+
+    private isExpectedSshCommandResult(
+        result: unknown,
+    ): result is Q01SshCommandData {
+        return (
+            typeof result === "object" &&
+            result !== null &&
+            "ip" in result &&
+            "status" in result &&
+            typeof result.ip === "string" &&
+            (result.status === "OPEN" || result.status === "CLOSE")
+        );
     }
 
     private isExpectedNmapResult(
