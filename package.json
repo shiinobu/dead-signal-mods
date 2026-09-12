@@ -9,6 +9,7 @@
     "build:replay:q01": "tsx scripts/build-q01-replay.ts",
     "build:smoke:ssh": "tsx scripts/build-ssh-native-smoke.ts",
     "build:smoke:ssh-random": "tsx scripts/build-ssh-native-random-smoke.ts",
+    "build:smoke:ssh-full": "tsx scripts/build-ssh-full-scaffold-smoke.ts",
     "dev": "tsx scripts/dev-watch.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "tsx --test"
