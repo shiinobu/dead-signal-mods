@@ -6,6 +6,7 @@ import appHTML from "../../../dead-signal.html";
 
 import {
     executeDssCommand,
+    triggerDssCommand,
 } from "../dss-command-runtime.js";
 import {
     opsRuntime,
@@ -34,7 +35,13 @@ const DSS_DIRECT_INTERACTION_PATCH = `
     sdk.Events.emit('DSS.Command.Request', { commandLine });
     return true;
   };
-  const startRecon = (target) => emit('recon -d ' + target);
+  const startRecon = (target) => {
+    const trigger = globalThis.startReconNow;
+    if (typeof trigger === 'function') {
+      return trigger(target) !== false;
+    }
+    return emit('recon -d ' + target);
+  };
   const bind = () => {
     const reconForm = document.getElementById('recon-form');
     const reconButton = document.getElementById('recon-run');
@@ -42,7 +49,7 @@ const DSS_DIRECT_INTERACTION_PATCH = `
     if (reconButton && !reconButton.dataset.dssDirectBound) {
       reconButton.type = 'button';
       reconButton.dataset.dssDirectBound = 'true';
-      reconButton.addEventListener('click', async () => {
+      reconButton.addEventListener('click', () => {
         const target = reconTarget?.value.trim();
         if (!target || reconButton.disabled) return;
         reconButton.disabled = true;
@@ -65,9 +72,9 @@ const DSS_DIRECT_INTERACTION_PATCH = `
         if (results) results.innerHTML = '<div class="empty">Scanning...</div>';
         if (sourceList) sourceList.innerHTML = '<div class="empty">Loading profile...</div>';
         try {
-          const ok = await startRecon(target);
+          const ok = startRecon(target);
           if (!ok) {
-            if (state) state.textContent = 'DSS reconnaissance runtime rejected the target.';
+            if (state) state.textContent = 'DSS reconnaissance trigger unavailable.';
             reconButton.disabled = false;
           }
         } catch (error) {
@@ -160,6 +167,7 @@ export class DeadSignalApp extends App {
         getCommandCatalog: (): readonly OpsCommandDefinition[] => opsRuntime.commands.getAll(),
         getSession: (): OpsSessionSnapshot => opsRuntime.session.getSnapshot(),
         startRecon: (target: string): Promise<boolean> => executeDssCommand(`recon -d ${target}`),
+        startReconNow: (target: string): boolean => triggerDssCommand(`recon -d ${target}`),
         executeCommand: (commandLine: string): Promise<boolean> => executeDssCommand(commandLine),
     };
 }
