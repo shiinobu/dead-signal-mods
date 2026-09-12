@@ -24,7 +24,7 @@ describe("DSS native window sizing", () => {
         );
         assert.match(
             appSource,
-            /MinSize\s*=\s*\{\s*width:\s*1180,\s*height:\s*740\s*\}/,
+            /MinSize\s*=\s*\{\s*width:\s*1200,\s*height:\s*780\s*\}/,
         );
     });
 });
