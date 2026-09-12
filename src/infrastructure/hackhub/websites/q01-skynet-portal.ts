@@ -32,7 +32,7 @@ export class Q01SkynetLogisticsWebsite extends Website {
     Host = Q01_WEB_HOST;
     Icon = "";
 
-    // The root domain is the public homepage. Four additional web surfaces
+    // The root domain is the public homepage. Four non-root web surfaces
     // are registered; only /security is the authorized audit target.
     Pages: WebsitePageDefinition[] = [
         {
