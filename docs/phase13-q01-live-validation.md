@@ -18,7 +18,12 @@ Use a fresh replay build after each code change. Each replay build receives a ne
 
 1. Confirm `THE CONTRACT — DEV REPLAY` is visible in HackHub.
 2. Accept the development quest.
-3. Confirm Adrian's Q01 contract mail arrives.
+3. Confirm Adrian's Q01 contract mail arrives from:
+
+```text
+adrian.cole@deadsignal.lock
+```
+
 4. Confirm the five locked objective names are presented in this order:
 
 ```text
@@ -60,15 +65,20 @@ https://skynet-logistics.test/security
 
 11. Confirm the page shows the Q01 audit findings, including the three exposed services and `No critical vulnerabilities identified.`
 12. Confirm Objective 04 completes from the `Browser.Meta` interaction.
-13. Submit the audit report with:
+13. Submit the audit report using the canonical mail contract:
 
 ```text
+To: adrian.cole@deadsignal.lock
+Subject: Security Audit — Jakarta
+
 Target: Skynet Logistics
 Open Ports: 22, 80, 443
 
 No critical vulnerabilities identified.
 Further internal assessment is recommended.
 ```
+
+The exact report text is included in Adrian's contract mail. The interim implementation intentionally does not require a custom keyboard or mail-composer API that is not exposed by the SDK; the player uses the normal in-game mail compose/reply flow.
 
 14. Confirm Objective 05 completes and the development quest finishes.
 15. Confirm the replay build does not grant production XP/money and does not set:
@@ -91,6 +101,25 @@ Browser.Meta
 ```
 
 Native SSH is not part of the Q01 acceptance path.
+
+## Email Boundary
+
+Adrian's sender identity is canonical and must never be randomized:
+
+```text
+character.adrian.cole
+adrian.cole@deadsignal.lock
+```
+
+Quest-critical submission values are canonical:
+
+```text
+recipient = adrian.cole@deadsignal.lock
+subject   = Security Audit — Jakarta
+body      = Q01_REPORT_BODY
+```
+
+Until a supported native draft/prefill mechanism is verified, do not introduce a custom mail UI contract solely to simulate prefilled drafts. The current implementation provides the exact values in the briefing and validates the sent message against them.
 
 ## Production Gate
 
