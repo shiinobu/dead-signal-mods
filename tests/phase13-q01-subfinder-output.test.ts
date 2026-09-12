@@ -42,7 +42,19 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         );
     });
 
-    it("implements the in-place braille spinner used by the reference capture", () => {
+    it("probes native CommandTools.clear() instead of emitting unsupported ANSI control sequences", () => {
+        assert.match(subfinderCommandSource, /tools\.clear\(\);/);
+        assert.match(
+            subfinderCommandSource,
+            /tools\.sleep\(SPINNER_DELAY_MS\)/,
+        );
+        assert.doesNotMatch(subfinderCommandSource, /\\u001B\[/);
+        assert.doesNotMatch(subfinderCommandSource, /ANSI_CURSOR_UP/);
+        assert.doesNotMatch(subfinderCommandSource, /ANSI_CLEAR_LINE/);
+        assert.doesNotMatch(subfinderCommandSource, /ANSI_CARRIAGE_RETURN/);
+    });
+
+    it("uses the reference braille frame sequence", () => {
         assert.match(subfinderCommandSource, /SPINNER_FRAMES = \[/);
         assert.match(subfinderCommandSource, /"⠋"/);
         assert.match(subfinderCommandSource, /"⠙"/);
@@ -54,26 +66,18 @@ describe("Phase 13 Q01 — subfinder presentation", () => {
         assert.match(subfinderCommandSource, /"⠧"/);
         assert.match(subfinderCommandSource, /"⠇"/);
         assert.match(subfinderCommandSource, /"⠏"/);
-        assert.match(subfinderCommandSource, /ANSI_CURSOR_UP = "\\u001B\[1A"/);
-        assert.match(subfinderCommandSource, /ANSI_CLEAR_LINE = "\\u001B\[2K"/);
-        assert.match(subfinderCommandSource, /ANSI_CARRIAGE_RETURN = "\\r"/);
         assert.match(subfinderCommandSource, /SPINNER_DELAY_MS = 100/);
         assert.match(subfinderCommandSource, /SPINNER_DURATION_MS = 2400/);
-        assert.match(
-            subfinderCommandSource,
-            /`\$\{ANSI_CURSOR_UP\}\$\{ANSI_CLEAR_LINE\}\$\{ANSI_CARRIAGE_RETURN\}\$\{SPINNER_FRAMES\[spinnerFrame\]\}`/,
-        );
     });
 
-    it("streams the deterministic Q01 result after the spinner instead of using an external enumerator", () => {
-        assert.match(subfinderCommandSource, /RESULT_DELAY_MS = 90/);
+    it("streams the deterministic Q01 result after the clear-based animation", () => {
         assert.match(
             subfinderCommandSource,
             /Q01_SUBFINDER_RESULT\.split\(\"\\n\"\)/,
         );
         assert.match(
             subfinderCommandSource,
-            /await sleep\(RESULT_DELAY_MS\);[\s\S]*tools\.println\(subdomain\)/,
+            /await tools\.sleep\(RESULT_DELAY_MS\);[\s\S]*tools\.println\(subdomain\)/,
         );
         assert.match(
             subfinderCommandSource,
