@@ -59,11 +59,11 @@ interface Q01NmapPort {
     readonly service: string;
 }
 
-// Keep the response shape compatible with HackHub SDK's LynxData.
-// In particular, SDK array fields are mutable string[] rather than readonly arrays.
+// Keep the response shape compatible with the HackHub SDK's LynxData.
+// The SDK defines LynxData.address and LynxData.ips as mutable string arrays.
 interface Q01LynxResult {
     readonly ips: string[];
-    readonly address: string;
+    readonly address: string[];
     readonly additional?: string;
 }
 
@@ -75,7 +75,7 @@ const Q01_NMAP_RESULT: Q01NmapPort[] = [
 
 const Q01_LYNX_RESULT: Q01LynxResult = {
     ips: [Q01_TARGET_IP],
-    address: Q01_WEB_HOME_URL,
+    address: [Q01_WEB_HOME_URL],
     additional: [
         "Skynet Logistics",
         "Jakarta Operations",
@@ -466,7 +466,11 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
             return false;
         }
 
-        if (!("address" in result) || result.address !== Q01_WEB_HOME_URL) {
+        if (!("address" in result) || !Array.isArray(result.address)) {
+            return false;
+        }
+
+        if (!result.address.includes(Q01_WEB_HOME_URL)) {
             return false;
         }
 
