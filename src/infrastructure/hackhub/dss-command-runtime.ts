@@ -44,10 +44,7 @@ const emitSdkEvent = (eventName: string, payload?: unknown): void => {
             payload,
         );
     } catch (error) {
-        console.warn(
-            `[DSS] SDK event emission failed for ${eventName}:`,
-            error,
-        );
+        console.warn(`[DSS] SDK event emission failed for ${eventName}:`, error);
     }
 };
 
@@ -225,6 +222,87 @@ const executeNativeTerminalCommand = async (
     };
 };
 
+const reconCommand = async (commandLine: string): Promise<boolean> => {
+    const resultPromise = commandRouter.execute(commandLine, {
+        observer: {
+            onStarted: (event) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_RECON_EVENTS.started, event);
+                    } catch (error) {
+                        console.warn("[DSS] recon started event failed:", error);
+                    }
+                }, 0);
+            },
+            onSourceStarted: (event) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
+                    } catch (error) {
+                        console.warn("[DSS] recon source-started event failed:", error);
+                    }
+                }, 0);
+            },
+            onSourceCompleted: (event) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
+                    } catch (error) {
+                        console.warn("[DSS] recon source-completed event failed:", error);
+                    }
+                }, 0);
+            },
+            onHostDiscovered: (host) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
+                    } catch (error) {
+                        console.warn("[DSS] recon host event failed:", error);
+                    }
+                }, 0);
+            },
+            onCompleted: (result) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_RECON_EVENTS.completed, result);
+                    } catch (error) {
+                        console.warn("[DSS] recon completed event failed:", error);
+                    }
+                }, 0);
+            },
+            sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+        },
+    });
+
+    const result = await resultPromise;
+
+    if (!result.ok) {
+        const message = result.message ?? "Command execution failed.";
+        setTimeout(() => {
+            try {
+                Events.emit(DSS_RECON_EVENTS.failed, {
+                    target: commandLine,
+                    reason: message,
+                });
+            } catch (error) {
+                console.warn("[DSS] recon failed event failed:", error);
+            }
+        }, 0);
+        emitCommandResult({
+            commandLine,
+            ok: false,
+            message,
+        });
+        return false;
+    }
+
+    emitCommandResult({
+        commandLine,
+        ok: true,
+    });
+    return true;
+};
+
 export const executeDssCommand = async (commandLine: string): Promise<boolean> => {
     const trimmed = commandLine.trim();
 
@@ -249,42 +327,44 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
     commandRunning = true;
 
     try {
-        const nativeResult = await executeNativeTerminalCommand(trimmed);
+        const parsed = parseCommandLine(trimmed);
 
-        if (nativeResult) {
-            const nativeResultPayload = nativeResult.message === undefined
-                ? {
-                    commandLine: trimmed,
-                    ok: nativeResult.ok,
-                }
-                : {
-                    commandLine: trimmed,
-                    ok: nativeResult.ok,
-                    message: nativeResult.message,
-                };
+        if (parsed.command === "nmap" || parsed.command === "lynx") {
+            const nativeResult = await executeNativeTerminalCommand(trimmed);
 
-            emitCommandResult(nativeResultPayload);
-            return nativeResult.ok;
+            if (nativeResult) {
+                const nativeResultPayload = nativeResult.message === undefined
+                    ? {
+                        commandLine: trimmed,
+                        ok: nativeResult.ok,
+                    }
+                    : {
+                        commandLine: trimmed,
+                        ok: nativeResult.ok,
+                        message: nativeResult.message,
+                    };
+
+                emitCommandResult(nativeResultPayload);
+                return nativeResult.ok;
+            }
         }
 
-        if (trimmed.toLowerCase() === "help") {
-            const message = [
-                "Available DSS commands:",
-                "  recon -d <domain>",
-                "  nmap [ip]",
-                "  lynx <ip-or-url>",
-                "  clear",
-            ].join("\n");
-
+        if (parsed.command === "help" && parsed.args.length === 0) {
             emitCommandResult({
                 commandLine: trimmed,
                 ok: true,
-                message,
+                message: [
+                    "Available DSS commands:",
+                    "  recon -d <domain>",
+                    "  nmap [ip]",
+                    "  lynx <ip-or-url>",
+                    "  clear",
+                ].join("\n"),
             });
             return true;
         }
 
-        if (trimmed.toLowerCase() === "clear") {
+        if (parsed.command === "clear" && parsed.args.length === 0) {
             emitCommandResult({
                 commandLine: trimmed,
                 ok: true,
@@ -293,73 +373,26 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
             return true;
         }
 
+        if (parsed.command === "recon") {
+            return await reconCommand(trimmed);
+        }
+
         const result = await commandRouter.execute(trimmed, {
             observer: {
-                onStarted: (event) => {
-                    setTimeout(() => {
-                        try {
-                            Events.emit(DSS_RECON_EVENTS.started, event);
-                        } catch (error) {
-                            console.warn("[DSS] recon started event failed:", error);
-                        }
-                    }, 0);
-                },
-                onSourceStarted: (event) => {
-                    setTimeout(() => {
-                        try {
-                            Events.emit(DSS_RECON_EVENTS.sourceStarted, event);
-                        } catch (error) {
-                            console.warn("[DSS] recon source-started event failed:", error);
-                        }
-                    }, 0);
-                },
-                onSourceCompleted: (event) => {
-                    setTimeout(() => {
-                        try {
-                            Events.emit(DSS_RECON_EVENTS.sourceCompleted, event);
-                        } catch (error) {
-                            console.warn("[DSS] recon source-completed event failed:", error);
-                        }
-                    }, 0);
-                },
-                onHostDiscovered: (host) => {
-                    setTimeout(() => {
-                        try {
-                            Events.emit(DSS_RECON_EVENTS.hostDiscovered, { host });
-                        } catch (error) {
-                            console.warn("[DSS] recon host event failed:", error);
-                        }
-                    }, 0);
-                },
-                onCompleted: (reconResult) => {
-                    setTimeout(() => {
-                        try {
-                            Events.emit(DSS_RECON_EVENTS.completed, reconResult);
-                        } catch (error) {
-                            console.warn("[DSS] recon completed event failed:", error);
-                        }
-                    }, 0);
-                },
+                onStarted: (event) => emitSdkEvent(DSS_RECON_EVENTS.started, event),
+                onSourceStarted: (event) => emitSdkEvent(DSS_RECON_EVENTS.sourceStarted, event),
+                onSourceCompleted: (event) => emitSdkEvent(DSS_RECON_EVENTS.sourceCompleted, event),
+                onHostDiscovered: (host) => emitSdkEvent(DSS_RECON_EVENTS.hostDiscovered, { host }),
+                onCompleted: (result) => emitSdkEvent(DSS_RECON_EVENTS.completed, result),
                 sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
             },
         });
 
         if (!result.ok) {
-            const message = result.message ?? "Command execution failed.";
-            setTimeout(() => {
-                try {
-                    Events.emit(DSS_RECON_EVENTS.failed, {
-                        target: trimmed,
-                        reason: message,
-                    });
-                } catch (error) {
-                    console.warn("[DSS] recon failed event failed:", error);
-                }
-            }, 0);
             emitCommandResult({
                 commandLine: trimmed,
                 ok: false,
-                message,
+                message: result.message ?? "Command execution failed.",
             });
             return false;
         }
@@ -374,20 +407,12 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
         const message = error instanceof Error
             ? error.message
             : "Unknown command execution error.";
+
         console.error("[DSS] command execution failed", {
             commandLine: trimmed,
             error,
         });
-        setTimeout(() => {
-            try {
-                Events.emit(DSS_RECON_EVENTS.failed, {
-                    target: trimmed,
-                    reason: message,
-                });
-            } catch (eventError) {
-                console.warn("[DSS] recon failed event failed:", eventError);
-            }
-        }, 0);
+
         emitCommandResult({
             commandLine: trimmed,
             ok: false,
