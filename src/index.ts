@@ -1,4 +1,4 @@
-import "./infrastructure/hackhub/commands/q01-subfinder.js";
+import "./infrastructure/hackhub/commands/recon.js";
 import "./infrastructure/hackhub/websites/q01-skynet-portal.js";
 import "./infrastructure/hackhub/q01-quest.js";
 
@@ -7,11 +7,16 @@ import {
     RegisterModPackage,
 } from "@hotbunny/hackhub-content-sdk";
 
+import {
+    Q01_RECON_PROFILE,
+} from "./content/q01.js";
 import { gameRuntime } from "./infrastructure/hackhub/runtime.js";
+import { opsRuntime } from "./application/ops-runtime.js";
 
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {
     override OnModPackageLoaded() {
+        opsRuntime.recon.registerProfile(Q01_RECON_PROFILE);
         gameRuntime.persistence.load();
         console.log("DEAD SIGNAL mod loaded!");
     }
