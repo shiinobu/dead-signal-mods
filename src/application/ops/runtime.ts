@@ -1,4 +1,7 @@
 import {
+    OpsCommandRegistry,
+} from "./command-registry.js";
+import {
     ReconService,
     type ReconObserver,
     type ReconProgress,
@@ -12,17 +15,20 @@ import {
 } from "./tool-registry.js";
 
 export interface OpsRuntimeServices {
+    readonly commands: OpsCommandRegistry;
     readonly recon: ReconService;
     readonly session: OpsSessionStore;
     readonly tools: OpsToolRegistry;
 }
 
 export class OpsRuntime {
+    readonly commands: OpsCommandRegistry;
     readonly recon: ReconService;
     readonly session: OpsSessionStore;
     readonly tools: OpsToolRegistry;
 
     constructor(services?: Partial<OpsRuntimeServices>) {
+        this.commands = services?.commands ?? new OpsCommandRegistry();
         this.recon = services?.recon ?? new ReconService();
         this.session = services?.session ?? new OpsSessionStore();
         this.tools = services?.tools ?? new OpsToolRegistry();
