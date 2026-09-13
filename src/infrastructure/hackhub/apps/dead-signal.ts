@@ -120,12 +120,6 @@ const DSS_DIRECT_INTERACTION_PATCH = `
     renderReconSession(session);
   };
 
-  const installReconScroller=()=>{
-    const view=$('view-recon');
-    if(!view)return;
-    view.dataset.dssReconScrollReady='true';
-  };
-
   let reconProjectionTimer=setInterval(projectReconSession,100);
 
   const invokeCommand=async(commandLine)=>{
@@ -137,7 +131,6 @@ const DSS_DIRECT_INTERACTION_PATCH = `
   const startRecon=(target)=>invokeCommand('recon -d '+target);
 
   const bind=()=>{
-    installReconScroller();
     const reconForm=$('recon-form');
     const reconButton=$('recon-run');
     const reconTarget=$('recon-target');
@@ -234,40 +227,9 @@ const DSS_DIRECT_INTERACTION_PATCH = `
 })();
 </script>`;
 
-const DSS_RECON_SCROLL_STYLE = `
-<style>
-.content{
-  position:relative;
-}
-.view-recon.active{
-  display:block;
-  position:absolute;
-  top:26px;
-  right:26px;
-  bottom:16px;
-  left:26px;
-  width:auto;
-  height:auto;
-  min-height:0;
-  max-height:none;
-  overflow-y:scroll;
-  overflow-x:hidden;
-  padding:0 10px 24px 0;
-  box-sizing:border-box;
-  scrollbar-gutter:stable;
-}
-.view-recon.active > .dss-recon-scroll{
-  display:contents;
-}
-.view-recon.active::-webkit-scrollbar{width:10px}
-.view-recon.active::-webkit-scrollbar-track{background:#061015}
-.view-recon.active::-webkit-scrollbar-thumb{background:#18343d;border-radius:8px}
-.view-recon.active{scrollbar-width:thin;scrollbar-color:#18343d #061015}
-</style>`;
-
 const dssHTML = appHTML.includes('</body>')
-    ? appHTML.replace('</body>', `${DSS_DIRECT_INTERACTION_PATCH}${DSS_RECON_SCROLL_STYLE}</body>`)
-    : `${appHTML}${DSS_DIRECT_INTERACTION_PATCH}${DSS_RECON_SCROLL_STYLE}`;
+    ? appHTML.replace('</body>', `${DSS_DIRECT_INTERACTION_PATCH}</body>`)
+    : `${appHTML}${DSS_DIRECT_INTERACTION_PATCH}`;
 
 @RegisterApp
 export class DeadSignalApp extends App {

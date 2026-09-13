@@ -11,3 +11,4 @@ coverage/
 .idea/
 /dev/replay-id.generated.ts
 /.dev-q01-replay-run
+.claude/rules/
