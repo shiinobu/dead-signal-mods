@@ -1,3 +1,7 @@
+import {
+    buildReconProfileFromNativeSubdomains,
+    synthesizeGenericReconProfile,
+} from "../../domain/recon/index.js";
 import type {
     ReconAnimationConfig,
     ReconProgress,
@@ -5,6 +9,14 @@ import type {
     ReconResult,
     ReconSourceDefinition,
 } from "../../domain/recon/index.js";
+
+// Resolves subdomains from HackHub's own native subfinder command (or any
+// other live source), or null when unavailable/timed out. Kept as an
+// injectable hook so this domain-agnostic service never imports the HackHub
+// SDK directly — the infrastructure layer wires in the real implementation.
+export type NativeSubdomainResolver = (
+    domain: string,
+) => Promise<readonly string[] | null>;
 
 export interface ReconStartedEvent {
     readonly profileId: string;
@@ -24,6 +36,7 @@ export interface ReconObserver {
 
 export interface ReconServiceOptions {
     readonly animation?: Partial<ReconAnimationConfig>;
+    readonly resolveNativeSubdomains?: NativeSubdomainResolver;
 }
 
 export const DEFAULT_RECON_ANIMATION: ReconAnimationConfig = {
@@ -74,12 +87,18 @@ export const normalizeReconTarget = (rawTarget: string): string | null => {
 export class ReconService {
     private readonly profiles = new Map<string, ReconProfile>();
     private readonly animation: ReconAnimationConfig;
+    private nativeResolver: NativeSubdomainResolver | null;
 
     constructor(options: ReconServiceOptions = {}) {
         this.animation = {
             ...DEFAULT_RECON_ANIMATION,
             ...options.animation,
         };
+        this.nativeResolver = options.resolveNativeSubdomains ?? null;
+    }
+
+    setNativeSubdomainResolver(resolver: NativeSubdomainResolver | null): void {
+        this.nativeResolver = resolver;
     }
 
     registerProfile(profile: ReconProfile): void {
@@ -128,13 +147,7 @@ export class ReconService {
         return [...this.profiles.values()];
     }
 
-    resolveProfile(rawTarget: string): ReconProfile | null {
-        const normalizedTarget = normalizeReconTarget(rawTarget);
-
-        if (!normalizedTarget) {
-            return null;
-        }
-
+    private findCuratedProfile(normalizedTarget: string): ReconProfile | null {
         for (const profile of this.profiles.values()) {
             if (
                 profile.targets.some(
@@ -148,6 +161,36 @@ export class ReconService {
         return null;
     }
 
+    resolveProfile(rawTarget: string): ReconProfile | null {
+        const normalizedTarget = normalizeReconTarget(rawTarget);
+
+        if (!normalizedTarget) {
+            return null;
+        }
+
+        // Synchronous resolution only checks curated profiles and the
+        // deterministic synthetic fallback — the native subfinder lookup is
+        // asynchronous and only attempted from run() below.
+        return this.findCuratedProfile(normalizedTarget)
+            ?? synthesizeGenericReconProfile(normalizedTarget);
+    }
+
+    private async resolveFallbackProfile(target: string): Promise<ReconProfile> {
+        if (this.nativeResolver) {
+            try {
+                const subdomains = await this.nativeResolver(target);
+                if (subdomains && subdomains.length > 0) {
+                    return buildReconProfileFromNativeSubdomains(target, subdomains);
+                }
+            } catch {
+                // Native lookup failed (unavailable, timed out, threw) —
+                // fall through to the deterministic synthetic profile.
+            }
+        }
+
+        return synthesizeGenericReconProfile(target);
+    }
+
     getAnimationConfig(): ReconAnimationConfig {
         return this.animation;
     }
@@ -159,11 +202,8 @@ export class ReconService {
             return null;
         }
 
-        const profile = this.resolveProfile(target);
-
-        if (!profile) {
-            return null;
-        }
+        const profile = this.findCuratedProfile(target)
+            ?? await this.resolveFallbackProfile(target);
 
         const startedAt = Date.now();
         observer.onStarted({

@@ -12,8 +12,10 @@ import { Q01_RECON_PROFILE } from "./content/q01.js";
 import { opsRuntime } from "./application/ops/runtime.js";
 import { gameRuntime } from "./infrastructure/hackhub/runtime.js";
 import { registerDssCommandBridge } from "./infrastructure/hackhub/dss-command-runtime.js";
+import { resolveNativeSubdomains } from "./infrastructure/hackhub/native-subfinder-bridge.js";
 
 opsRuntime.recon.registerProfile(Q01_RECON_PROFILE);
+opsRuntime.recon.setNativeSubdomainResolver(resolveNativeSubdomains);
 
 @RegisterModPackage
 export default class DeadSignalMod extends Bootstrap {
