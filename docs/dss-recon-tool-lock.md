@@ -58,9 +58,37 @@ www.skynet-logistics.idx
 
 Future quests may register additional recon profiles without adding quest-specific command implementations.
 
+## Fallback For Unregistered Targets (amended 2026-09-13)
+
+A target with no registered `ReconProfile` no longer fails outright. `ReconService.run()` resolves in this order:
+
+```text
+1. Curated ReconProfile (exact target match, e.g. Q01)
+2. Native subfinder (Shell.exec + Subfinder.Results, 6s timeout, best-effort)
+3. Deterministic synthetic subdomain generator (always succeeds)
+```
+
+The native path was live-tested and did not return real subfinder data when
+triggered from the DSS Desktop App's export boundary (see
+[dss-toolkit-expansion.md](dss-toolkit-expansion.md) for the finding); the
+code remains in place as a best-effort attempt with a safe fallback, since a
+future SDK version or a different trigger boundary may make it work. The
+synthetic generator is deterministic (same target always yields the same
+hosts) and is implemented in `src/domain/recon/recon.ts` as
+`synthesizeGenericReconProfile`. Curated profiles always take priority over
+both fallback tiers, so Q01 (and any future quest profile) is unaffected.
+
 ## Presentation
 
-The visible command branding is original DSS branding. Third-party Subfinder branding is not part of the player-facing command.
+The visible command branding is original DSS branding. Third-party Subfinder branding is not part of the player-facing command **output** — no Subfinder banner, ASCII art, or third-party tool identity is ever rendered.
+
+Amended 2026-09-13: `subfinder -d <domain>` is now also accepted as a Terminal+
+input alias (a familiar name players may type or pick from the "/" command
+picker), rewritten to `recon` before dispatch in
+`src/infrastructure/hackhub/dss-command-runtime.ts`. This does not reintroduce
+third-party branding: the alias only changes what the player may type, not
+what renders — output, animation, and the canonical runtime command remain
+`recon`/DSS-original throughout.
 
 Shared animation configuration lives in `ReconService`:
 

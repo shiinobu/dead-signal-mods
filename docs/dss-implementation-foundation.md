@@ -1,7 +1,11 @@
 # DEAD SIGNAL — DSS Implementation Foundation
 
 Date: 2026-09-13
-Status: **IMPLEMENTED — FOUNDATION; LIVE DESKTOP VALIDATION PENDING**
+Status: **IMPLEMENTED — TERMINAL+ AND RECON LIVE-VALIDATED; WIRESHARK+ LIVE VALIDATION PENDING**
+
+> Amendment (2026-09-13): see [dss-toolkit-expansion.md](dss-toolkit-expansion.md) for the
+> Wireshark+ launch, the Terminal+ UX overhaul, and the Recon native/synthetic fallback chain
+> that supersede parts of this document (marked inline below).
 
 ## Scope
 
@@ -38,9 +42,9 @@ The app is a single HackHub Desktop App with a left tool navigator and active wo
 Initial navigator entries:
 
 ```text
-Terminal+   FOUNDATION
+Terminal+   FOUNDATION (command surface substantially implemented — see amendment)
 Recon       READY
-Wireshark+  FOUNDATION
+Wireshark+  READY (amended 2026-09-13 — was FOUNDATION)
 ```
 
 `DEAD-SIGNAL` does not embed or replace native HackHub applications.
@@ -60,6 +64,13 @@ The native HackHub `recon` command and the DSS Terminal+ command console both ro
 ## Recon Integration
 
 The existing shared `ReconService` remains the sole owner of deterministic reconnaissance behavior and timing.
+
+Amended 2026-09-13: Recon no longer fails for targets outside a registered
+`ReconProfile`. Resolution order is curated profile (e.g. Q01) → HackHub's
+native `subfinder` command (`Shell.exec` + `Subfinder.Results`, best-effort,
+6s timeout) → deterministic synthetic subdomain generator. See
+[dss-toolkit-expansion.md](dss-toolkit-expansion.md) for the full rationale
+and live-test findings on the native path.
 
 The DSS Desktop App exposes:
 
@@ -111,9 +122,9 @@ Persistent save ownership is not introduced in this foundation slice. The sessio
 Initial tools:
 
 ```text
-Terminal+   FOUNDATION
+Terminal+   FOUNDATION (registry label unchanged; command surface expanded — see amendment)
 Recon       READY
-Wireshark+  FOUNDATION
+Wireshark+  READY (amended 2026-09-13 — was FOUNDATION)
 ```
 
 Each tool definition contains:
@@ -132,19 +143,47 @@ capability (optional)
 
 ```text
 command input
-command history/output
+command history/output (scrollable, 500-line buffer)
 command catalog
+Tab autocomplete on command names
+"/" command picker (nmap, lynx, subfinder, ping)
+native commands: nmap, lynx, ping (Shell.CommandDataMap-backed)
+subfinder as a friendly alias that dispatches to recon
 shared recon execution
 shared DSS recon event stream
+Copy-to-clipboard action (Clipboard API with execCommand fallback)
 ```
+
+Command results render by reading `getLastCommandResult()` directly rather than
+relying solely on an SDK event listener, which previously double-delivered or
+delayed output. Live-validated 2026-09-13: help, nmap, lynx, ping, Tab, Enter,
+and the "/" picker all confirmed working in HackHub.
 
 It does not attempt to embed or clone the native HackHub terminal.
 
 ## Wireshark+
 
-`Wireshark+` remains a foundation surface only. Its packet model, capture service, filters, packet detail renderer, and HackHub network/event adapters are not yet implemented.
+`Wireshark+` is implemented. `PacketCaptureService` and `PacketSessionStore`
+mirror `ReconService`'s architecture: a deterministic simulated packet capture
+between the local host and a target, reusing Recon's discovered hosts as
+capture peers when the target matches an already-completed Recon session.
 
-The native HackHub Wireshark application remains independent.
+The desktop command is:
+
+```text
+wireshark -t <target>
+```
+
+exposed through `App.Exports.startCapture(target)` / `getPacketSession()`, with
+the same direct-poll UI pattern proven for Recon (not an SDK event listener).
+
+Captures are deterministic investigation fixtures, not a live OS-level packet
+sniff — the native HackHub Wireshark application remains independent and is
+not wrapped or embedded.
+
+Live desktop validation (opening Wireshark+ in HackHub and confirming a real
+capture run) has not yet been performed; do not treat this section as a
+live-PASS claim until that is recorded.
 
 ## UI Boundary
 
@@ -184,4 +223,11 @@ Verify native terminal history remains unaffected
 
 ## Next Slice
 
-The next implementation slice is `Wireshark+` as a real DSS forensic workspace, beginning with a framework-agnostic packet domain contract and deterministic packet-capture service before adding filters and detailed rendering.
+Wireshark+ (this section's original next slice) is implemented — see the
+amended Wireshark+ section above. The next open items are:
+
+```text
+Live-validate Wireshark+ capture in HackHub
+Formally lock Terminal+ (live-validated, not yet given a LOCKED status doc)
+Resume the Q01 production live-validation gate (docs/phase13-q01-final-lock.md)
+```
