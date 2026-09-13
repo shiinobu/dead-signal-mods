@@ -25,7 +25,6 @@ const replayAppPath = resolve(replayOutputDir, "dead-signal.html");
 const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
 const sourceDssAppPath = resolve(projectRoot, "src/dead-signal.html");
-const rootDssAppPath = resolve(projectRoot, "dead-signal.html");
 const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
 const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
@@ -51,11 +50,6 @@ await writeFile(
 await writeFile(replayStatePath, `${replayRun}\n`, "utf8");
 
 await rm(replayOutputDir, { recursive: true, force: true });
-
-// DeadSignalApp currently imports the root-level HTML path. Keep that path
-// synchronized with the tracked canonical source before building the replay
-// so dist-replay embeds the same UI that is copied into the package below.
-await cp(sourceDssAppPath, rootDssAppPath, { force: true });
 
 await buildMod({
     entryPoint: "dev/q01-replay-entry.ts",
