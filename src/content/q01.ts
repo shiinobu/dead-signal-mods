@@ -126,7 +126,7 @@ export const Q01_REPORT_BODY = [
     "Further internal assessment is recommended.",
 ].join("\n");
 
-export const Q01_FINAL_STATE_FLAG = "dead_signal.q01.completed";
+export const Q01_FINAL_STATE_FLAG = "entity_resolution.q01.completed";
 
 export const Q01_OBJECTIVE_IDS = {
     reviewScope: "q01.objective.01",
@@ -145,8 +145,8 @@ export const Q01_REWARDS = {
 } as const;
 
 export const Q01_THE_CONTRACT: Quest = {
-    id: asId<"Quest">("dead_signal.q01"),
-    chapterId: "chapter-01-dead-signal",
+    id: asId<"Quest">("entity_resolution.q01"),
+    chapterId: "chapter-01-ghost-server",
     title: "THE CONTRACT",
     description: `Routine security audit for ${Q01_CLIENT_NAME} in Jakarta.`,
     objectives: [

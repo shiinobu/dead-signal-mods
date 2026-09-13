@@ -73,7 +73,7 @@ const replayEntrySource = readFileSync(
 
 describe("Phase 13 Q01 — THE CONTRACT", () => {
     it("matches the revised quest identity, client, target, and apex domain", () => {
-        assert.equal(Q01_THE_CONTRACT.id, "dead_signal.q01");
+        assert.equal(Q01_THE_CONTRACT.id, "entity_resolution.q01");
         assert.equal(Q01_THE_CONTRACT.title, "THE CONTRACT");
         assert.equal(Q01_CLIENT_NAME, "Skynet Logistics");
         assert.equal(Q01_TARGET_IP, "203.0.113.42");
@@ -172,7 +172,7 @@ describe("Phase 13 Q01 — THE CONTRACT", () => {
     });
 
     it("defines the canonical email identity and player-facing report template", () => {
-        assert.equal(Q01_ADRIAN_EMAIL, "adrian.cole@deadsignal.lock");
+        assert.equal(Q01_ADRIAN_EMAIL, "adrian.cole@entityresolution.lock");
         assert.equal(Q01_REPORT_RECIPIENT, Q01_ADRIAN_EMAIL);
         assert.equal(Q01_REPORT_SUBJECT, "Security Audit — Jakarta");
         assert.equal(

@@ -25,7 +25,7 @@ const appSource = readFileSync(
     resolve(
         fileURLToPath(
             new URL(
-                "../src/infrastructure/hackhub/apps/dead-signal.ts",
+                "../src/infrastructure/hackhub/apps/entity-resolution.ts",
                 import.meta.url,
             ),
         ),
@@ -48,7 +48,7 @@ const commandRuntimeSource = readFileSync(
 const appHtml = readFileSync(
     resolve(
         fileURLToPath(
-            new URL("../src/dead-signal.html", import.meta.url),
+            new URL("../src/entity-resolution.html", import.meta.url),
         ),
     ),
     "utf8",
@@ -92,7 +92,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /@RegisterApp/);
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
-        assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/dead-signal\.html"/);
+        assert.match(appSource, /import appHTML from "\.\.\/\.\.\/\.\.\/entity-resolution\.html"/);
         assert.match(appSource, /HTML\s*=\s*dssHTML/);
         assert.match(appSource, /DefaultSize\s*=\s*\{\s*width:\s*1220,\s*height:\s*800\s*\}/);
         assert.match(appSource, /override\s+Unlocked\s*=\s*true/);
@@ -118,7 +118,7 @@ describe("DSS operations application foundation", () => {
 
     it("contains a single-workspace navigator for the initial DSS tools", () => {
         assert.match(appHtml, /DSS/);
-        assert.match(appHtml, /DEAD SIGNAL SYSTEM/);
+        assert.match(appHtml, /DATA SURVEILLANCE SYSTEM/);
         assert.match(appHtml, /Terminal\+/);
         assert.match(appHtml, />Recon</);
         assert.match(appHtml, /Wireshark\+/);
@@ -149,11 +149,11 @@ describe("DSS operations application foundation", () => {
     it("is imported by both production and Q01 replay entries", () => {
         assert.match(
             productionEntrySource,
-            /import "\.\/infrastructure\/hackhub\/apps\/dead-signal\.js";/,
+            /import "\.\/infrastructure\/hackhub\/apps\/entity-resolution\.js";/,
         );
         assert.match(
             replayEntrySource,
-            /import "\.\.\/src\/infrastructure\/hackhub\/apps\/dead-signal\.js";/,
+            /import "\.\.\/src\/infrastructure\/hackhub\/apps\/entity-resolution\.js";/,
         );
     });
 
@@ -161,7 +161,7 @@ describe("DSS operations application foundation", () => {
         assert.match(appSource, /AppName\s*=\s*"dss"/);
         assert.match(appSource, /Title\s*=\s*"DSS"/);
         assert.doesNotMatch(appSource, /DEV_Q01_REPLAY_ID/);
-        assert.match(replayQuestSource, /override Name = `dead_signal\.dev\.q01\.\$\{DEV_Q01_REPLAY_ID\}`;/);
+        assert.match(replayQuestSource, /override Name = `entity_resolution\.dev\.q01\.\$\{DEV_Q01_REPLAY_ID\}`;/);
         assert.match(replayQuestSource, /override Title = "THE CONTRACT — DEV REPLAY";/);
         assert.match(replayEntrySource, /opsRuntime\.recon\.registerProfile\(Q01_RECON_PROFILE\)/);
     });
@@ -187,12 +187,12 @@ describe("DSS operations application foundation", () => {
         assert.deepEqual(registry.getAll(), [
             {
                 name: "recon",
-                description: "Run the DEAD SIGNAL reconnaissance module.",
+                description: "Run the ENTITY RESOLUTION reconnaissance module.",
                 toolId: "recon",
             },
             {
                 name: "wireshark",
-                description: "Run a DEAD SIGNAL Wireshark+ packet capture.",
+                description: "Run an ENTITY RESOLUTION Wireshark+ packet capture.",
                 toolId: "wireshark",
             },
         ]);

@@ -20,7 +20,7 @@ function runBuild() {
     }
 
     building = true;
-    console.log("[DEAD SIGNAL] Building mod...");
+    console.log("[ENTITY RESOLUTION] Building mod...");
 
     const tsxCli = resolve(root, "node_modules/tsx/dist/cli.mjs");
     buildProcess = spawn(process.execPath, [tsxCli, "esbuild.config.ts"], {
@@ -30,7 +30,7 @@ function runBuild() {
     });
 
     buildProcess.once("error", (error) => {
-        console.error("[DEAD SIGNAL] Build process failed to start:", error);
+        console.error("[ENTITY RESOLUTION] Build process failed to start:", error);
     });
 
     buildProcess.once("close", (code, signal) => {
@@ -38,10 +38,10 @@ function runBuild() {
         building = false;
 
         if (code === 0) {
-            console.log("[DEAD SIGNAL] Build complete. Watching for changes...");
+            console.log("[ENTITY RESOLUTION] Build complete. Watching for changes...");
         } else {
             console.error(
-                `[DEAD SIGNAL] Build failed (code=${code ?? "null"}, signal=${signal ?? "none"}).`,
+                `[ENTITY RESOLUTION] Build failed (code=${code ?? "null"}, signal=${signal ?? "none"}).`,
             );
         }
 
@@ -66,11 +66,11 @@ function scheduleBuild() {
 for (const path of watchedPaths) {
     try {
         watch(path, { recursive: true }, (_eventType, filename) => {
-            console.log(`[DEAD SIGNAL] Change detected: ${filename ?? path}`);
+            console.log(`[ENTITY RESOLUTION] Change detected: ${filename ?? path}`);
             scheduleBuild();
         });
     } catch (error) {
-        console.error(`[DEAD SIGNAL] Failed to watch ${path}:`, error);
+        console.error(`[ENTITY RESOLUTION] Failed to watch ${path}:`, error);
         process.exitCode = 1;
     }
 }
@@ -87,7 +87,7 @@ function shutdown() {
         buildProcess = undefined;
     }
 
-    console.log("\n[DEAD SIGNAL] Watcher stopped.");
+    console.log("\n[ENTITY RESOLUTION] Watcher stopped.");
 }
 
 process.on("SIGINT", shutdown);

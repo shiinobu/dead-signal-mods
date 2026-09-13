@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.1 Story Source Audit
+# ENTITY RESOLUTION — Phase 13 Step 13.1 Story Source Audit
 
 Date: 2026-09-11
 
@@ -61,10 +61,10 @@ Therefore the Phase 13 policy is **not** that Phase 1–8 are unknown. Their loc
 
 | Quest | Chapter | Canonical high-level identity | Detailed locked source currently directly readable |
 |---|---|---|---|
-| Q01 | Chapter 1 — DEAD SIGNAL | Start the audit (ARKA) | Partial: identity and XP allocation |
-| Q02 | Chapter 1 — DEAD SIGNAL | Find unregistered server | Partial: identity and XP allocation |
-| Q03 | Chapter 1 — DEAD SIGNAL | Missing logs (restricted data) | Partial: identity and XP allocation |
-| Q04 | Chapter 1 — DEAD SIGNAL | Server still active / first contact from Unknown | Partial: identity and XP allocation |
+| Q01 | Chapter 1 — GHOST SERVER | Start the audit (ARKA) | Partial: identity and XP allocation |
+| Q02 | Chapter 1 — GHOST SERVER | Find unregistered server | Partial: identity and XP allocation |
+| Q03 | Chapter 1 — GHOST SERVER | Missing logs (restricted data) | Partial: identity and XP allocation |
+| Q04 | Chapter 1 — GHOST SERVER | Server still active / first contact from Unknown | Partial: identity and XP allocation |
 | Q05 | Chapter 2 — THE LIST | Second client (same pattern) | Partial: identity and XP allocation |
 | Q06 | Chapter 2 — THE LIST | Discover CRI (risk classification) | Partial: identity and XP allocation |
 | Q07 | Chapter 2 — THE LIST | Find relationship influence | Partial: identity and XP allocation |

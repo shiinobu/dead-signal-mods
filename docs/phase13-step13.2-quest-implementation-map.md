@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.2 Quest Implementation Map
+# ENTITY RESOLUTION — Phase 13 Step 13.2 Quest Implementation Map
 
 Date: 2026-09-11
 
@@ -6,7 +6,7 @@ Date: 2026-09-11
 
 **COMPLETE FOR RECOVERED CONTENT — EXECUTION BLOCKED ONLY WHERE SOURCE OR RUNTIME CONTRACT IS INSUFFICIENT**
 
-Step 13.2 maps the recovered locked story content onto the existing DEAD SIGNAL runtime contracts. This document does not invent missing Q01–Q13 or Q16 canon and does not introduce a parallel story-state or condition model.
+Step 13.2 maps the recovered locked story content onto the existing ENTITY RESOLUTION runtime contracts. This document does not invent missing Q01–Q13 or Q16 canon and does not introduce a parallel story-state or condition model.
 
 ## Governing rule
 
@@ -50,7 +50,7 @@ HackHub adapter
 
 ### Source identity
 
-`dead_signal.q14`
+`entity_resolution.q14`
 
 Chapter: `Chapter 4 — THE OVERRIDE`
 
@@ -72,13 +72,13 @@ Marcus must not be represented as the physical operator solely because he approv
 
 | Objective | Locked story outcome | Runtime mapping | Status |
 |---|---|---|---|
-| 01 — Find the access registry | `OVERRIDE_OPERATOR` registry discovered | Story flag `dead_signal.q14.override_access_registry_found` | **DIRECT** |
-| 02 — Trace the access window | session `A-77402` found | Story flag `dead_signal.q14.access_window_found` and/or `override_session_found` | **DIRECT** |
+| 01 — Find the access registry | `OVERRIDE_OPERATOR` registry discovered | Story flag `entity_resolution.q14.override_access_registry_found` | **DIRECT** |
+| 02 — Trace the access window | session `A-77402` found | Story flag `entity_resolution.q14.access_window_found` and/or `override_session_found` | **DIRECT** |
 | 03 — Find the authorization | `AR-44192` linked to `A-77402` | No dedicated exact state key is named in the locked artifact | **SOURCE-TO-RUNTIME GAP** |
-| 04 — Resolve the approver | Marcus Reed resolved as approver | `dead_signal.q14.marcus_reed_confirmed` | **DIRECT** |
-| 05 — Speak to Marcus | Marcus confirms approval and authority context | `dead_signal.marcus_introduced`, `dead_signal.marcus_authority_confirmed` | **DIRECT-ISH; objective semantics should remain adapter-driven** |
+| 04 — Resolve the approver | Marcus Reed resolved as approver | `entity_resolution.q14.marcus_reed_confirmed` | **DIRECT** |
+| 05 — Speak to Marcus | Marcus confirms approval and authority context | `entity_resolution.marcus_introduced`, `entity_resolution.marcus_authority_confirmed` | **DIRECT-ISH; objective semantics should remain adapter-driven** |
 | 06 — Ask about the session | Marcus denies operating it; delegated identity remains | No dedicated exact completion flag is named | **SOURCE-TO-RUNTIME GAP** |
-| 07 — Check the access justification | emergency operational maintenance / temporary relationship-policy access | `dead_signal.q14.exception_access_found` | **DIRECT** |
+| 07 — Check the access justification | emergency operational maintenance / temporary relationship-policy access | `entity_resolution.q14.exception_access_found` | **DIRECT** |
 
 ### Q14 evidence records
 
@@ -99,18 +99,18 @@ Where evidence discovery is needed, the target owner is `EvidenceState` and its 
 The following source-backed flags are canonical and should be preserved exactly:
 
 ```text
-dead_signal.q14.completed
-dead_signal.q14.override_access_registry_found
-dead_signal.q14.delegated_access_confirmed
-dead_signal.q14.access_window_found
-dead_signal.q14.override_session_found
-dead_signal.q14.marcus_access_approval_confirmed
-dead_signal.q14.marcus_reed_confirmed
-dead_signal.q14.operator_identity_unknown
-dead_signal.q14.exception_access_found
-dead_signal.q14.primary_audit_system_required
-dead_signal.marcus_introduced
-dead_signal.marcus_authority_confirmed
+entity_resolution.q14.completed
+entity_resolution.q14.override_access_registry_found
+entity_resolution.q14.delegated_access_confirmed
+entity_resolution.q14.access_window_found
+entity_resolution.q14.override_session_found
+entity_resolution.q14.marcus_access_approval_confirmed
+entity_resolution.q14.marcus_reed_confirmed
+entity_resolution.q14.operator_identity_unknown
+entity_resolution.q14.exception_access_found
+entity_resolution.q14.primary_audit_system_required
+entity_resolution.marcus_introduced
+entity_resolution.marcus_authority_confirmed
 ```
 
 ### Q14 explicit negative states
@@ -118,12 +118,12 @@ dead_signal.marcus_authority_confirmed
 These states must not be produced by the implementation unless a future locked source explicitly changes the canon:
 
 ```text
-dead_signal.q14.marcus_operated_account
-dead_signal.q14.marcus_created_false_connection
-dead_signal.q14.marcus_manipulated_cri
-dead_signal.q14.marcus_targeted_rizky
-dead_signal.q14.marcus_malicious_intent
-dead_signal.q14.operator_person_identified
+entity_resolution.q14.marcus_operated_account
+entity_resolution.q14.marcus_created_false_connection
+entity_resolution.q14.marcus_manipulated_cri
+entity_resolution.q14.marcus_targeted_rizky
+entity_resolution.q14.marcus_malicious_intent
+entity_resolution.q14.operator_person_identified
 ```
 
 ### Q14 rewards
@@ -146,7 +146,7 @@ No cash reward is defined by the locked Q14 artifact.
 
 ### Source identity
 
-`dead_signal.q15`
+`entity_resolution.q15`
 
 Chapter: `Chapter 4 — THE OVERRIDE`
 
@@ -178,14 +178,14 @@ It must not simplify this into "operator changed Rizky's score".
 
 | Objective | Locked story outcome | Runtime mapping | Status |
 |---|---|---|---|
-| 01 — Retrieve primary audit export | forensic export accessed | `dead_signal.q15.primary_audit_accessed` | **DIRECT** |
-| 02 — Reconstruct session A-77402 | operator session reconstructed | `dead_signal.q15.operator_session_found` | **DIRECT** |
-| 03 — Trace user reference | identity hash traced | `dead_signal.q15.operator_identity_hash_found` | **DIRECT** |
+| 01 — Retrieve primary audit export | forensic export accessed | `entity_resolution.q15.primary_audit_accessed` | **DIRECT** |
+| 02 — Reconstruct session A-77402 | operator session reconstructed | `entity_resolution.q15.operator_session_found` | **DIRECT** |
+| 03 — Trace user reference | identity hash traced | `entity_resolution.q15.operator_identity_hash_found` | **DIRECT** |
 | 04 — Reconstruct the session | action timeline reconstructed | No dedicated exact state key named for this step | **SOURCE-TO-RUNTIME GAP** |
-| 05 — Compare policy versions | relationship policy changed | `dead_signal.q15.policy_change_reconstructed` + `relationship_policy_modified` | **DIRECT** |
-| 06 — Trace Rizky through pipeline | COM-07 → entity resolution → accepted relationship → CRI classification | `dead_signal.q15.rizky_processing_chain_reconstructed` and `com07_policy_path_confirmed` | **DIRECT** |
-| Optional — Check previous policy | confidence unchanged, review behavior changed | `dead_signal.q15.before_after_policy_verified`, `review_behavior_changed_confirmed` | **DIRECT** |
-| 07 — Correlate operator identity | operator reference `ARKA-OPS-0441` correlated, name still restricted | `dead_signal.q15.operator_identity_correlated`, `operator_identity_restricted`, `operator_employment_arka` | **DIRECT** |
+| 05 — Compare policy versions | relationship policy changed | `entity_resolution.q15.policy_change_reconstructed` + `relationship_policy_modified` | **DIRECT** |
+| 06 — Trace Rizky through pipeline | COM-07 → entity resolution → accepted relationship → CRI classification | `entity_resolution.q15.rizky_processing_chain_reconstructed` and `com07_policy_path_confirmed` | **DIRECT** |
+| Optional — Check previous policy | confidence unchanged, review behavior changed | `entity_resolution.q15.before_after_policy_verified`, `review_behavior_changed_confirmed` | **DIRECT** |
+| 07 — Correlate operator identity | operator reference `ARKA-OPS-0441` correlated, name still restricted | `entity_resolution.q15.operator_identity_correlated`, `operator_identity_restricted`, `operator_employment_arka` | **DIRECT** |
 
 ### Q15 policy values
 
@@ -227,21 +227,21 @@ These are compatible with the existing typed `Evidence` model. The exact evidenc
 The following source-backed flags are canonical:
 
 ```text
-dead_signal.q15.completed
-dead_signal.q15.primary_audit_accessed
-dead_signal.q15.operator_session_found
-dead_signal.q15.operator_identity_hash_found
-dead_signal.q15.operator_identity_correlated
-dead_signal.q15.policy_change_reconstructed
-dead_signal.q15.relationship_policy_modified
-dead_signal.q15.com07_policy_path_confirmed
-dead_signal.q15.rizky_processing_chain_reconstructed
-dead_signal.q15.before_after_policy_verified
-dead_signal.q15.review_behavior_changed_confirmed
-dead_signal.q15.operator_identity_restricted
-dead_signal.q15.operator_employment_arka
-dead_signal.evidence_chain_complete
-dead_signal.operator_identity_known_to_system
+entity_resolution.q15.completed
+entity_resolution.q15.primary_audit_accessed
+entity_resolution.q15.operator_session_found
+entity_resolution.q15.operator_identity_hash_found
+entity_resolution.q15.operator_identity_correlated
+entity_resolution.q15.policy_change_reconstructed
+entity_resolution.q15.relationship_policy_modified
+entity_resolution.q15.com07_policy_path_confirmed
+entity_resolution.q15.rizky_processing_chain_reconstructed
+entity_resolution.q15.before_after_policy_verified
+entity_resolution.q15.review_behavior_changed_confirmed
+entity_resolution.q15.operator_identity_restricted
+entity_resolution.q15.operator_employment_arka
+entity_resolution.evidence_chain_complete
+entity_resolution.operator_identity_known_to_system
 ```
 
 ### Q15 explicit negative states
@@ -249,14 +249,14 @@ dead_signal.operator_identity_known_to_system
 These states must remain absent unless future locked canon changes them:
 
 ```text
-dead_signal.q15.operator_identity_revealed
-dead_signal.q15.operator_intent_confirmed
-dead_signal.q15.operator_targeted_rizky
-dead_signal.q15.operator_created_false_connection
-dead_signal.q15.marcus_ordered_manipulation
-dead_signal.q15.marcus_operated_account
-dead_signal.q15.arka_institutional_manipulation_confirmed
-dead_signal.q15.cri_manually_manipulated
+entity_resolution.q15.operator_identity_revealed
+entity_resolution.q15.operator_intent_confirmed
+entity_resolution.q15.operator_targeted_rizky
+entity_resolution.q15.operator_created_false_connection
+entity_resolution.q15.marcus_ordered_manipulation
+entity_resolution.q15.marcus_operated_account
+entity_resolution.q15.arka_institutional_manipulation_confirmed
+entity_resolution.q15.cri_manually_manipulated
 ```
 
 ### Q15 rewards

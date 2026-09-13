@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.4
+# ENTITY RESOLUTION — Phase 13 Step 13.4
 
 ## Contract Gap Closure — Q14 Optional Objective Semantics
 
@@ -19,8 +19,8 @@ The same source provides the Marcus dialogue in which he confirms he approved th
 The Q14 persistent state explicitly contains:
 
 ```text
-dead_signal.q14.marcus_access_approval_confirmed
-dead_signal.q14.operator_identity_unknown
+entity_resolution.q14.marcus_access_approval_confirmed
+entity_resolution.q14.operator_identity_unknown
 ```
 
 as well as the other Q14 canonical state keys. fileciteturn205file1L49-L62
@@ -42,7 +42,7 @@ Resolved mapping:
 ```text
 Q14 Objective 03 — FIND THE AUTHORIZATION
     ↓
-dead_signal.q14.marcus_access_approval_confirmed == true
+entity_resolution.q14.marcus_access_approval_confirmed == true
 ```
 
 The source record itself establishes the access request, approver, approval status, and linked session. fileciteturn200file0L16-L41
@@ -60,7 +60,7 @@ Resolved mapping:
 ```text
 Q14 Objective 06 — ASK ABOUT THE SESSION
     ↓
-dead_signal.q14.operator_identity_unknown == true
+entity_resolution.q14.operator_identity_unknown == true
 ```
 
 The source explicitly establishes that Marcus did not use the session and that the identity was delegated, preserving the authorization/operation distinction. fileciteturn200file1L107-L117
@@ -142,7 +142,7 @@ StateStore
 The locked Q14 source requires:
 
 ```text
-dead_signal.q14.completed = true
+entity_resolution.q14.completed = true
 ```
 
 The current generic `QuestService` persists quest completion in `QuestState.completedQuestIds`, but it does not automatically write arbitrary story flags. A separate source-backed completion transition must therefore be wired at the application/content integration boundary rather than adding a hidden side effect to `QuestService`.
@@ -188,4 +188,4 @@ This remains an explicit source-to-runtime gap.
 
 **STEP 13.4 COMPLETE**
 
-The next step may proceed to the Q14 production registration/integration boundary, including the explicit `dead_signal.q14.completed` transition, while Q15 Objective 04 remains separately tracked.
+The next step may proceed to the Q14 production registration/integration boundary, including the explicit `entity_resolution.q14.completed` transition, while Q15 Objective 04 remains separately tracked.

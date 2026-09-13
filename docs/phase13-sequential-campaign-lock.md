@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Sequential Campaign Execution Lock
+# ENTITY RESOLUTION — Phase 13 Sequential Campaign Execution Lock
 
 Date: 2026-09-11
 Status: **LOCKED — CURRENT IMPLEMENTATION TARGET Q01**
@@ -116,7 +116,7 @@ The recovered source defines:
 - target `203.0.113.42`;
 - expected services TCP 22/80/443;
 - five required player objectives;
-- `dead_signal.q01.completed = true` as persistent story state;
+- `entity_resolution.q01.completed = true` as persistent story state;
 - `$200` reward;
 - maximum `80 XP`.
 

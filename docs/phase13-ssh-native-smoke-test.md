@@ -1,10 +1,10 @@
-# DEAD SIGNAL — Native SSH Smoke Test
+# ENTITY RESOLUTION — Native SSH Smoke Test
 
 Status: **READY FOR LIVE TEST**
 
 ## Purpose
 
-This smoke test isolates HackHub native SSH from the DEAD SIGNAL Q01 implementation.
+This smoke test isolates HackHub native SSH from the ENTITY RESOLUTION Q01 implementation.
 
 The fixture intentionally follows the structure of the FULL `npm create hackhub-mod` scaffold and the HackHub SDK 0.21.0 SSH example:
 
@@ -54,7 +54,7 @@ dist-ssh-smoke/
 Install the complete directory as:
 
 ```text
-HackHub/mods/dead-signal-ssh-smoke/
+HackHub/mods/entity-resolution-ssh-smoke/
 ```
 
 Restart HackHub.
@@ -97,15 +97,15 @@ Connection could not be established.
 
 and `connect` remains incomplete.
 
-This proves the failure is reproducible without Q01's code, custom command data, quest-specific state, or child-device topology. The next investigation target is therefore the HackHub game/runtime or the SDK/game compatibility surface, not DEAD SIGNAL Q01.
+This proves the failure is reproducible without Q01's code, custom command data, quest-specific state, or child-device topology. The next investigation target is therefore the HackHub game/runtime or the SDK/game compatibility surface, not ENTITY RESOLUTION Q01.
 
 ## Scope Boundary
 
 This smoke test is diagnostic only. It must not:
 
-- set `dead_signal.q01.completed`;
+- set `entity_resolution.q01.completed`;
 - grant production XP or money;
 - import Q01;
 - import Q14;
 - run the Phase 12 diagnostic harness;
-- modify canonical DEAD SIGNAL state.
+- modify canonical ENTITY RESOLUTION state.

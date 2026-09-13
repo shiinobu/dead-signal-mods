@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Q01 Recon Promotion Amendment
+# ENTITY RESOLUTION — Q01 Recon Promotion Amendment
 
 Date: 2026-09-13
 Status: **ACTIVE AMENDMENT**
@@ -20,7 +20,7 @@ recon -d <domain>
 Reconnaissance is now a reusable DSS capability owned by:
 
 ```text
-DEAD-SIGNAL
+DSS
     ↓
 OpsRuntime
     ↓

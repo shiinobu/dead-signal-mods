@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Historical Q01 Subfinder Lock
+# ENTITY RESOLUTION — Historical Q01 Subfinder Lock
 
 Status: **SUPERSEDED**
 
@@ -6,7 +6,7 @@ This historical document described the temporary Q01-specific `subfinders` comma
 
 That design is no longer canonical.
 
-The reconnaissance capability has been promoted into the shared DEAD SIGNAL System architecture and is now owned by `ReconService` under `DEAD-SIGNAL / OpsRuntime`.
+The reconnaissance capability has been promoted into the shared Data Surveillance System architecture and is now owned by `ReconService` under `DSS / OpsRuntime`.
 
 Canonical command:
 
@@ -17,7 +17,7 @@ recon -d <domain>
 Canonical architecture and reusable tool contract:
 
 ```text
-DEAD-SIGNAL
+DSS
     ↓
 OpsRuntime
     ↓

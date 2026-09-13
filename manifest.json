@@ -1,9 +1,9 @@
 {
-  "id": "dead-signal",
-  "name": "DEAD SIGNAL",
+  "id": "entity-resolution",
+  "name": "ENTITY RESOLUTION",
   "version": "0.1.0",
   "author": "Shiinobu",
-  "description": "DEAD SIGNAL story and gameplay expansion for HackHub.",
+  "description": "ENTITY RESOLUTION story and gameplay expansion for HackHub.",
   "apiVersion": 1,
   "permissions": ["events", "mail", "network", "shell"],
   "tags": ["story", "quest", "investigation", "mystery"]

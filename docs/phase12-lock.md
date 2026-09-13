@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 12 Lock
+# ENTITY RESOLUTION — Phase 12 Lock
 
 Date: 2026-09-11
 
@@ -27,7 +27,7 @@ Phase 12 is the in-game HackHub integration and runtime validation phase. Its ex
 
 ## Nmap integration contract
 
-DEAD SIGNAL does not depend on the unreliable `Terminal.NmapScan` direct-event path discovered during Phase 12. The validated integration uses the supported `Terminal.Command` objective path for `nmap` together with typed command data through the SDK Shell API.
+ENTITY RESOLUTION does not depend on the unreliable `Terminal.NmapScan` direct-event path discovered during Phase 12. The validated integration uses the supported `Terminal.Command` objective path for `nmap` together with typed command data through the SDK Shell API.
 
 The Nmap smoke quest remains a diagnostic artifact and is not part of the production bootstrap.
 

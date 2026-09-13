@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Q01 Lynx/Subdomain Amendment
+# ENTITY RESOLUTION — Q01 Lynx/Subdomain Amendment
 
 Date: 2026-09-12
 Status: **IMPLEMENTED — LIVE VALIDATION PENDING**

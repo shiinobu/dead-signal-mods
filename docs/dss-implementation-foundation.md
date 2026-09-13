@@ -1,4 +1,4 @@
-# DEAD SIGNAL — DSS Implementation Foundation
+# ENTITY RESOLUTION — DSS Implementation Foundation
 
 Date: 2026-09-13
 Status: **IMPLEMENTED — TERMINAL+ AND RECON LIVE-VALIDATED; WIRESHARK+ LIVE VALIDATION PENDING**
@@ -9,12 +9,12 @@ Status: **IMPLEMENTED — TERMINAL+ AND RECON LIVE-VALIDATED; WIRESHARK+ LIVE VA
 
 ## Scope
 
-This document records the first implementation slice of the locked DEAD-SIGNAL / DSS desktop architecture.
+This document records the first implementation slice of the locked DSS desktop architecture.
 
 The implemented foundation establishes:
 
 ```text
-DEAD-SIGNAL Desktop App
+DSS Desktop App
     ↓
 OpsRuntime
     ├── OpsCommandRegistry
@@ -33,8 +33,8 @@ Canonical identity:
 
 ```text
 AppName: dss
-Title: DEAD-SIGNAL
-Brand: DSS // Dead Signal System
+Title: DSS
+Brand: DSS // Data Surveillance System
 ```
 
 The app is a single HackHub Desktop App with a left tool navigator and active workspace.
@@ -47,7 +47,7 @@ Recon       READY
 Wireshark+  READY (amended 2026-09-13 — was FOUNDATION)
 ```
 
-`DEAD-SIGNAL` does not embed or replace native HackHub applications.
+`DSS` does not embed or replace native HackHub applications.
 
 ## Command Architecture
 
@@ -187,7 +187,7 @@ live-PASS claim until that is recorded.
 
 ## UI Boundary
 
-`src/infrastructure/hackhub/apps/dead-signal.html` is presentation-only.
+`src/infrastructure/hackhub/apps/entity-resolution.html` is presentation-only.
 
 It consumes DSS exports and events and does not directly mutate GameRuntime, quests, flags, rewards, or narrative state.
 
@@ -204,7 +204,7 @@ npm run typecheck
 npm test
 npm run build
         ↓
-Open DEAD-SIGNAL from HackHub desktop
+Open DSS from HackHub desktop
         ↓
 Verify navigator and workspace rendering
         ↓

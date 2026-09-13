@@ -59,7 +59,7 @@ h2{margin:0;font-size:30px;line-height:1.1;letter-spacing:-.02em}.lead{max-width
 <body>
 <div class="app">
 <aside class="side">
-  <div class="brand"><h1>DSS</h1><p>DEAD SIGNAL SYSTEM</p></div>
+  <div class="brand"><h1>DSS</h1><p>DATA SURVEILLANCE SYSTEM</p></div>
   <div class="section">Tools</div>
   <div id="nav" class="nav"></div>
   <div class="session"><div class="session-head"><span class="label">Session</span><span id="session-status" class="pill">IDLE</span></div><div class="kv"><b>Target</b><span id="session-target">—</span><b>Profile</b><span id="session-profile">—</span><b>Hosts</b><span id="session-hosts">0</span></div></div>
@@ -83,7 +83,7 @@ h2{margin:0;font-size:30px;line-height:1.1;letter-spacing:-.02em}.lead{max-width
 <div id="view-terminal" class="view">
   <div class="eyebrow">Command Workspace</div><h2>Terminal+</h2><p class="lead">DSS command console. It operates independently from the persistent HackHub terminal.</p>
   <div class="termgrid">
-    <div class="panel terminal"><div class="head"><span class="title">DSS Shell</span><div style="display:flex;gap:8px;align-items:center"><span class="pill">LOCAL WORKSPACE</span><button id="copy-terminal" class="btn" type="button" style="min-height:26px;padding:0 10px;font-size:9px">Copy</button></div></div><div id="terminal-output" class="output"><div class="line line-info">DSS // Dead Signal System</div><div class="line line-info">Terminal+ ready.</div><div class="line line-info">Type help to list available DSS commands. Tab to autocomplete, / to pick a command.</div></div><div id="cmd-picker" class="cmd-picker" hidden></div><form id="cmd-form" class="cmd"><span class="prompt">dss~$</span><input id="cmd-input" class="cmd-input" autocomplete="off" spellcheck="false" placeholder="nmap 203.0.113.42"><button id="cmd-run" class="btn" type="button">Run</button></form></div>
+    <div class="panel terminal"><div class="head"><span class="title">DSS Shell</span><div style="display:flex;gap:8px;align-items:center"><span class="pill">LOCAL WORKSPACE</span><button id="copy-terminal" class="btn" type="button" style="min-height:26px;padding:0 10px;font-size:9px">Copy</button></div></div><div id="terminal-output" class="output"><div class="line line-info">DSS // Data Surveillance System</div><div class="line line-info">Terminal+ ready.</div><div class="line line-info">Type help to list available DSS commands. Tab to autocomplete, / to pick a command.</div></div><div id="cmd-picker" class="cmd-picker" hidden></div><form id="cmd-form" class="cmd"><span class="prompt">dss~$</span><input id="cmd-input" class="cmd-input" autocomplete="off" spellcheck="false" placeholder="nmap 203.0.113.42"><button id="cmd-run" class="btn" type="button">Run</button></form></div>
     <div class="panel"><div class="head"><span class="title">Commands</span></div><div id="command-list" class="body commands"></div></div>
   </div>
 </div>
@@ -99,11 +99,11 @@ h2{margin:0;font-size:30px;line-height:1.1;letter-spacing:-.02em}.lead{max-width
 (() => {
   const views={terminal:'view-terminal',recon:'view-recon',wireshark:'view-wireshark'};
   const fallbackTools=[
-    {id:'terminal',name:'Terminal+',description:'DEAD SIGNAL command workspace and native HackHub integration boundary.'},
+    {id:'terminal',name:'Terminal+',description:'ENTITY RESOLUTION command workspace and native HackHub integration boundary.'},
     {id:'recon',name:'Recon',description:'Reusable reconnaissance workspace backed by DSS ReconService.'},
-    {id:'wireshark',name:'Wireshark+',description:'DEAD SIGNAL forensic packet-analysis workspace.'}
+    {id:'wireshark',name:'Wireshark+',description:'ENTITY RESOLUTION forensic packet-analysis workspace.'}
   ];
-  const fallbackCommands=[{name:'recon',description:'Run the DEAD SIGNAL reconnaissance module.'}];
+  const fallbackCommands=[{name:'recon',description:'Run the ENTITY RESOLUTION reconnaissance module.'}];
   const state={sources:[],results:[],running:false};
   let sdkEventsBound=false;
   const $=id=>document.getElementById(id);
@@ -127,7 +127,7 @@ h2{margin:0;font-size:30px;line-height:1.1;letter-spacing:-.02em}.lead{max-width
   const onHostDiscovered=e=>{const host=typeof e==='string'?e:e?.host;if(!host||state.results.includes(host))return;state.results.push(host);renderResults();appendLine(host,'line-host');text('session-hosts',state.results.length)};
   const onCompleted=e=>{state.running=false;$('recon-run').disabled=false;progress(100);text('session-status','COMPLETED');text('session-hosts',e?.uniqueHostsFound??state.results.length);text('scan-state','Enumeration completed in '+(e?.elapsedMs??0)+' ms.');appendLine('[INF] Enumeration completed in '+(e?.elapsedMs??0)+' ms.','line-ok');};
   const onFailed=e=>{state.running=false;$('recon-run').disabled=false;text('session-status','FAILED');text('scan-state',e?.reason||'Reconnaissance failed.');appendLine('[ERR] '+(e?.reason||'Reconnaissance failed.'),'line-warn')};
-  const onCommandResult=e=>{if(!e)return;if(String(e?.message||'')==='__DSS_CLEAR__'){const output=$('terminal-output');if(output)output.innerHTML='';appendLine('DSS // Dead Signal System');appendLine('Terminal+ ready.');return}if(!e?.ok&&String(e?.commandLine||'').trim().startsWith('recon ')){onFailed({reason:e?.message||'Reconnaissance failed.'})}};
+  const onCommandResult=e=>{if(!e)return;if(String(e?.message||'')==='__DSS_CLEAR__'){const output=$('terminal-output');if(output)output.innerHTML='';appendLine('DSS // Data Surveillance System');appendLine('Terminal+ ready.');return}if(!e?.ok&&String(e?.commandLine||'').trim().startsWith('recon ')){onFailed({reason:e?.message||'Reconnaissance failed.'})}};
   const bindSdkEvents=()=>{if(sdkEventsBound)return true;const sdk=getSdk();if(!sdk?.Events?.on)return false;sdkEventsBound=true;sdk.Events.on('DSS.Recon.Started',onStarted);sdk.Events.on('DSS.Recon.SourceStarted',onSourceStarted);sdk.Events.on('DSS.Recon.SourceCompleted',onSourceCompleted);sdk.Events.on('DSS.Recon.HostDiscovered',onHostDiscovered);sdk.Events.on('DSS.Recon.Completed',onCompleted);sdk.Events.on('DSS.Recon.Failed',onFailed);sdk.Events.on('DSS.Command.Result',onCommandResult);return true};
   $('recon-form').addEventListener('submit',async e=>{e.preventDefault();if(state.running)return;const target=$('recon-target').value.trim();if(!target)return;resetRecon();state.running=true;$('recon-run').disabled=true;try{const emitted=await invokeCommand(`recon -d ${target}`);if(!emitted)onFailed({reason:'DSS command bridge is unavailable.'})}catch(error){onFailed({reason:error instanceof Error?error.message:'Reconnaissance failed.'})}});
   $('cmd-form').addEventListener('submit',e=>e.preventDefault());

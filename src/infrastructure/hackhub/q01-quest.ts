@@ -177,8 +177,8 @@ const sendAdrianMail = (subject: string, content: string): void => {
 };
 
 @RegisterQuest
-export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
-    override Name = "dead_signal.q01";
+export class EntityResolutionQ01Quest extends HackHubQuest<Q01QuestData> {
+    override Name = "entity_resolution.q01";
     override Title = "THE CONTRACT";
     override Description =
         `Complete a routine external security audit for ${Q01_CLIENT_NAME} in Jakarta.`;
@@ -316,33 +316,33 @@ export class DeadSignalQ01Quest extends HackHubQuest<Q01QuestData> {
         }
 
         gameRuntime.reward.claim({
-            id: asId<"Reward">("dead_signal.q01.xp.external-audit"),
+            id: asId<"Reward">("entity_resolution.q01.xp.external-audit"),
             kind: "experience",
             amount: Q01_REWARDS.externalAudit,
         });
 
         gameRuntime.reward.claim({
-            id: asId<"Reward">("dead_signal.q01.xp.network-service-enumeration"),
+            id: asId<"Reward">("entity_resolution.q01.xp.network-service-enumeration"),
             kind: "experience",
             amount: Q01_REWARDS.networkServiceEnumeration,
         });
 
         gameRuntime.reward.claim({
-            id: asId<"Reward">("dead_signal.q01.xp.basic-vulnerability-assessment"),
+            id: asId<"Reward">("entity_resolution.q01.xp.basic-vulnerability-assessment"),
             kind: "experience",
             amount: Q01_REWARDS.basicVulnerabilityAssessment,
         });
 
         gameRuntime.reward.claim({
-            id: asId<"Reward">("dead_signal.q01.xp.submit-report"),
+            id: asId<"Reward">("entity_resolution.q01.xp.submit-report"),
             kind: "experience",
             amount: Q01_REWARDS.submitCorrectReport,
         });
 
         gameRuntime.economy.applyMissionReward(
             {
-                id: asId<"MissionReward">("dead_signal.q01.money"),
-                questId: "dead_signal.q01",
+                id: asId<"MissionReward">("entity_resolution.q01.money"),
+                questId: "entity_resolution.q01",
                 amount: Q01_REWARDS.money,
                 rewardIndex: 0,
             },

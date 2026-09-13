@@ -1,4 +1,4 @@
-import "./infrastructure/hackhub/apps/dead-signal.js";
+import "./infrastructure/hackhub/apps/entity-resolution.js";
 import "./infrastructure/hackhub/commands/recon.js";
 import "./infrastructure/hackhub/websites/q01-skynet-portal.js";
 import "./infrastructure/hackhub/q01-quest.js";
@@ -18,15 +18,15 @@ opsRuntime.recon.registerProfile(Q01_RECON_PROFILE);
 opsRuntime.recon.setNativeSubdomainResolver(resolveNativeSubdomains);
 
 @RegisterModPackage
-export default class DeadSignalMod extends Bootstrap {
+export default class EntityResolutionMod extends Bootstrap {
     override OnModPackageLoaded() {
         registerDssCommandBridge();
         gameRuntime.persistence.load();
-        console.log("DEAD SIGNAL mod loaded!");
+        console.log("ENTITY RESOLUTION mod loaded!");
     }
 
     override OnModPackageUnloaded() {
         gameRuntime.persistence.save();
-        console.log("DEAD SIGNAL mod unloaded.");
+        console.log("ENTITY RESOLUTION mod unloaded.");
     }
 }

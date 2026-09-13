@@ -2,7 +2,7 @@ import {
     App,
     RegisterApp,
 } from "@hotbunny/hackhub-content-sdk";
-import appHTML from "../../../dead-signal.html";
+import appHTML from "../../../entity-resolution.html";
 
 import {
     executeDssCommand,
@@ -357,7 +357,7 @@ const DSS_DIRECT_INTERACTION_PATCH = `
         if(commandOutput)commandOutput.innerHTML='';
         const line=document.createElement('div');
         line.className='line line-info';
-        line.textContent='DSS // Dead Signal System';
+        line.textContent='DSS // Data Surveillance System';
         commandOutput?.append(line);
         commandInput?.focus();
         return;
@@ -493,7 +493,7 @@ const dssHTML = appHTML.includes('</body>')
     : `${appHTML}${DSS_DIRECT_INTERACTION_PATCH}`;
 
 @RegisterApp
-export class DeadSignalApp extends App {
+export class EntityResolutionApp extends App {
     AppName = "dss";
     Title = "DSS";
     Icon = "./assets/dss.svg";
@@ -505,7 +505,7 @@ export class DeadSignalApp extends App {
     override Store = {
         title: "DSS",
         ratings: 0,
-        description: "DSS // Dead Signal System — integrated investigation workspace.",
+        description: "DSS // Data Surveillance System — integrated investigation workspace.",
     };
 
     override Exports = {

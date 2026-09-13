@@ -41,14 +41,14 @@ const printBanner = (tools: ReconTools): void => {
     }
 
     tools.println("");
-    tools.println("        DSS // Dead Signal System");
+    tools.println("        DSS // Data Surveillance System");
     tools.println("        RECONNAISSANCE MODULE");
 };
 
 @RegisterCommand({ default: true })
 export class ReconCommand extends Command {
     CommandName = "recon";
-    Description = "Run the DEAD SIGNAL reconnaissance module.";
+    Description = "Run the ENTITY RESOLUTION reconnaissance module.";
 
     override async Run(tools: ReconTools): Promise<void> {
         const args = tools.getArgs();

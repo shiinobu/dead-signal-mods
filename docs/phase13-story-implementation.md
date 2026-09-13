@@ -1,11 +1,11 @@
-# DEAD SIGNAL — Phase 13 Story Implementation
+# ENTITY RESOLUTION — Phase 13 Story Implementation
 
 Date: 2026-09-12
 Status: **SEQUENTIAL CAMPAIGN LOCKED — Q01 REVISED, LIVE VALIDATION PENDING**
 
 ## Purpose
 
-Phase 13 turns the locked DEAD SIGNAL story/design outputs from Phases 1–8 into concrete game content while preserving the locked runtime contracts established by Phases 9–12.
+Phase 13 turns the locked ENTITY RESOLUTION story/design outputs from Phases 1–8 into concrete game content while preserving the locked runtime contracts established by Phases 9–12.
 
 The execution strategy remains strictly sequential:
 
@@ -75,15 +75,15 @@ docs/phase13-q01-final-lock.md
 ### Q01 Contract
 
 ```text
-ID:            dead_signal.q01
+ID:            entity_resolution.q01
 Title:         THE CONTRACT
-Chapter:       01 — DEAD SIGNAL
+Chapter:       01 — ENTITY RESOLUTION
 Location:      Jakarta
 Primary:       Adrian Cole
 Prerequisite:  none
 Client:        Skynet Logistics
 Target:        203.0.113.42
-State:         dead_signal.q01.completed = true
+State:         entity_resolution.q01.completed = true
 Money:         $200
 Maximum XP:    80
 ```

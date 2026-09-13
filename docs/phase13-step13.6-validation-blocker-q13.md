@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.6
+# ENTITY RESOLUTION — Phase 13 Step 13.6
 
 ## Validation Blocker — Q13 Production Dependency
 
@@ -17,12 +17,12 @@ The first live validation attempt produced no visible Q14 gameplay. Repository/s
 The production Q14 adapter declares:
 
 ```text
-QuestsToComplete = ["dead_signal.q13"]
+QuestsToComplete = ["entity_resolution.q13"]
 ```
 
 This preserves the locked campaign dependency Q13 → Q14.
 
-However, the current production bundle does not contain a `dead_signal.q13` quest implementation. Therefore a fresh progression cannot satisfy the prerequisite and cannot legitimately claim Q14.
+However, the current production bundle does not contain a `entity_resolution.q13` quest implementation. Therefore a fresh progression cannot satisfy the prerequisite and cannot legitimately claim Q14.
 
 The locked campaign audit states:
 
@@ -53,7 +53,7 @@ The current Q14 adapter defines:
 ```text
 AutoStart    = false
 AutoComplete = true
-QuestsToComplete = ["dead_signal.q13"]
+QuestsToComplete = ["entity_resolution.q13"]
 ```
 
 but does not define `HackhubPost`.

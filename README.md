@@ -1,4 +1,4 @@
-# DEAD SIGNAL
+# ENTITY RESOLUTION
 
 A story-driven HackHub mod built with the official `@hotbunny/hackhub-content-sdk`.
 
@@ -9,7 +9,7 @@ A story-driven HackHub mod built with the official `@hotbunny/hackhub-content-sd
 ├── src/
 │   ├── index.ts          # HackHub Bootstrap entry point
 │   ├── core/             # Framework-agnostic primitives and shared contracts
-│   ├── domain/           # Canonical DEAD SIGNAL domain model and rules
+│   ├── domain/           # Canonical ENTITY RESOLUTION domain model and rules
 │   ├── state/            # Canonical runtime state ownership
 │   ├── application/      # Use cases and orchestration
 │   ├── infrastructure/   # Persistence, HackHub, and website adapters
@@ -24,7 +24,7 @@ A story-driven HackHub mod built with the official `@hotbunny/hackhub-content-sd
 └── tsconfig.json
 ```
 
-The production runtime entry point is `src/index.ts`. DEAD SIGNAL canonical state remains owned by the internal architecture rather than by the HackHub entry point.
+The production runtime entry point is `src/index.ts`. ENTITY RESOLUTION canonical state remains owned by the internal architecture rather than by the HackHub entry point.
 
 ## Requirements
 
@@ -55,7 +55,7 @@ Perform basic vulnerability checks
 Submit audit report
 ```
 
-The current Q01 client is **Skynet Logistics**. The target remains `203.0.113.42`, the chapter is Jakarta, Adrian Cole is the primary contact, the completion flag is `dead_signal.q01.completed`, the cash reward is `$200`, and the maximum XP is `80`.
+The current Q01 client is **Skynet Logistics**. The target remains `203.0.113.42`, the chapter is Jakarta, Adrian Cole is the primary contact, the completion flag is `entity_resolution.q01.completed`, the cash reward is `$200`, and the maximum XP is `80`.
 
 Expected service enumeration:
 
@@ -82,7 +82,7 @@ Use the maintained development replay for repeatable live testing:
 npm run build:replay:q01
 ```
 
-Install the complete `dist-replay/` package into `HackHub/mods/dead-signal-dev/` and restart HackHub. Each build receives a fresh development quest identity.
+Install the complete `dist-replay/` package into `HackHub/mods/entity-resolution-dev/` and restart HackHub. Each build receives a fresh development quest identity.
 
 Replay is isolated from production completion state and production rewards.
 

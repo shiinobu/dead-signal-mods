@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Q01 Live Validation
+# ENTITY RESOLUTION — Q01 Live Validation
 
 Status: **REVISED — READY FOR LIVE VALIDATION**
 
@@ -10,7 +10,7 @@ Use the development replay package for repeatable testing:
 npm run build:replay:q01
 ```
 
-Install the complete `dist-replay/` contents into `HackHub/mods/dead-signal-dev/` and restart HackHub.
+Install the complete `dist-replay/` contents into `HackHub/mods/entity-resolution-dev/` and restart HackHub.
 
 Use a fresh replay build after each code change. Each replay build receives a new quest identity.
 
@@ -21,7 +21,7 @@ Use a fresh replay build after each code change. Each replay build receives a ne
 3. Confirm Adrian's Q01 contract mail arrives from:
 
 ```text
-adrian.cole@deadsignal.lock
+adrian.cole@entityresolution.lock
 ```
 
 4. Confirm the five locked objective names are presented in this order:
@@ -123,7 +123,7 @@ Further internal assessment is recommended.
 23. Confirm the replay build does not grant production XP/money and does not set:
 
 ```text
-dead_signal.q01.completed
+entity_resolution.q01.completed
 ```
 
 24. Confirm no Q14 or Phase 12 diagnostic content is exposed by the replay package.
@@ -197,13 +197,13 @@ Adrian's sender identity is canonical and must never be randomized:
 
 ```text
 character.adrian.cole
-adrian.cole@deadsignal.lock
+adrian.cole@entityresolution.lock
 ```
 
 Submission values are discovered rather than supplied directly:
 
 ```text
-recipient = adrian.cole@deadsignal.lock
+recipient = adrian.cole@entityresolution.lock
 subject   = Security Audit — Jakarta
 body      = resolved report using the supplied template
 ```

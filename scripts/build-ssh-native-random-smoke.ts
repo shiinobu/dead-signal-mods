@@ -40,8 +40,8 @@ const sourceManifest = JSON.parse(
 
 const manifest: Record<string, unknown> = {
     ...sourceManifest,
-    id: "dead-signal-ssh-random-smoke",
-    name: "DEAD SIGNAL — Native SSH Random-IP Smoke Test",
+    id: "entity-resolution-ssh-random-smoke",
+    name: "ENTITY RESOLUTION — Native SSH Random-IP Smoke Test",
     version: `0.1.0-dev.${smokeId}`,
     description:
         `Minimal native SSH smoke test using Network.randomIp() (${smokeId}).`,
@@ -67,5 +67,5 @@ console.log("Package contents:");
 console.log("  - mod.js");
 console.log("  - manifest.json");
 console.log(
-    "Install the complete dist-ssh-random-smoke contents into HackHub/mods/dead-signal-ssh-random-smoke and restart HackHub.",
+    "Install the complete dist-ssh-random-smoke contents into HackHub/mods/entity-resolution-ssh-random-smoke and restart HackHub.",
 );

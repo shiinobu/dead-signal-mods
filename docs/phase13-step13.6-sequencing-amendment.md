@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.6 Amendment
+# ENTITY RESOLUTION — Phase 13 Step 13.6 Amendment
 
 Date: 2026-09-11
 
@@ -51,7 +51,7 @@ The optional path must therefore be tested while Q14 is still active:
 ```text
 Open AR-44192-justification.txt
         ↓
-dead_signal.q14.exception_access_found = true
+entity_resolution.q14.exception_access_found = true
         ↓
 finish Objective 06
         ↓

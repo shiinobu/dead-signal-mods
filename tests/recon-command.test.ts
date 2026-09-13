@@ -45,7 +45,7 @@ describe("DSS recon command", () => {
     });
 
     it("renders DSS-native branding and delegates timing to the shared service", () => {
-        assert.match(reconCommandSource, /DSS \/\/ Dead Signal System/);
+        assert.match(reconCommandSource, /DSS \/\/ Data Surveillance System/);
         assert.match(reconCommandSource, /RECONNAISSANCE MODULE/);
         assert.match(reconCommandSource, /sleep: \(ms\) => tools\.sleep\(ms\)/);
     });

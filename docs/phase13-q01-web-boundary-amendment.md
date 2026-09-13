@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Q01 Web Boundary Amendment
+# ENTITY RESOLUTION — Q01 Web Boundary Amendment
 
 Date: 2026-09-12
 Status: **CHANGE CONTROL — APPLIED; LIVE VALIDATION PENDING**

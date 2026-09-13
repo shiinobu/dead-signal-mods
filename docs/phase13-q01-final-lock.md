@@ -1,27 +1,27 @@
-# DEAD SIGNAL — Q01 Final Lock
+# ENTITY RESOLUTION — Q01 Final Lock
 
 Date: 2026-09-13
 Status: **FINAL LOCK — LYNX/DSS RECON; LIVE VALIDATION PENDING**
 
 ## Lock Scope
 
-This document is the current implementation lock for Q01 after the approved Lynx/subdomain reconnaissance amendment and subsequent promotion of reconnaissance into the shared DEAD SIGNAL System (DSS) tool architecture.
+This document is the current implementation lock for Q01 after the approved Lynx/subdomain reconnaissance amendment and subsequent promotion of reconnaissance into the shared Data Surveillance System (DSS) tool architecture.
 
 The story intent, client, target, five objectives, canonical completion state, rewards, and non-exploitative assessment boundary remain unchanged. The web discovery model is now genuinely subdomain-based and is executed through the reusable DSS `ReconService`.
 
 ## Canonical Identity
 
 ```text
-ID:            dead_signal.q01
+ID:            entity_resolution.q01
 Title:         THE CONTRACT
-Chapter:       01 — DEAD SIGNAL
+Chapter:       01 — ENTITY RESOLUTION
 Location:      Jakarta
 Primary:       Adrian Cole
 Prerequisite:  none
 Client:        Skynet Logistics
 Target:        203.0.113.42
 Completion:    audit report submitted
-State:         dead_signal.q01.completed = true
+State:         entity_resolution.q01.completed = true
 Money:         $200
 Maximum XP:    80
 ```
@@ -141,7 +141,7 @@ www.skynet-logistics.idx
 
 The shared service owns target normalization, source sequencing, progress calculations, candidate/unique counters, animation timing, spinner frames, and result streaming. The HackHub command is only an adapter that renders service events.
 
-The command uses original DEAD SIGNAL branding. ProjectDiscovery/Subfinder branding is not part of the player-facing Q01 command vocabulary.
+The command uses original ENTITY RESOLUTION branding. ProjectDiscovery/Subfinder branding is not part of the player-facing Q01 command vocabulary.
 
 ## Objective 04 Method
 
@@ -192,7 +192,7 @@ Adrian Cole remains canonical:
 
 ```text
 character.adrian.cole
-adrian.cole@deadsignal.lock
+adrian.cole@entityresolution.lock
 ```
 
 The incoming email does not expose the web audit URL, company answer, or open-port answer.

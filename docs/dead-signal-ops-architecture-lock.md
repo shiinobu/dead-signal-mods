@@ -1,31 +1,31 @@
-# DEAD SIGNAL — Desktop Operations Architecture Lock
+# ENTITY RESOLUTION — Desktop Operations Architecture Lock
 
 Date: 2026-09-13
 Status: **LOCKED — ARCHITECTURE DECISION**
 
 ## 1. Product Identity
 
-The DEAD SIGNAL custom desktop application is named:
+The ENTITY RESOLUTION custom desktop application is named:
 
 ```text
-DEAD-SIGNAL
+DSS
 ```
 
-`DSS` is the canonical abbreviation for **Dead Signal System** and may be used as secondary branding/internal terminology, but it is not the primary desktop title.
+`DSS` is the canonical abbreviation for **Data Surveillance System** (amended 2026-09-13, was "Dead Signal System") and is the primary desktop title, matching the shipped implementation.
 
 Recommended identifiers:
 
 ```text
 AppName: dss
-Title: DEAD-SIGNAL
-Brand label: DSS // Dead Signal System
+Title: DSS
+Brand label: DSS // Data Surveillance System
 ```
 
-Do not use `DEAD_SIGNAL` as the visible product title. Hyphenated `DEAD-SIGNAL` is the canonical player-facing name.
+`DSS` is the canonical in-game, player-facing app name. It is intentionally decoupled from the mod's own outer title (ENTITY RESOLUTION) — an in-fiction tool does not need to share its parent product's marketing name.
 
 ## 2. Application Model
 
-`DEAD-SIGNAL` is one HackHub Desktop App containing a custom DEAD SIGNAL operations workspace.
+`DSS` is one HackHub Desktop App containing a custom ENTITY RESOLUTION operations workspace.
 
 It is not a clone of HackHub's whole desktop environment and it does not embed or replace native HackHub applications.
 
@@ -37,7 +37,7 @@ The canonical layout is:
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ DEAD-SIGNAL                                      _ □ ×      │
+│ DSS                                      _ □ ×      │
 ├────────────────┬─────────────────────────────────────────────┤
 │ TOOLS          │                                             │
 │                │              ACTIVE WORKSPACE               │
@@ -59,7 +59,7 @@ The canonical navigation pattern is **left tool navigator + active workspace**, 
 ## 4. Runtime Boundary
 
 ```text
-DEAD-SIGNAL UI
+DSS UI
       ↓
 OpsRuntime
       ├── CommandRegistry
@@ -77,13 +77,13 @@ OpsRuntime
 
 Presentation must not own game-state mutation.
 
-Game quest/narrative/capability state remains owned by the existing DEAD SIGNAL runtime. OPS consumes capabilities and publishes meaningful findings/events through the established runtime boundary.
+Game quest/narrative/capability state remains owned by the existing ENTITY RESOLUTION runtime. OPS consumes capabilities and publishes meaningful findings/events through the established runtime boundary.
 
 ## 5. Terminal+
 
-`Terminal+` is a DEAD SIGNAL workbench, not an embedded clone of HackHub's native terminal.
+`Terminal+` is an ENTITY RESOLUTION workbench, not an embedded clone of HackHub's native terminal.
 
-It owns its own command presentation and can expose DEAD SIGNAL commands through `CommandRegistry`.
+It owns its own command presentation and can expose ENTITY RESOLUTION commands through `CommandRegistry`.
 
 Native HackHub commands may be integrated through adapters where the SDK supports the required behavior, but native command stdout must not be assumed to be capturable into the OPS UI.
 
@@ -91,7 +91,7 @@ The native HackHub terminal remains an independent application.
 
 ## 6. Wireshark+
 
-`Wireshark+` is a DEAD SIGNAL forensic packet-analysis workspace implemented as our own HTML/UI surface.
+`Wireshark+` is an ENTITY RESOLUTION forensic packet-analysis workspace implemented as our own HTML/UI surface.
 
 It is not a wrapper or embedded copy of HackHub's native Wireshark.
 
@@ -99,7 +99,7 @@ Its data source is `PacketCaptureService` / investigation state and supported Ha
 
 ## 7. Recon Tool
 
-The Q01 command previously named `subfinders` is renamed to the original DEAD SIGNAL command:
+The Q01 command previously named `subfinders` is renamed to the original ENTITY RESOLUTION command:
 
 ```text
 recon
@@ -111,9 +111,9 @@ Canonical invocation:
 recon -d https://www.skynet-logistics.idx/
 ```
 
-`recon` is intentionally broader than the Q01 implementation name. In Q01 it performs deterministic subdomain reconnaissance; future DEAD SIGNAL tools may extend the same command family without exposing third-party product branding to the player.
+`recon` is intentionally broader than the Q01 implementation name. In Q01 it performs deterministic subdomain reconnaissance; future ENTITY RESOLUTION tools may extend the same command family without exposing third-party product branding to the player.
 
-The prior command name `subfinders` is not part of the canonical DEAD SIGNAL command vocabulary after this lock.
+The prior command name `subfinders` is not part of the canonical ENTITY RESOLUTION command vocabulary after this lock.
 
 ## 8. Tool Services
 
@@ -149,7 +149,7 @@ evidenceIds
 
 The session is separate from quest/narrative state.
 
-Meaningful discoveries can be promoted into the existing DEAD SIGNAL evidence/state pipeline through explicit services/events.
+Meaningful discoveries can be promoted into the existing ENTITY RESOLUTION evidence/state pipeline through explicit services/events.
 
 ## 10. Capability and Progression
 
@@ -210,9 +210,9 @@ The following are explicitly out of scope for this architecture:
 
 ## 14. Locked Decision
 
-The DEAD SIGNAL desktop architecture is therefore:
+The ENTITY RESOLUTION desktop architecture is therefore:
 
-**`DEAD-SIGNAL` / `DSS` single Desktop App + left navigator + independent DEAD SIGNAL tool workspaces + OpsRuntime + explicit HackHub adapters.**
+**`DSS` single Desktop App + left navigator + independent ENTITY RESOLUTION tool workspaces + OpsRuntime + explicit HackHub adapters.**
 
 Initial tools:
 

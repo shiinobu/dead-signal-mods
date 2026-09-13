@@ -1,4 +1,4 @@
-# DEAD SIGNAL — DSS Toolkit Expansion
+# ENTITY RESOLUTION — DSS Toolkit Expansion
 
 Date: 2026-09-13
 Status: **IMPLEMENTED — MIXED LIVE VALIDATION (see status table)**
@@ -58,7 +58,7 @@ delayed messages (the same class of unreliability documented in the earlier
 DSS Recon live-validation saga).
 
 **What shipped** (`src/infrastructure/hackhub/dss-command-runtime.ts`,
-`src/infrastructure/hackhub/apps/dead-signal.ts`, `src/dead-signal.html`):
+`src/infrastructure/hackhub/apps/entity-resolution.ts`, `src/entity-resolution.html`):
 
 - **Enter** runs the current input — unified with the Run button (previously
   two separate execution paths existed and could both fire).
@@ -119,7 +119,7 @@ The desktop app's visual identity moved from a generic cyan/teal dashboard
 palette to an amber-phosphor "signal intercept console" — sharp
 bracket-cornered panels, a CRT scanline overlay, and glow accents on the
 wordmark/progress bar, replacing `--accent:#4fd1c5` (teal) with
-`--accent:#ffb400` (amber) throughout `src/dead-signal.html`. Fonts remain
+`--accent:#ffb400` (amber) throughout `src/entity-resolution.html`. Fonts remain
 the existing system monospace stack (`ui-monospace,SFMono-Regular,Menlo,monospace`)
 rather than the Google Fonts pairing used in the design preview, since the
 production file has no external resource dependencies by design and the

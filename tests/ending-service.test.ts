@@ -72,7 +72,7 @@ test(
         const endingId =
             endingService.resolve([
                 {
-                    id: "ending.dead-signal",
+                    id: "ending.entity-resolution",
                     condition: flagEquals(
                         "ending.signal",
                         true,
@@ -82,7 +82,7 @@ test(
 
         assert.equal(
             endingId,
-            "ending.dead-signal",
+            "ending.entity-resolution",
         );
 
         assert.equal(
@@ -92,7 +92,7 @@ test(
 
         assert.equal(
             endingService.getEndingId(),
-            "ending.dead-signal",
+            "ending.entity-resolution",
         );
     },
 );
@@ -107,7 +107,7 @@ test(
         const endingId =
             endingService.resolve([
                 {
-                    id: "ending.dead-signal",
+                    id: "ending.entity-resolution",
                     condition: flagEquals(
                         "ending.signal",
                         true,
@@ -143,7 +143,7 @@ test(
 
         endingService.resolve([
             {
-                id: "ending.dead-signal",
+                id: "ending.entity-resolution",
                 condition: flagEquals(
                     "ending.signal",
                     true,
@@ -157,7 +157,7 @@ test(
                 .domain
                 .ending,
             {
-                endingId: "ending.dead-signal",
+                endingId: "ending.entity-resolution",
                 resolved: true,
             },
         );

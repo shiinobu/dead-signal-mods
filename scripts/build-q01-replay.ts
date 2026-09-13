@@ -21,10 +21,10 @@ const replayManifestPath = resolve(
     "manifest.json",
 );
 const replayModPath = resolve(replayOutputDir, "mod.js");
-const replayAppPath = resolve(replayOutputDir, "dead-signal.html");
+const replayAppPath = resolve(replayOutputDir, "entity-resolution.html");
 const sourceManifestPath = resolve(projectRoot, "manifest.json");
 const sourceAssetsDir = resolve(projectRoot, "public/assets");
-const sourceDssAppPath = resolve(projectRoot, "src/dead-signal.html");
+const sourceDssAppPath = resolve(projectRoot, "src/entity-resolution.html");
 const replayAssetsDir = resolve(replayOutputDir, "assets");
 const replayAvatarPath = resolve(replayAssetsDir, "adrian-cole.png");
 const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
@@ -32,7 +32,7 @@ const replayDssIconPath = resolve(replayAssetsDir, "dss.svg");
 // One-time development reinstall namespace. This forces HackHub to load the
 // replay as a clean mod installation while the DSS application identity stays
 // stable as AppName = "dss" and the quest remains uniquely replayed.
-const replayModId = "dead-signal-dev-refresh";
+const replayModId = "entity-resolution-dev-refresh";
 
 const previousRun = Number.parseInt(
     await readFile(replayStatePath, "utf8").catch(() => "0"),
@@ -58,7 +58,7 @@ await buildMod({
 
 const replayBundle = await readFile(replayModPath, "utf8");
 const requiredBundleMarkers = [
-    "DeadSignalApp",
+    "EntityResolutionApp",
     "dss",
     "ReconCommand",
     "Q01_RECON_PROFILE",
@@ -151,7 +151,7 @@ for (const marker of requiredDssHtmlMarkers) {
 console.log("Package contents:");
 console.log("  - mod.js");
 console.log("  - manifest.json");
-console.log("  - dead-signal.html");
+console.log("  - entity-resolution.html");
 console.log("  - assets/adrian-cole.png");
 console.log("  - assets/dss.svg");
 console.log(

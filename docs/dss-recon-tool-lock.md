@@ -1,15 +1,15 @@
-# DEAD SIGNAL — DSS Recon Tool Lock
+# ENTITY RESOLUTION — DSS Recon Tool Lock
 
 Date: 2026-09-13
 Status: **LOCKED — SHARED DSS TOOL CONTRACT**
 
 ## Identity
 
-The reconnaissance capability is a shared DEAD SIGNAL System (DSS) tool, not a Q01-specific implementation.
+The reconnaissance capability is a shared Data Surveillance System (DSS) tool, not a Q01-specific implementation.
 
 ```text
-Desktop application: DEAD-SIGNAL
-System abbreviation: DSS // Dead Signal System
+Desktop application: DSS
+System abbreviation: DSS // Data Surveillance System
 Tool:               Recon
 Command:            recon
 Canonical usage:    recon -d <domain>
@@ -18,7 +18,7 @@ Canonical usage:    recon -d <domain>
 ## Ownership
 
 ```text
-DEAD-SIGNAL / OpsRuntime
+DSS / OpsRuntime
     ↓
 ReconService
     ↓
@@ -123,4 +123,4 @@ The same recon behavior can therefore be surfaced in Terminal+, the DSS desktop 
 
 ## Final Disposition
 
-`ReconService` is the canonical reusable reconnaissance capability for DEAD SIGNAL. Q01 is one profile consumer, not the owner of the tool.
+`ReconService` is the canonical reusable reconnaissance capability for ENTITY RESOLUTION. Q01 is one profile consumer, not the owner of the tool.

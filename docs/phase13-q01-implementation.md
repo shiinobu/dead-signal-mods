@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Q01 Revised Implementation
+# ENTITY RESOLUTION — Q01 Revised Implementation
 
 Date: 2026-09-13
 Status: **IMPLEMENTED — LYNX/DSS RECON; LIVE VALIDATION PENDING**
@@ -6,15 +6,15 @@ Status: **IMPLEMENTED — LYNX/DSS RECON; LIVE VALIDATION PENDING**
 ## Identity
 
 ```text
-ID:            dead_signal.q01
+ID:            entity_resolution.q01
 Title:         THE CONTRACT
-Chapter:       01 — DEAD SIGNAL
+Chapter:       01 — ENTITY RESOLUTION
 Location:      Jakarta
 Primary:       Adrian Cole
 Prerequisite:  none
 Client:        Skynet Logistics
 Target:        203.0.113.42
-State:         dead_signal.q01.completed = true
+State:         entity_resolution.q01.completed = true
 Money:         $200
 Maximum XP:    80
 Apex Domain:   skynet-logistics.idx
@@ -127,7 +127,7 @@ https://www.skynet-logistics.idx/
 
 ## DSS Recon
 
-Reconnaissance is a shared DEAD SIGNAL System capability, not Q01-specific command logic.
+Reconnaissance is a shared Data Surveillance System capability, not Q01-specific command logic.
 
 Canonical command:
 

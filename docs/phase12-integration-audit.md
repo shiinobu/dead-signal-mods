@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 12 Integration Audit
+# ENTITY RESOLUTION — Phase 12 Integration Audit
 
 Date: 2026-09-11
 
@@ -26,11 +26,11 @@ Phase 12 runtime integration is validated in-game and through automated tests. T
 
 The production integration does not depend on `Terminal.NmapScan`. The validated path is a quest objective triggered from `Terminal.Command` for the Nmap command, with typed Nmap response data supplied through the SDK Shell API. The smoke quest verifies the expected typed result and cleans the command data on completion.
 
-The smoke quest intentionally provides deterministic command response data from `OnStart()`. This validates DEAD SIGNAL's supported use of HackHub's dynamic Nmap command-data mechanism; it is not a claim that HackHub's underlying Nmap engine independently reports those exact ports without mod-provided command data.
+The smoke quest intentionally provides deterministic command response data from `OnStart()`. This validates ENTITY RESOLUTION's supported use of HackHub's dynamic Nmap command-data mechanism; it is not a claim that HackHub's underlying Nmap engine independently reports those exact ports without mod-provided command data.
 
 ## Persistence boundary
 
-`HackHubSaveStorageAdapter` maps DEAD SIGNAL's persistence boundary to HackHub `SaveStorage`. The runtime integration tests verify serialization, restore, and canonical-state ownership. The in-process regression verifies a fresh `GameRuntime` can restore the saved canonical state. The separate SaveStorage probe was used during Phase 12 to verify the save backend across game restart.
+`HackHubSaveStorageAdapter` maps ENTITY RESOLUTION's persistence boundary to HackHub `SaveStorage`. The runtime integration tests verify serialization, restore, and canonical-state ownership. The in-process regression verifies a fresh `GameRuntime` can restore the saved canonical state. The separate SaveStorage probe was used during Phase 12 to verify the save backend across game restart.
 
 ## Production isolation
 

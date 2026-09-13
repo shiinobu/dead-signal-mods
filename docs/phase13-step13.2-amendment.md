@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Step 13.2 Amendment
+# ENTITY RESOLUTION — Step 13.2 Amendment
 
 Date: 2026-09-11
 
@@ -15,7 +15,7 @@ The original Step 13.2 document remains the historical record of the mapping sta
 Current canonical mapping:
 
 ```text
-dead_signal.q14.marcus_access_approval_confirmed == true
+entity_resolution.q14.marcus_access_approval_confirmed == true
 ```
 
 The locked source explicitly records `AR-44192`, `M.REED`, approved status, and link to `A-77402`. fileciteturn200file0L16-L41
@@ -25,7 +25,7 @@ The locked source explicitly records `AR-44192`, `M.REED`, approved status, and 
 Current canonical mapping:
 
 ```text
-dead_signal.q14.operator_identity_unknown == true
+entity_resolution.q14.operator_identity_unknown == true
 ```
 
 The locked source explicitly records that Marcus did not use the session and that the identity was delegated. fileciteturn200file1L107-L117
@@ -42,7 +42,7 @@ The source defines this investigation as optional and assigns +20 XP. filecit
 
 ## Remaining runtime gap
 
-Q15 Objective 04 — `RECONSTRUCT THE SESSION` remains a dedicated source-to-runtime gap because the source supplies an action timeline but the persistent state does not provide a unique completion key separate from `dead_signal.q15.operator_session_found` used by Objective 02. The action timeline must not be collapsed into the earlier state without an explicit canonical decision.
+Q15 Objective 04 — `RECONSTRUCT THE SESSION` remains a dedicated source-to-runtime gap because the source supplies an action timeline but the persistent state does not provide a unique completion key separate from `entity_resolution.q15.operator_session_found` used by Objective 02. The action timeline must not be collapsed into the earlier state without an explicit canonical decision.
 
 ## Current status
 

@@ -9,12 +9,12 @@ export interface OpsCommandDefinition {
 const COMMAND_DEFINITIONS: readonly OpsCommandDefinition[] = [
     {
         name: "recon",
-        description: "Run the DEAD SIGNAL reconnaissance module.",
+        description: "Run the ENTITY RESOLUTION reconnaissance module.",
         toolId: "recon",
     },
     {
         name: "wireshark",
-        description: "Run a DEAD SIGNAL Wireshark+ packet capture.",
+        description: "Run an ENTITY RESOLUTION Wireshark+ packet capture.",
         toolId: "wireshark",
     },
 ];

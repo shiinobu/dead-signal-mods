@@ -14,7 +14,7 @@ const TOOL_DEFINITIONS: readonly OpsToolDefinition[] = [
     {
         id: "terminal",
         name: "Terminal+",
-        description: "DEAD SIGNAL command workspace and native HackHub integration boundary.",
+        description: "ENTITY RESOLUTION command workspace and native HackHub integration boundary.",
         status: "foundation",
         capability: "terminal.basic",
     },
@@ -28,7 +28,7 @@ const TOOL_DEFINITIONS: readonly OpsToolDefinition[] = [
     {
         id: "wireshark",
         name: "Wireshark+",
-        description: "DEAD SIGNAL forensic packet-analysis workspace.",
+        description: "ENTITY RESOLUTION forensic packet-analysis workspace.",
         status: "ready",
         capability: "tool.wireshark",
     },

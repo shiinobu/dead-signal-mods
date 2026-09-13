@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const appHtml = readFileSync(
     resolve(
         fileURLToPath(
-            new URL("../src/dead-signal.html", import.meta.url),
+            new URL("../src/entity-resolution.html", import.meta.url),
         ),
     ),
     "utf8",

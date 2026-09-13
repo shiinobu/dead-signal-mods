@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Replay Scope Lock
+# ENTITY RESOLUTION — Replay Scope Lock
 
 Date: 2026-09-13
 Status: **LOCKED**
@@ -7,14 +7,14 @@ Status: **LOCKED**
 
 Replay builds repeat the quest fixture, not the DSS application.
 
-The `DSS` desktop application is a persistent, reusable DEAD SIGNAL System surface. A Q01 replay must not create a replay-specific DSS app identity, title, registration, or runtime contract.
+The `DSS` desktop application is a persistent, reusable Data Surveillance System surface. A Q01 replay must not create a replay-specific DSS app identity, title, registration, or runtime contract.
 
 ## Stable DSS identity
 
 ```text
 AppName: dss
 Title:   DSS
-HTML:    dead-signal.html
+HTML:    entity-resolution.html
 ```
 
 The application remains the same DSS application across development replay builds and future quests.
@@ -24,7 +24,7 @@ The application remains the same DSS application across development replay build
 Only the development quest instance receives a unique replay identity:
 
 ```text
-Name = dead_signal.dev.q01.<DEV_Q01_REPLAY_ID>
+Name = entity_resolution.dev.q01.<DEV_Q01_REPLAY_ID>
 ```
 
 A new replay ID therefore creates a fresh Q01 quest registration without changing the DSS app identity.

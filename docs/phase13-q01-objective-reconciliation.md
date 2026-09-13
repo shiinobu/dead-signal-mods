@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Q01 Objective Reconciliation
+# ENTITY RESOLUTION — Q01 Objective Reconciliation
 
 Date: 2026-09-12
 Status: **REVISED — PHASE 8 OBJECTIVE STRUCTURE PRESERVED**

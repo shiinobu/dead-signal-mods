@@ -10,7 +10,7 @@ import type {
     SaveStorage,
 } from "../../state/index.js";
 
-const RUNTIME_STATE_KEY = "dead_signal.runtime_state";
+const RUNTIME_STATE_KEY = "entity_resolution.runtime_state";
 
 class SaveStorageAdapter implements SaveStorage {
     write(serializedState: string): void {
@@ -30,7 +30,7 @@ class SaveStorageAdapter implements SaveStorage {
 }
 
 /**
- * Production DEAD SIGNAL runtime composition root.
+ * Production ENTITY RESOLUTION runtime composition root.
  *
  * HackHub SaveStorage is only the persistence transport. Canonical runtime
  * state remains owned by GameRuntime -> StateStore, not by the SDK storage

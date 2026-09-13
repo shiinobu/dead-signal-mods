@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Repository Cleanup Audit
+# ENTITY RESOLUTION — Repository Cleanup Audit
 
 Date: 2026-09-12
 Status: **CLEANUP EXECUTED — Q01 REVISED PATH ONLY**

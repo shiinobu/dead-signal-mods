@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Development Q01 Replay
+# ENTITY RESOLUTION — Development Q01 Replay
 
 Purpose: provide a repeatable in-game Q01 test loop without changing production quest state or production campaign progression.
 
@@ -16,9 +16,9 @@ The replay fixture is built separately with:
 npm run build:replay:q01
 ```
 
-The replay build is emitted to `dist-replay/` and uses the development mod id `dead-signal-dev`.
+The replay build is emitted to `dist-replay/` and uses the development mod id `entity-resolution-dev`.
 
-Replay remains intentionally isolated from the canonical `dead_signal.q01` completion flag and production rewards.
+Replay remains intentionally isolated from the canonical `entity_resolution.q01` completion flag and production rewards.
 
 ## Fresh Replay Rule
 
@@ -27,7 +27,7 @@ Each replay build generates a fresh native quest identity so previously complete
 The production quest id remains:
 
 ```text
-dead_signal.q01
+entity_resolution.q01
 ```
 
 ## Revised Q01 Gameplay
@@ -76,7 +76,7 @@ npm run build:replay:q01
 3. Remove/replace the local development mod folder:
 
 ```text
-HackHub/mods/dead-signal-dev/
+HackHub/mods/entity-resolution-dev/
 ```
 
 Copy the complete contents of `dist-replay/` into that folder.
@@ -219,7 +219,7 @@ The replay fixture:
 
 - grants no production XP;
 - grants no production money;
-- does not set `dead_signal.q01.completed`;
+- does not set `entity_resolution.q01.completed`;
 - does not register Q02–Q16;
 - does not import historical SSH smoke-test fixtures.
 

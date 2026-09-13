@@ -1,18 +1,18 @@
-# DEAD SIGNAL — Q01 Source Gate
+# ENTITY RESOLUTION — Q01 Source Gate
 
 Date: 2026-09-12
 Status: **REVISED IMPLEMENTATION LOCK — LIVE VALIDATION PENDING**
 
 ## Source Authority
 
-Q01 remains `dead_signal.q01` and keeps the locked five-objective structure and Phase 8 reward allocation. The current project-owner revision changes the web discovery model to Lynx + subdomain enumeration and changes Adrian's report email to a player-completed format.
+Q01 remains `entity_resolution.q01` and keeps the locked five-objective structure and Phase 8 reward allocation. The current project-owner revision changes the web discovery model to Lynx + subdomain enumeration and changes Adrian's report email to a player-completed format.
 
 The revision does not add a new character, persistent completion flag, dependency, reward, or objective.
 
 ## Canonical Q01 Contract
 
 ```text
-ID:          dead_signal.q01
+ID:          entity_resolution.q01
 Title:       THE CONTRACT
 Location:    Jakarta
 Primary:     Adrian Cole
@@ -20,7 +20,7 @@ Target:      203.0.113.42
 Client:      Skynet Logistics
 Apex domain: skynet-logistics.idx
 Completion:  audit report submitted
-State:       dead_signal.q01.completed = true
+State:       entity_resolution.q01.completed = true
 Reward:      $200 + up to 80 XP
 ```
 
@@ -172,7 +172,7 @@ Further internal assessment is recommended.
 Only the canonical completion flag is persistent:
 
 ```text
-dead_signal.q01.completed = true
+entity_resolution.q01.completed = true
 ```
 
 Lynx/subfinder discovery state remains transient Q01 quest data.

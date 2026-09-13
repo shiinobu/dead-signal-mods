@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 1–12 Cross-Phase Audit
+# ENTITY RESOLUTION — Phase 1–12 Cross-Phase Audit
 
 Date: 2026-09-11
 
@@ -369,7 +369,7 @@ Detailed content still absent from the readable source set
 
 ## Overall conclusion
 
-**The DEAD SIGNAL project now has a verified source chain for the locked phase history from Phase 1 through Phase 12.** The previous audit's statement that Phase 1–8 were simply "source-gaps" was too broad and is corrected here.
+**The ENTITY RESOLUTION project now has a verified source chain for the locked phase history from Phase 1 through Phase 12.** The previous audit's statement that Phase 1–8 were simply "source-gaps" was too broad and is corrected here.
 
 The remaining limitation is narrower: not every original design artifact is present as a standalone readable document, especially for the detailed content of earlier quests. This is a documentation/source-detail limitation, not an indication that those phases were unlocked, invalid, or redesigned later.
 

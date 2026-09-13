@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.3
+# ENTITY RESOLUTION — Phase 13 Step 13.3
 
 Date: 2026-09-11
 
@@ -58,11 +58,11 @@ The following Q14 objective outcomes have exact source-backed state representati
 
 | Objective | Source-backed state | Runtime condition | Slice status |
 |---|---|---|---|
-| 01 — Find the access registry | `dead_signal.q14.override_access_registry_found` | `flagEquals(..., true)` | READY |
-| 02 — Trace the access window | `dead_signal.q14.override_session_found` | `flagEquals(..., true)` | READY |
-| 04 — Resolve the approver | `dead_signal.q14.marcus_reed_confirmed` | `flagEquals(..., true)` | READY |
-| 05 — Speak to Marcus | `dead_signal.marcus_introduced` + `dead_signal.marcus_authority_confirmed` | `all(...)` | READY |
-| 07 — Check the access justification | `dead_signal.q14.exception_access_found` | `flagEquals(..., true)` | READY |
+| 01 — Find the access registry | `entity_resolution.q14.override_access_registry_found` | `flagEquals(..., true)` | READY |
+| 02 — Trace the access window | `entity_resolution.q14.override_session_found` | `flagEquals(..., true)` | READY |
+| 04 — Resolve the approver | `entity_resolution.q14.marcus_reed_confirmed` | `flagEquals(..., true)` | READY |
+| 05 — Speak to Marcus | `entity_resolution.marcus_introduced` + `entity_resolution.marcus_authority_confirmed` | `all(...)` | READY |
+| 07 — Check the access justification | `entity_resolution.q14.exception_access_found` | `flagEquals(..., true)` | READY |
 
 Q14 Objective 03 and Objective 06 are not placed into the executable slice because the recovered artifact does not name an exact dedicated completion state for those objective boundaries.
 
@@ -72,13 +72,13 @@ The following Q15 objective outcomes have exact source-backed state representati
 
 | Objective | Source-backed state | Runtime condition | Slice status |
 |---|---|---|---|
-| 01 — Retrieve primary audit export | `dead_signal.q15.primary_audit_accessed` | `flagEquals(..., true)` | READY |
-| 02 — Reconstruct session A-77402 | `dead_signal.q15.operator_session_found` | `flagEquals(..., true)` | READY |
-| 03 — Trace the user reference | `dead_signal.q15.operator_identity_hash_found` | `flagEquals(..., true)` | READY |
-| 05 — Compare policy versions | `dead_signal.q15.policy_change_reconstructed` + `dead_signal.q15.relationship_policy_modified` | `all(...)` | READY |
-| 06 — Trace Rizky through the pipeline | `dead_signal.q15.rizky_processing_chain_reconstructed` + `dead_signal.q15.com07_policy_path_confirmed` | `all(...)` | READY |
-| Optional — Check previous policy | `dead_signal.q15.before_after_policy_verified` + `dead_signal.q15.review_behavior_changed_confirmed` | `all(...)` | READY |
-| 07 — Correlate operator identity | `dead_signal.q15.operator_identity_correlated` + `dead_signal.q15.operator_identity_restricted` + `dead_signal.q15.operator_employment_arka` | `all(...)` | READY |
+| 01 — Retrieve primary audit export | `entity_resolution.q15.primary_audit_accessed` | `flagEquals(..., true)` | READY |
+| 02 — Reconstruct session A-77402 | `entity_resolution.q15.operator_session_found` | `flagEquals(..., true)` | READY |
+| 03 — Trace the user reference | `entity_resolution.q15.operator_identity_hash_found` | `flagEquals(..., true)` | READY |
+| 05 — Compare policy versions | `entity_resolution.q15.policy_change_reconstructed` + `entity_resolution.q15.relationship_policy_modified` | `all(...)` | READY |
+| 06 — Trace Rizky through the pipeline | `entity_resolution.q15.rizky_processing_chain_reconstructed` + `entity_resolution.q15.com07_policy_path_confirmed` | `all(...)` | READY |
+| Optional — Check previous policy | `entity_resolution.q15.before_after_policy_verified` + `entity_resolution.q15.review_behavior_changed_confirmed` | `all(...)` | READY |
+| 07 — Correlate operator identity | `entity_resolution.q15.operator_identity_correlated` + `entity_resolution.q15.operator_identity_restricted` + `entity_resolution.q15.operator_employment_arka` | `all(...)` | READY |
 
 Q15 Objective 04 remains blocked because the recovered story artifact does not name a dedicated exact completion state for the reconstructed action timeline.
 

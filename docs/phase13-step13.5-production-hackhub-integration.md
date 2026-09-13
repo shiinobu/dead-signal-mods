@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.5
+# ENTITY RESOLUTION — Phase 13 Step 13.5
 
 ## Production HackHub Integration — Q14
 
@@ -35,7 +35,7 @@ It uses the HackHub SDK:
 
 ```ts
 @RegisterQuest
-export class DeadSignalQ14Quest extends HackHubQuest<Q14QuestData>
+export class EntityResolutionQ14Quest extends HackHubQuest<Q14QuestData>
 ```
 
 Registration is imported by the production bootstrap:
@@ -51,15 +51,15 @@ Diagnostic Phase 12 smoke/regression artifacts remain separate and are not impor
 ## Quest identity and dependency
 
 ```text
-Name:          dead_signal.q14
+Name:          entity_resolution.q14
 Title:         THE OWNER
 Group:         storyline
 AutoStart:     false
 AutoComplete:  true
-Prerequisite:  dead_signal.q13
+Prerequisite:  entity_resolution.q13
 ```
 
-The `dead_signal.q13` prerequisite is intentionally retained because Q13 → Q14 is part of the locked campaign dependency chain. Q13 production content is not implemented in this step, so Q14 is registered but not independently force-started outside its canonical dependency.
+The `entity_resolution.q13` prerequisite is intentionally retained because Q13 → Q14 is part of the locked campaign dependency chain. Q13 production content is not implemented in this step, so Q14 is registered but not independently force-started outside its canonical dependency.
 
 ## Q14 production objectives
 
@@ -85,7 +85,7 @@ The optional source objective:
 07 Check the access justification
 ```
 
-is intentionally handled as an optional side investigation rather than a required HackHub objective because the current HackHub objective-definition contract has no canonical `optional` field. The internal DEAD SIGNAL domain model already represents the objective as optional, and `QuestService` excludes optional objectives from the completion barrier.
+is intentionally handled as an optional side investigation rather than a required HackHub objective because the current HackHub objective-definition contract has no canonical `optional` field. The internal ENTITY RESOLUTION domain model already represents the objective as optional, and `QuestService` excludes optional objectives from the completion barrier.
 
 This preserves the source rule that optional investigation must never block Q14 completion.
 
@@ -108,7 +108,7 @@ HackHub objective completion
 The adapter creates a namespaced in-game file tree:
 
 ```text
-/exports/operations/dead-signal/q14/
+/exports/operations/entity-resolution/q14/
 ├── authorizations/
 │   ├── access-registry.txt
 │   ├── AR-44192.txt
@@ -156,18 +156,18 @@ The adapter never becomes a canonical state owner.
 The following source-backed Q14 states are written through `FlagStore`:
 
 ```text
-dead_signal.q14.override_access_registry_found
-dead_signal.q14.delegated_access_confirmed
-dead_signal.q14.access_window_found
-dead_signal.q14.override_session_found
-dead_signal.q14.marcus_access_approval_confirmed
-dead_signal.q14.marcus_reed_confirmed
-dead_signal.q14.operator_identity_unknown
-dead_signal.q14.exception_access_found
-dead_signal.q14.primary_audit_system_required
-dead_signal.marcus_introduced
-dead_signal.marcus_authority_confirmed
-dead_signal.q14.completed
+entity_resolution.q14.override_access_registry_found
+entity_resolution.q14.delegated_access_confirmed
+entity_resolution.q14.access_window_found
+entity_resolution.q14.override_session_found
+entity_resolution.q14.marcus_access_approval_confirmed
+entity_resolution.q14.marcus_reed_confirmed
+entity_resolution.q14.operator_identity_unknown
+entity_resolution.q14.exception_access_found
+entity_resolution.q14.primary_audit_system_required
+entity_resolution.marcus_introduced
+entity_resolution.marcus_authority_confirmed
+entity_resolution.q14.completed
 ```
 
 Explicitly forbidden negative states remain untouched.
@@ -189,7 +189,7 @@ Marcus operated the session
 and leaves:
 
 ```text
-dead_signal.q14.operator_identity_unknown = true
+entity_resolution.q14.operator_identity_unknown = true
 ```
 
 ## Runtime completion
@@ -206,7 +206,7 @@ StateStore quest completion
 source-backed q14.completed flag
 ```
 
-If the canonical internal runtime refuses completion, the adapter throws rather than silently diverging from the DEAD SIGNAL state model.
+If the canonical internal runtime refuses completion, the adapter throws rather than silently diverging from the ENTITY RESOLUTION state model.
 
 ## Rewards
 
@@ -241,7 +241,7 @@ SaveLoadService
 StateStore
 ```
 
-HackHub SaveStorage is a transport layer only. It does not replace the canonical DEAD SIGNAL state owner.
+HackHub SaveStorage is a transport layer only. It does not replace the canonical ENTITY RESOLUTION state owner.
 
 Save/load continues to restore canonical state directly and does not replay gameplay events.
 

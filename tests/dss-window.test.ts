@@ -8,7 +8,7 @@ const appSource = readFileSync(
     resolve(
         fileURLToPath(
             new URL(
-                "../src/infrastructure/hackhub/apps/dead-signal.ts",
+                "../src/infrastructure/hackhub/apps/entity-resolution.ts",
                 import.meta.url,
             ),
         ),

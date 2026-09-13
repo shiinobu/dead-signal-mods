@@ -4,7 +4,7 @@ import {
 } from "@hotbunny/hackhub-content-sdk";
 
 import "./q01-replay-quest.js";
-import "../src/infrastructure/hackhub/apps/dead-signal.js";
+import "../src/infrastructure/hackhub/apps/entity-resolution.js";
 import "../src/infrastructure/hackhub/commands/recon.js";
 import "../src/infrastructure/hackhub/websites/q01-skynet-portal.js";
 
@@ -17,13 +17,13 @@ opsRuntime.recon.registerProfile(Q01_RECON_PROFILE);
 opsRuntime.recon.setNativeSubdomainResolver(resolveNativeSubdomains);
 
 @RegisterModPackage
-export default class DeadSignalReplayMod extends Bootstrap {
+export default class EntityResolutionReplayMod extends Bootstrap {
     override OnModPackageLoaded() {
         registerDssCommandBridge();
-        console.log("DEAD SIGNAL Q01 replay build loaded.");
+        console.log("ENTITY RESOLUTION Q01 replay build loaded.");
     }
 
     override OnModPackageUnloaded() {
-        console.log("DEAD SIGNAL Q01 replay build unloaded.");
+        console.log("ENTITY RESOLUTION Q01 replay build unloaded.");
     }
 }

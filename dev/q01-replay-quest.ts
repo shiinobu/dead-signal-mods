@@ -156,8 +156,8 @@ const Q01_COMPLETION_MAIL_CONTENT = [
 ].join("\n");
 
 @RegisterQuest
-export class DeadSignalQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
-    override Name = `dead_signal.dev.q01.${DEV_Q01_REPLAY_ID}`;
+export class EntityResolutionQ01ReplayQuest extends HackHubQuest<Q01ReplayData> {
+    override Name = `entity_resolution.dev.q01.${DEV_Q01_REPLAY_ID}`;
     override Title = "THE CONTRACT — DEV REPLAY";
     override Description =
         "Development replay fixture for the revised Q01 reconnaissance flow.";

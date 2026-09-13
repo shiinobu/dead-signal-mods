@@ -1,4 +1,4 @@
-# DEAD SIGNAL — Phase 13 Step 13.6
+# ENTITY RESOLUTION — Phase 13 Step 13.6
 
 ## Focused In-Game Validation — Q14
 
@@ -75,14 +75,14 @@ Install the freshly built package into:
 ```text
 HackHub/
 └── mods/
-    └── dead-signal/
+    └── entity-resolution/
         ├── mod.js
         └── manifest.json
 ```
 
 Restart HackHub after copying the build.
 
-Verify the mod is shown as enabled/loaded and that there is no startup exception from the DEAD SIGNAL production bootstrap.
+Verify the mod is shown as enabled/loaded and that there is no startup exception from the ENTITY RESOLUTION production bootstrap.
 
 ## Live validation matrix
 
@@ -90,12 +90,12 @@ Verify the mod is shown as enabled/loaded and that there is no startup exception
 
 Action:
 
-1. Start/restart HackHub with the freshly built `dead-signal` mod.
+1. Start/restart HackHub with the freshly built `entity-resolution` mod.
 2. Observe the developer console/mod status.
 
 Expected:
 
-- DEAD SIGNAL loads successfully.
+- ENTITY RESOLUTION loads successfully.
 - No Phase 12 diagnostic PASS notification is emitted from startup.
 - No Q14 quest is force-started without its prerequisite.
 
@@ -115,7 +115,7 @@ Q13 completed in the active save.
 
 Action:
 
-Open the quest feed/journal and inspect the DEAD SIGNAL storyline.
+Open the quest feed/journal and inspect the ENTITY RESOLUTION storyline.
 
 Expected:
 
@@ -138,7 +138,7 @@ Claim Q14 when it becomes available.
 Expected:
 
 - Quest title is `THE OWNER`.
-- Quest identity is `dead_signal.q14`.
+- Quest identity is `entity_resolution.q14`.
 - Quest group is `storyline`.
 - Six required objectives appear in the expected order.
 - Q14 evidence files are created in the player filesystem.
@@ -146,7 +146,7 @@ Expected:
 Expected file tree:
 
 ```text
-/exports/operations/dead-signal/q14/
+/exports/operations/entity-resolution/q14/
 ├── authorizations/
 │   ├── access-registry.txt
 │   ├── AR-44192.txt
@@ -170,14 +170,14 @@ Action:
 Open:
 
 ```text
-/exports/operations/dead-signal/q14/authorizations/access-registry.txt
+/exports/operations/entity-resolution/q14/authorizations/access-registry.txt
 ```
 
 Expected state:
 
 ```text
-dead_signal.q14.override_access_registry_found = true
-dead_signal.q14.delegated_access_confirmed = true
+entity_resolution.q14.override_access_registry_found = true
+entity_resolution.q14.delegated_access_confirmed = true
 ```
 
 Expected gameplay result:
@@ -201,14 +201,14 @@ Action:
 Open:
 
 ```text
-/exports/operations/dead-signal/q14/sessions/A-77402.session
+/exports/operations/entity-resolution/q14/sessions/A-77402.session
 ```
 
 Expected state:
 
 ```text
-dead_signal.q14.access_window_found = true
-dead_signal.q14.override_session_found = true
+entity_resolution.q14.access_window_found = true
+entity_resolution.q14.override_session_found = true
 ```
 
 Expected gameplay result:
@@ -225,13 +225,13 @@ Action:
 Open:
 
 ```text
-/exports/operations/dead-signal/q14/authorizations/AR-44192.txt
+/exports/operations/entity-resolution/q14/authorizations/AR-44192.txt
 ```
 
 Expected state:
 
 ```text
-dead_signal.q14.marcus_access_approval_confirmed = true
+entity_resolution.q14.marcus_access_approval_confirmed = true
 ```
 
 Expected gameplay result:
@@ -258,14 +258,14 @@ Action:
 Open:
 
 ```text
-/exports/operations/dead-signal/q14/identity/M-REED.txt
+/exports/operations/entity-resolution/q14/identity/M-REED.txt
 ```
 
 Expected state:
 
 ```text
-dead_signal.q14.marcus_reed_confirmed = true
-dead_signal.marcus_introduced = true
+entity_resolution.q14.marcus_reed_confirmed = true
+entity_resolution.marcus_introduced = true
 ```
 
 Expected gameplay result:
@@ -283,7 +283,7 @@ Complete the Marcus dialogue normally.
 Expected state after the authority confirmation callback:
 
 ```text
-dead_signal.marcus_authority_confirmed = true
+entity_resolution.marcus_authority_confirmed = true
 ```
 
 Expected gameplay result:
@@ -304,12 +304,12 @@ Marcus operated the session
 The following negative states must remain absent/false:
 
 ```text
-dead_signal.q14.marcus_operated_account
-dead_signal.q14.marcus_created_false_connection
-dead_signal.q14.marcus_manipulated_cri
-dead_signal.q14.marcus_targeted_rizky
-dead_signal.q14.marcus_malicious_intent
-dead_signal.q14.operator_person_identified
+entity_resolution.q14.marcus_operated_account
+entity_resolution.q14.marcus_created_false_connection
+entity_resolution.q14.marcus_manipulated_cri
+entity_resolution.q14.marcus_targeted_rizky
+entity_resolution.q14.marcus_malicious_intent
+entity_resolution.q14.operator_person_identified
 ```
 
 ### V09 — Objective 06 / unknown operator boundary
@@ -321,8 +321,8 @@ Finish the final Marcus exchange asking who used the delegated identity/session.
 Expected state:
 
 ```text
-dead_signal.q14.operator_identity_unknown = true
-dead_signal.q14.delegated_access_confirmed = true
+entity_resolution.q14.operator_identity_unknown = true
+entity_resolution.q14.delegated_access_confirmed = true
 ```
 
 Expected gameplay result:
@@ -341,13 +341,13 @@ Action:
 Open:
 
 ```text
-/exports/operations/dead-signal/q14/authorizations/AR-44192-justification.txt
+/exports/operations/entity-resolution/q14/authorizations/AR-44192-justification.txt
 ```
 
 Expected state:
 
 ```text
-dead_signal.q14.exception_access_found = true
+entity_resolution.q14.exception_access_found = true
 ```
 
 Expected reward:
