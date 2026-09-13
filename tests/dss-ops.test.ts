@@ -15,6 +15,7 @@ import {
     ReconService,
 } from "../src/application/ops/index.js";
 import type { OpsEventMap } from "../src/application/ops/index.js";
+import type { ReconResult } from "../src/domain/recon/index.js";
 import {
     Q01_RECON_INPUT,
     Q01_RECON_PROFILE,
@@ -189,8 +190,14 @@ describe("DSS operations application foundation", () => {
                 description: "Run the DEAD SIGNAL reconnaissance module.",
                 toolId: "recon",
             },
+            {
+                name: "wireshark",
+                description: "Run a DEAD SIGNAL Wireshark+ packet capture.",
+                toolId: "wireshark",
+            },
         ]);
         assert.equal(registry.get("RECON")?.toolId, "recon");
+        assert.equal(registry.get("wireshark")?.toolId, "wireshark");
         assert.equal(registry.get("unknown"), null);
     });
 
@@ -217,7 +224,7 @@ describe("DSS operations application foundation", () => {
         );
         assert.equal(registry.get("recon")?.status, "ready");
         assert.equal(registry.get("terminal")?.status, "foundation");
-        assert.equal(registry.get("wireshark")?.status, "foundation");
+        assert.equal(registry.get("wireshark")?.status, "ready");
     });
 
     it("keeps investigation context separate from quest state", () => {
@@ -297,7 +304,7 @@ describe("DSS operations application foundation", () => {
 
         assert.equal(result.ok, true);
         assert.equal(result.command, "recon");
-        assert.equal(result.result?.uniqueHostsFound, 4);
+        assert.equal((result.result as ReconResult | null)?.uniqueHostsFound, 4);
     });
 
     it("bridges native recon command progress into the DSS event surface", () => {

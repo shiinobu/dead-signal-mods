@@ -7,6 +7,7 @@ import {
     OpsCommandRouter,
 } from "../../application/ops/command-router.js";
 import {
+    DSS_CAPTURE_EVENTS,
     DSS_COMMAND_EVENTS,
     DSS_RECON_EVENTS,
 } from "../../application/ops/events.js";
@@ -165,12 +166,18 @@ const formatLynxResult = (result: unknown): string => {
     return lines.join("\n");
 };
 
+const formatPingResult = (result: unknown, target: string): string => result === true
+    ? `PING ${target}: host is reachable.`
+    : `PING ${target}: request timed out.`;
+
+const NATIVE_TERMINAL_COMMANDS = ["nmap", "lynx", "ping"] as const;
+
 const executeNativeTerminalCommand = async (
     commandLine: string,
 ): Promise<NativeTerminalCommandResult | null> => {
     const { command, args } = parseCommandLine(commandLine);
 
-    if (command !== "nmap" && command !== "lynx") {
+    if (!(NATIVE_TERMINAL_COMMANDS as readonly string[]).includes(command)) {
         return null;
     }
 
@@ -192,16 +199,16 @@ const executeNativeTerminalCommand = async (
         };
     }
 
+    if (!input && command === "ping") {
+        return {
+            ok: false,
+            message: "Usage: ping <ip>",
+        };
+    }
+
     const result = Shell.getCommandData(command, input);
 
     if (typeof result === "undefined") {
-        if (command === "nmap" && input) {
-            return {
-                ok: true,
-                message: formatNmapResult(undefined, input),
-            };
-        }
-
         return {
             ok: false,
             message: `${command}: no fixture available for '${input || "default"}'.`,
@@ -214,12 +221,13 @@ const executeNativeTerminalCommand = async (
         emitNativeNmapScan(input);
     }
 
-    return {
-        ok: true,
-        message: command === "nmap"
-            ? formatNmapResult(result, input || "local")
-            : formatLynxResult(result),
-    };
+    const message = command === "nmap"
+        ? formatNmapResult(result, input || "local")
+        : command === "lynx"
+            ? formatLynxResult(result)
+            : formatPingResult(result, input);
+
+    return { ok: true, message };
 };
 
 const reconCommand = async (commandLine: string): Promise<boolean> => {
@@ -303,6 +311,77 @@ const reconCommand = async (commandLine: string): Promise<boolean> => {
     return true;
 };
 
+const captureCommand = async (commandLine: string): Promise<boolean> => {
+    const resultPromise = commandRouter.execute(commandLine, {
+        observer: {
+            onStarted: () => undefined,
+            onSourceStarted: () => undefined,
+            onSourceCompleted: () => undefined,
+            onHostDiscovered: () => undefined,
+            onCompleted: () => undefined,
+            sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+        },
+        captureObserver: {
+            onStarted: (event) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_CAPTURE_EVENTS.started, event);
+                    } catch (error) {
+                        console.warn("[DSS] capture started event failed:", error);
+                    }
+                }, 0);
+            },
+            onPacketCaptured: (event) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_CAPTURE_EVENTS.packetCaptured, event);
+                    } catch (error) {
+                        console.warn("[DSS] capture packet event failed:", error);
+                    }
+                }, 0);
+            },
+            onCompleted: (result) => {
+                setTimeout(() => {
+                    try {
+                        Events.emit(DSS_CAPTURE_EVENTS.completed, result);
+                    } catch (error) {
+                        console.warn("[DSS] capture completed event failed:", error);
+                    }
+                }, 0);
+            },
+            sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+        },
+    });
+
+    const result = await resultPromise;
+
+    if (!result.ok) {
+        const message = result.message ?? "Command execution failed.";
+        setTimeout(() => {
+            try {
+                Events.emit(DSS_CAPTURE_EVENTS.failed, {
+                    target: commandLine,
+                    reason: message,
+                });
+            } catch (error) {
+                console.warn("[DSS] capture failed event failed:", error);
+            }
+        }, 0);
+        emitCommandResult({
+            commandLine,
+            ok: false,
+            message,
+        });
+        return false;
+    }
+
+    emitCommandResult({
+        commandLine,
+        ok: true,
+    });
+    return true;
+};
+
 export const executeDssCommand = async (commandLine: string): Promise<boolean> => {
     const trimmed = commandLine.trim();
 
@@ -329,7 +408,7 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
     try {
         const parsed = parseCommandLine(trimmed);
 
-        if (parsed.command === "nmap" || parsed.command === "lynx") {
+        if ((NATIVE_TERMINAL_COMMANDS as readonly string[]).includes(parsed.command)) {
             const nativeResult = await executeNativeTerminalCommand(trimmed);
 
             if (nativeResult) {
@@ -356,8 +435,11 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
                 message: [
                     "Available DSS commands:",
                     "  recon -d <domain>",
+                    "  subfinder -d <domain>  (alias for recon)",
+                    "  wireshark -t <target>",
                     "  nmap [ip]",
                     "  lynx <ip-or-url>",
+                    "  ping <ip>",
                     "  clear",
                 ].join("\n"),
             });
@@ -375,6 +457,21 @@ export const executeDssCommand = async (commandLine: string): Promise<boolean> =
 
         if (parsed.command === "recon") {
             return await reconCommand(trimmed);
+        }
+
+        // "subfinder" is a familiar alias players may type/pick from the
+        // Terminal+ command palette; the canonical DSS command remains
+        // "recon" per the locked Q01 recon-promotion decision, so this
+        // rewrites the leading token before dispatch rather than adding a
+        // second, competing implementation.
+        if (parsed.command === "subfinder") {
+            return await reconCommand(
+                trimmed.replace(/^subfinder\b/i, "recon"),
+            );
+        }
+
+        if (parsed.command === "wireshark") {
+            return await captureCommand(trimmed);
         }
 
         const result = await commandRouter.execute(trimmed, {

@@ -3,6 +3,8 @@ export * from "./command-router.js";
 export * from "./event-bus.js";
 export * from "./event-types.js";
 export * from "./events.js";
+export * from "./packet-capture-service.js";
+export * from "./packet-session-store.js";
 export * from "./recon-service.js";
 export * from "./runtime.js";
 export * from "./session-store.js";

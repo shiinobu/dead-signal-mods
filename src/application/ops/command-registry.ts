@@ -12,6 +12,11 @@ const COMMAND_DEFINITIONS: readonly OpsCommandDefinition[] = [
         description: "Run the DEAD SIGNAL reconnaissance module.",
         toolId: "recon",
     },
+    {
+        name: "wireshark",
+        description: "Run a DEAD SIGNAL Wireshark+ packet capture.",
+        toolId: "wireshark",
+    },
 ];
 
 export class OpsCommandRegistry {

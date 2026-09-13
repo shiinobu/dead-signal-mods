@@ -29,7 +29,7 @@ const TOOL_DEFINITIONS: readonly OpsToolDefinition[] = [
         id: "wireshark",
         name: "Wireshark+",
         description: "DEAD SIGNAL forensic packet-analysis workspace.",
-        status: "foundation",
+        status: "ready",
         capability: "tool.wireshark",
     },
 ];

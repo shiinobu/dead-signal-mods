@@ -16,8 +16,18 @@ import type {
     ReconResult,
 } from "../../domain/recon/index.js";
 import {
+    PacketCaptureService,
+    type PacketCaptureObserver,
+    type PacketCaptureResult,
+    type PacketCapturedEvent,
+    type PacketCaptureStartedEvent,
+} from "./packet-capture-service.js";
+import {
     OpsSessionStore,
 } from "./session-store.js";
+import {
+    PacketSessionStore,
+} from "./packet-session-store.js";
 import {
     OpsToolRegistry,
 } from "./tool-registry.js";
@@ -27,6 +37,8 @@ export interface OpsRuntimeServices {
     readonly events: OpsEventBus<OpsEventMap>;
     readonly recon: ReconService;
     readonly session: OpsSessionStore;
+    readonly packets: PacketCaptureService;
+    readonly packetSession: PacketSessionStore;
     readonly tools: OpsToolRegistry;
 }
 
@@ -35,6 +47,8 @@ export class OpsRuntime {
     readonly events: OpsEventBus<OpsEventMap>;
     readonly recon: ReconService;
     readonly session: OpsSessionStore;
+    readonly packets: PacketCaptureService;
+    readonly packetSession: PacketSessionStore;
     readonly tools: OpsToolRegistry;
 
     constructor(services?: Partial<OpsRuntimeServices>) {
@@ -42,6 +56,8 @@ export class OpsRuntime {
         this.events = services?.events ?? new OpsEventBus<OpsEventMap>();
         this.recon = services?.recon ?? new ReconService();
         this.session = services?.session ?? new OpsSessionStore();
+        this.packets = services?.packets ?? new PacketCaptureService();
+        this.packetSession = services?.packetSession ?? new PacketSessionStore();
         this.tools = services?.tools ?? new OpsToolRegistry();
     }
 
@@ -78,6 +94,40 @@ export class OpsRuntime {
             onCompleted: (result: ReconResult) => {
                 this.session.completeRecon(result);
                 this.events.emit("reconCompleted", result);
+                observer.onCompleted(result);
+            },
+        });
+    }
+
+    async runCapture(
+        rawTarget: string,
+        observer: PacketCaptureObserver,
+    ): Promise<PacketCaptureResult | null> {
+        const reconSnapshot = this.session.getSnapshot();
+        const relatedHosts = reconSnapshot.target === rawTarget.trim().toLowerCase()
+            && reconSnapshot.status === "completed"
+            ? reconSnapshot.discoveredHosts
+            : [];
+
+        return this.packets.run(rawTarget, relatedHosts, {
+            ...observer,
+            onStarted: (event: PacketCaptureStartedEvent) => {
+                this.packetSession.startCapture(
+                    event.target,
+                    event.localHost,
+                    event.totalPackets,
+                );
+                this.events.emit("captureStarted", event);
+                observer.onStarted(event);
+            },
+            onPacketCaptured: (event: PacketCapturedEvent) => {
+                this.packetSession.addPacket(event.packet);
+                this.events.emit("packetCaptured", event);
+                observer.onPacketCaptured(event);
+            },
+            onCompleted: (result: PacketCaptureResult) => {
+                this.packetSession.completeCapture(result);
+                this.events.emit("captureCompleted", result);
                 observer.onCompleted(result);
             },
         });
